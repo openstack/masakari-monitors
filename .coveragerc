@@ -1,0 +1,6 @@
+[run]
+branch = True
+source = masakarimonitors
+
+[report]
+ignore_errors = True
