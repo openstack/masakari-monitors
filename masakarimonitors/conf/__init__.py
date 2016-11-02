@@ -14,9 +14,11 @@
 from oslo_config import cfg
 
 from masakarimonitors.conf import base
+from masakarimonitors.conf import instance
 from masakarimonitors.conf import service
 
 CONF = cfg.CONF
 
 base.register_opts(CONF)
+instance.register_opts(CONF)
 service.register_opts(CONF)
