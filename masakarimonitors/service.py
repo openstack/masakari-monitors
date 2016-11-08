@@ -22,7 +22,6 @@ from oslo_service import service
 from oslo_utils import importutils
 
 import masakarimonitors.conf
-from masakarimonitors.i18n import _
 from masakarimonitors.i18n import _LE
 from masakarimonitors.i18n import _LI
 from masakarimonitors import utils
@@ -120,21 +119,3 @@ class Service(service.Service):
 
 def process_launcher():
     return service.ProcessLauncher(CONF)
-
-
-# NOTE: the global launcher is to maintain the existing
-#       functionality of calling service.serve +
-#       service.wait
-_launcher = None
-
-
-def serve(server, workers=None):
-    global _launcher
-    if _launcher:
-        raise RuntimeError(_('serve() can only be called once'))
-
-    _launcher = service.launch(CONF, server, workers=workers)
-
-
-def wait():
-    _launcher.wait()
