@@ -82,7 +82,7 @@ class Callback(object):
         retry_count = 0
         while True:
             try:
-                response = conn.sdk.create_notification(
+                response = conn.vmha.create_notification(
                     type=type,
                     hostname=hostname,
                     generated_time=generated_time,
