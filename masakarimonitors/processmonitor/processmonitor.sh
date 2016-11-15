@@ -172,10 +172,10 @@ set_conf_value () {
 
     # If the PROJECT is omitted, return 1.
     if [ "x" = "x${PROJECT}" ]; then
-        log_info "config file parameter error. [$DOMAIN:PROJECT]"
+        log_info "config file parameter error. [$PROJECT:PROJECT]"
         return 1
     else
-        log_debug "config file parameterREGIONCT=$PROJECT"
+        log_debug "config file parameter : PROJECT=$PROJECT"
     fi
 
     # If the ADMIN_USER is omitted, return 1.
