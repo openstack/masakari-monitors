@@ -21,7 +21,7 @@ MONITORS_PRODUCT = "OpenStack Masakari Monitors"
 MONITORS_PACKAGE = None  # OS distro package version suffix
 
 loaded = False
-version_info = pbr_version.VersionInfo('masakarimonitors')
+version_info = pbr_version.VersionInfo('masakari-monitors')
 version_string = version_info.version_string
 
 

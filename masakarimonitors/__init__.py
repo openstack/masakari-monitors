@@ -16,4 +16,4 @@ import pbr.version
 
 
 __version__ = pbr.version.VersionInfo(
-    'masakarimonitors').version_string()
+    'masakari-monitors').version_string()
