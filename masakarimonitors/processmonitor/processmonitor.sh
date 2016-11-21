@@ -475,7 +475,7 @@ do
     fi
 
     # Execute process check processing.
-    ${SCRIPT_CHECK_PROCESS}
+    ${SCRIPT_CHECK_PROCESS} ${PROC_LIST}
     RESULT_CODE=$?
 
     # If the return code is 2, because can't continue functionally, stop.

@@ -19,7 +19,7 @@ SCRIPT_DIR=$(cd $(dirname $0);pwd)
 SCRIPT_COMMON_SH="$SCRIPT_DIR/common.sh"
 
 TMP_DIR="/var/tmp"
-PROC_LIST=/etc/masakari/proc.list
+PROC_LIST=$1
 BAD_CODE_LIST_FILE="$TMP_DIR/badproc.list"
 
 # Common processing (check of proc.list)
