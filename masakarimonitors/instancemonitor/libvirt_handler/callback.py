@@ -18,7 +18,7 @@ from openstack import connection
 from openstack import profile
 from oslo_log import log as oslo_logging
 
-from masakariclient.sdk.vmha import vmha_service
+from masakariclient.sdk.ha import ha_service
 import masakarimonitors.conf
 from masakarimonitors.i18n import _LE
 from masakarimonitors.i18n import _LI
@@ -27,7 +27,8 @@ from masakarimonitors.i18n import _LW
 
 LOG = oslo_logging.getLogger(__name__)
 CONF = masakarimonitors.conf.CONF
-VMHA = "vmha"
+TYPE = "ha"
+NAME = "masakari"
 
 
 class Callback(object):
@@ -38,11 +39,11 @@ class Callback(object):
                         user_domain_id):
 
         prof = profile.Profile()
-        prof._add_service(vmha_service.VMHAService(version=api_version))
-        prof.set_name(VMHA, VMHA)
-        prof.set_region(VMHA, region)
-        prof.set_version(VMHA, api_version)
-        prof.set_interface(VMHA, interface)
+        prof._add_service(ha_service.HAService(version=api_version))
+        prof.set_name(TYPE, NAME)
+        prof.set_region(TYPE, region)
+        prof.set_version(TYPE, api_version)
+        prof.set_interface(TYPE, interface)
 
         conn = connection.Connection(auth_url=auth_url,
                                      project_name=project_name,
@@ -82,7 +83,7 @@ class Callback(object):
         retry_count = 0
         while True:
             try:
-                response = conn.vmha.create_notification(
+                response = conn.ha.create_notification(
                     type=type,
                     hostname=hostname,
                     generated_time=generated_time,
