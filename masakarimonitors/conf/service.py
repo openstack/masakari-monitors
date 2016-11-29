@@ -30,6 +30,10 @@ Possible values:
                default='masakarimonitors.instancemonitor.instance'
                        '.InstancemonitorManager',
                help='Full class name for the Manager for instancemonitor.'),
+    cfg.StrOpt('processmonitor_manager',
+               default='masakarimonitors.processmonitor.process'
+                       '.ProcessmonitorManager',
+               help='Full class name for the Manager for processmonitor.'),
     ]
 
 
