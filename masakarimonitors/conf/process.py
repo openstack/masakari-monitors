@@ -13,16 +13,19 @@
 # limitations under the License.
 from oslo_config import cfg
 
-from masakarimonitors.conf import api
-from masakarimonitors.conf import base
-from masakarimonitors.conf import instance
-from masakarimonitors.conf import process
-from masakarimonitors.conf import service
 
-CONF = cfg.CONF
+monitor_process_opts = [
+    cfg.StrOpt('process_list_path',
+               default='/etc/masakarimonitors/process_list.yaml',
+               help='The file path of process list.'),
+]
 
-api.register_opts(CONF)
-base.register_opts(CONF)
-instance.register_opts(CONF)
-process.register_opts(CONF)
-service.register_opts(CONF)
+
+def register_opts(conf):
+    conf.register_opts(monitor_process_opts, group='process')
+
+
+def list_opts():
+    return {
+        'process': monitor_process_opts
+    }
