@@ -513,7 +513,8 @@ check_node_status () {
     # Check whether the node of argument is "Online".
     if [ "`echo $online_nodes | grep -e "$1 " -e "$1$"`" ]; then
         # Check whether the node of state of all RA is "Started".
-        START_RA_COUNT=`grep "Started $1 " $TMP_CRM_MON_FILE | grep -v stonith | wc -l`
+        # In some cases "unmanaged" may not exist.
+        START_RA_COUNT=`egrep -e "Started\s+$1\s*(\(unmanaged\))*\s*$" $TMP_CRM_MON_FILE | grep -v stonith | wc -l`
         if [ $START_RA_COUNT -eq $RA_COUNT ] || [ $RA_COUNT -eq -1 ]  ; then
             # Node is online and state of all RA is "Started"(startup state)
             return 0
