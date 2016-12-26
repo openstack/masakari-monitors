@@ -11,20 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from oslo_config import cfg
 
-from masakarimonitors.conf import api
-from masakarimonitors.conf import base
-from masakarimonitors.conf import host
-from masakarimonitors.conf import instance
-from masakarimonitors.conf import process
-from masakarimonitors.conf import service
+import abc
+import six
 
-CONF = cfg.CONF
 
-api.register_opts(CONF)
-base.register_opts(CONF)
-host.register_opts(CONF)
-instance.register_opts(CONF)
-process.register_opts(CONF)
-service.register_opts(CONF)
+@six.add_metaclass(abc.ABCMeta)
+class DriverBase(object):
+    """Driver Base class.
+
+    This class is base of monitoring hosts.
+    """
+
+    def __init__(self):
+        pass
+
+    @abc.abstractmethod
+    def monitor_hosts(self):
+        """Must override monitor_hosts method."""
+        pass

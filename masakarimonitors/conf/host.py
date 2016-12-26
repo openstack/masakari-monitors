@@ -13,18 +13,18 @@
 # limitations under the License.
 from oslo_config import cfg
 
-from masakarimonitors.conf import api
-from masakarimonitors.conf import base
-from masakarimonitors.conf import host
-from masakarimonitors.conf import instance
-from masakarimonitors.conf import process
-from masakarimonitors.conf import service
+monitor_host_opts = [
+    cfg.StrOpt('monitoring_driver',
+               default='default',
+               help='Driver that hostmonitor uses for monitoring hosts.'),
+]
 
-CONF = cfg.CONF
 
-api.register_opts(CONF)
-base.register_opts(CONF)
-host.register_opts(CONF)
-instance.register_opts(CONF)
-process.register_opts(CONF)
-service.register_opts(CONF)
+def register_opts(conf):
+    conf.register_opts(monitor_host_opts, group='host')
+
+
+def list_opts():
+    return {
+        'host': monitor_host_opts
+    }
