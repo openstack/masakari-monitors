@@ -19,8 +19,10 @@ from oslo_log import log as oslo_logging
 
 import masakarimonitors.conf
 import masakarimonitors.hostmonitor.host_handler.driver as driver
+from masakarimonitors.hostmonitor.host_handler import hold_host_status
 from masakarimonitors.hostmonitor.host_handler import parse_cib_xml
 from masakarimonitors.i18n import _LE
+from masakarimonitors.i18n import _LI
 from masakarimonitors.i18n import _LW
 from masakarimonitors import utils
 
@@ -38,6 +40,7 @@ class HandleHost(driver.DriverBase):
         super(HandleHost, self).__init__()
         self.my_hostname = socket.gethostname()
         self.xml_parser = parse_cib_xml.ParseCibXml()
+        self.status_holder = hold_host_status.HostHoldStatus()
 
     def _check_host_status_by_crmadmin(self):
         try:
@@ -78,6 +81,43 @@ class HandleHost(driver.DriverBase):
 
         return out
 
+    def _check_if_status_changed(self, node_state_tag_list):
+
+        # Check if host status changed.
+        for node_state_tag in node_state_tag_list:
+
+            # hostmonitor doesn't monitor itself.
+            if node_state_tag.get('uname') == self.my_hostname:
+                continue
+
+            # Get current status and old status.
+            current_status = node_state_tag.get('crmd')
+            old_status = self.status_holder.get_host_status(
+                node_state_tag.get('uname'))
+
+            # If old_status is None, This is first get of host status.
+            if old_status is None:
+                msg = ("Recognized '%s' as a new member of cluster."
+                       " Host status is '%s'.") \
+                    % (node_state_tag.get('uname'), current_status)
+                LOG.info(_LI("%s"), msg)
+                self.status_holder.set_host_status(node_state_tag)
+                continue
+
+            # Output host status.
+            msg = ("'%s' is '%s'.") % (node_state_tag.get('uname'),
+                                       current_status)
+            LOG.info(_LI("%s"), msg)
+
+            # If host status changed, send a notification.
+            if current_status != old_status:
+                # TODO(takahara.kengo)
+                # Implement the notification processing.
+                pass
+
+            # Update host status.
+            self.status_holder.set_host_status(node_state_tag)
+
     def _check_host_status_by_cibadmin(self):
         # Get xml of cib info.
         cib_xml = self._get_cib_xml()
@@ -100,6 +140,9 @@ class HandleHost(driver.DriverBase):
             # it is an unexpected result.
             raise Exception(
                 "Failed to get node_state tag from cib xml.")
+
+        # Check if status changed.
+        self._check_if_status_changed(node_state_tag_list)
 
         return 0
 
