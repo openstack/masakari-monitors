@@ -100,65 +100,35 @@ class InstancemonitorManager(manager.Manager):
         # Run a background thread with the event loop
         self._vir_event_loop_native_start()
 
+        event_callback_handlers = {
+            libvirt.VIR_DOMAIN_EVENT_ID_LIFECYCLE:
+                self._my_domain_event_callback,
+            libvirt.VIR_DOMAIN_EVENT_ID_REBOOT:
+                self._my_domain_event_reboot_callback,
+            libvirt.VIR_DOMAIN_EVENT_ID_RTC_CHANGE:
+                self._my_domain_event_rtc_change_callback,
+            libvirt.VIR_DOMAIN_EVENT_ID_IO_ERROR:
+                self._my_domain_event_io_error_callback,
+            libvirt.VIR_DOMAIN_EVENT_ID_WATCHDOG:
+                self._my_domain_event_watchdog_callback,
+            libvirt.VIR_DOMAIN_EVENT_ID_GRAPHICS:
+                self._my_domain_event_graphics_callback,
+            libvirt.VIR_DOMAIN_EVENT_ID_DISK_CHANGE:
+                self._my_domain_event_disk_change_callback,
+            libvirt.VIR_DOMAIN_EVENT_ID_IO_ERROR_REASON:
+                self._my_domain_event_io_error_reason_callback,
+            libvirt.VIR_DOMAIN_EVENT_ID_CONTROL_ERROR:
+                self._my_domain_event_generic_callback
+        }
         # Connect to libvert - If be disconnected, reprocess.
         while True:
             vc = libvirt.openReadOnly(uri)
 
             # Event callback settings
             callback_ids = []
-            cid = vc.domainEventRegisterAny(
-                None,
-                libvirt.VIR_DOMAIN_EVENT_ID_LIFECYCLE,
-                self._my_domain_event_callback, None)
-            callback_ids.append(cid)
-
-            cid = vc.domainEventRegisterAny(
-                None,
-                libvirt.VIR_DOMAIN_EVENT_ID_REBOOT,
-                self._my_domain_event_reboot_callback, None)
-            callback_ids.append(cid)
-
-            cid = vc.domainEventRegisterAny(
-                None,
-                libvirt.VIR_DOMAIN_EVENT_ID_RTC_CHANGE,
-                self._my_domain_event_rtc_change_callback, None)
-            callback_ids.append(cid)
-
-            cid = vc.domainEventRegisterAny(
-                None,
-                libvirt.VIR_DOMAIN_EVENT_ID_IO_ERROR,
-                self._my_domain_event_io_error_callback, None)
-            callback_ids.append(cid)
-
-            cid = vc.domainEventRegisterAny(
-                None,
-                libvirt.VIR_DOMAIN_EVENT_ID_WATCHDOG,
-                self._my_domain_event_watchdog_callback, None)
-            callback_ids.append(cid)
-
-            cid = vc.domainEventRegisterAny(
-                None,
-                libvirt.VIR_DOMAIN_EVENT_ID_GRAPHICS,
-                self._my_domain_event_graphics_callback, None)
-            callback_ids.append(cid)
-
-            cid = vc.domainEventRegisterAny(
-                None,
-                libvirt.VIR_DOMAIN_EVENT_ID_DISK_CHANGE,
-                self._my_domain_event_disk_change_callback, None)
-            callback_ids.append(cid)
-
-            cid = vc.domainEventRegisterAny(
-                None,
-                libvirt.VIR_DOMAIN_EVENT_ID_IO_ERROR_REASON,
-                self._my_domain_event_io_error_reason_callback, None)
-            callback_ids.append(cid)
-
-            cid = vc.domainEventRegisterAny(
-                None,
-                libvirt.VIR_DOMAIN_EVENT_ID_CONTROL_ERROR,
-                self._my_domain_event_generic_callback, None)
-            callback_ids.append(cid)
+            for event, callback in event_callback_handlers.items():
+                cid = vc.domainEventRegisterAny(None, event, callback, None)
+                callback_ids.append(cid)
 
             # Connection monitoring.
             vc.setKeepAlive(5, 3)
