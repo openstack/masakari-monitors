@@ -103,8 +103,6 @@ class Callback(object):
                     LOG.exception(_LE("%s"), e)
                     break
 
-        return
-
     def libvirt_event_callback(self, eventID, detail, uuID, noticeType,
                                hostname, currentTime):
         """Callback method.
@@ -146,4 +144,3 @@ class Callback(object):
         retry_interval = float(CONF.callback.retry_interval)
 
         self._post_event(retry_max, retry_interval, event)
-        return

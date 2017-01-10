@@ -17,6 +17,7 @@ import sys
 import threading
 
 from oslo_log import log as oslo_logging
+from oslo_utils import excutils
 from oslo_utils import timeutils
 
 from masakarimonitors.instancemonitor.libvirt_handler import callback
@@ -72,18 +73,13 @@ class EventFilter(object):
                 thread.start()
             else:
                 LOG.debug("Event Filter Unmatched.")
-                pass
 
         except KeyError:
             LOG.debug("virEventFilter KeyError")
-            pass
         except IndexError:
             LOG.debug("virEventFilter IndexError")
-            pass
         except TypeError:
             LOG.debug("virEventFilter TypeError")
-            pass
         except Exception:
-            LOG.debug("Unexpected error")
-            sys.exc_info()[0]
-            raise
+            with excutils.save_and_reraise_exception():
+                LOG.debug("Unexpected error: %s" % sys.exc_info()[0])
