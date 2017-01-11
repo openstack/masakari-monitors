@@ -61,9 +61,11 @@ def _import_modules(module_names):
     for modname in module_names:
         mod = importlib.import_module("masakarimonitors.conf." + modname)
         if not hasattr(mod, LIST_OPTS_FUNC_NAME):
-            msg = "The module 'masakarimonitors.conf.%s' should have a '%s' "\
-                  "function which returns the config options." % \
-                  (modname, LIST_OPTS_FUNC_NAME)
+            msg = (_("The module 'masakarimonitors.conf.%(modname)s'"
+                     " should have a '%(function)s' function"
+                     " which returns the config options.") % {
+                'modname': modname,
+                'function': LIST_OPTS_FUNC_NAME})
             raise Exception(msg)
         else:
             imported_modules.append(mod)

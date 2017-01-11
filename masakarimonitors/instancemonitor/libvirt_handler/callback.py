@@ -56,7 +56,14 @@ class Callback(object):
 
     def _post_event(self, retry_max, retry_interval, event):
 
-        LOG.info(_LI("%s"), "Send a notification.")
+        type = event['notification']['type']
+        hostname = event['notification']['hostname']
+        generated_time = event['notification']['generated_time']
+        payload = event['notification']['payload']
+
+        LOG.info(_LI("Send notification for hostname '%(hostname)s',"
+                     " type '%(type)s' ") % {'hostname': hostname,
+                                             'type': type})
 
         # Set conf value.
         project_domain_name = CONF.keystone.project_domain_name
@@ -75,11 +82,6 @@ class Callback(object):
             password=password, project_domain_id=project_domain_name,
             user_domain_id=project_domain_name)
 
-        type = event['notification']['type']
-        hostname = event['notification']['hostname']
-        generated_time = event['notification']['generated_time']
-        payload = event['notification']['payload']
-
         retry_count = 0
         while True:
             try:
@@ -89,7 +91,7 @@ class Callback(object):
                     generated_time=generated_time,
                     payload=payload)
 
-                LOG.info(_LI("%s"), "response:%s" % (response))
+                LOG.info(_LI("Notification response received : %s"), response)
                 break
 
             except Exception as e:
@@ -100,42 +102,51 @@ class Callback(object):
                     retry_count = retry_count + 1
                     time.sleep(int(retry_interval))
                 else:
-                    LOG.exception(_LE("%s"), e)
+                    LOG.exception(_LE("Failed to send notification for type"
+                                      " '%(type)s' for hostname"
+                                      " '%(hostname)s'") %
+                                  {'type': type, 'hostname': hostname})
                     break
 
-    def libvirt_event_callback(self, eventID, detail, uuID, noticeType,
-                               hostname, currentTime):
+    def libvirt_event_callback(self, event_id, details, domain_uuid,
+                               notice_type, hostname, current_time):
         """Callback method.
 
         Callback processing be executed as result of the
         libvirt event filter.
 
-        :param eventID: Event ID notify to the callback function
-        :param detail: Event code notify to the callback function
-        :param uuID: Uuid notify to the callback function
-        :param noticeType: Notice type notify to the callback function
+        :param event_id: Event ID notify to the callback function
+        :param details: Event code notify to the callback function
+        :param domain_uuid: Uuid notify to the callback function
+        :param notice_type: Notice type notify to the callback function
         :param hostname: Server host name of the source an event occur
                          notify to the callback function
-        :param currentTime: Event occurred time notify to the callback
+        :param current_time: Event occurred time notify to the callback
                             function
         """
 
         # Output to the syslog.
-        msg = "libvirt Event: type=%s hostname=%s uuid=%s \
-            time=%s eventID=%s detail=%s " % (
-            noticeType, hostname, uuID, currentTime, eventID, detail)
-        LOG.info(_LI("%s"), msg)
+        LOG.info(_LI("Libvirt Event: type=%(notice_type)s,"
+                     " hostname=%(hostname)s,"
+                     " uuid=%(uuid)s, time=%(current_time)s,"
+                     " event_id=%(event_id)s,"
+                     " detail=%(detail)s)") % {'notice_type': notice_type,
+                                               'hostname': hostname,
+                                               'uuid': domain_uuid,
+                                               'current_time': current_time,
+                                               'event_id': event_id,
+                                               'detail': details})
 
         # Set the event to the dictionary.
         event = {
             'notification': {
-                'type': noticeType,
+                'type': notice_type,
                 'hostname': hostname,
-                'generated_time': currentTime,
+                'generated_time': current_time,
                 'payload': {
-                    'event': eventID,
-                    'instance_uuid': uuID,
-                    'vir_domain_event': detail
+                    'event': event_id,
+                    'instance_uuid': domain_uuid,
+                    'vir_domain_event': details
                 }
             }
         }

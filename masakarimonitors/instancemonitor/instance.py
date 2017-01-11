@@ -94,7 +94,7 @@ class InstancemonitorManager(manager.Manager):
                                   -1, -1, dom.UUIDString())
 
     def _err_handler(self, ctxt, err):
-        LOG.warning(_LW("%s"), err[2])
+        LOG.warning(_LW("Error from libvirt : %s"), err[2])
 
     def _virt_event(self, uri):
         # Run a background thread with the event loop
@@ -137,7 +137,7 @@ class InstancemonitorManager(manager.Manager):
 
             # If connection between libvirtd was lost,
             # clear callback connection.
-            LOG.warning(_LW("%s"), 'Libvirt Connection Closed Unexpectedly.')
+            LOG.warning(_LW("Libvirt Connection Closed Unexpectedly."))
             for cid in callback_ids:
                 try:
                     vc.domainEventDeregisterAny(cid)
