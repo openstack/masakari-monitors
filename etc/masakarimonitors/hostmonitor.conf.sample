@@ -69,3 +69,6 @@ REGION="RegionOne"
 
 # Address of Keystone
 AUTH_URL="http://127.0.0.1:5000/"
+
+# Pattern of resource group name to ignore from RA count
+IGNORE_RESOURCE_GROUP_NAME_PATTERN="stonith"

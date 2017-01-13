@@ -187,6 +187,7 @@ check_config_type() {
 #       PROJECT               (default : "")
 #       AUTH_URL              (default : "")
 #       REGION                (default : "")
+#       IGNORE_RESOURCE_GROUP_NAME_PATTERN (default : "stonith")
 #
 # Return value
 #   0 : Setting completion
@@ -252,6 +253,9 @@ set_conf_value () {
 
     REGION=${REGION:-""}
     check_config_type 'string' REGION $REGION
+
+    IGNORE_RESOURCE_GROUP_NAME_PATTERN=${IGNORE_RESOURCE_GROUP_NAME_PATTERN:-""}
+    check_config_type 'string' IGNORE_RESOURCE_GROUP_NAME_PATTERN $IGNORE_RESOURCE_GROUP_NAME_PATTERN
 
     return 0
 }
@@ -423,16 +427,16 @@ run_crm_mon () {
     else
         # Count the number of RA.
         if [ $RA_COUNT -eq 0 ]; then
-            group_define=`sudo crm configure show | grep "^group grp_" | sed -n '$p' | cut -d" " -f3-`
+            group_define=`sudo crm configure show | grep "^group " | grep -vi "$IGNORE_RESOURCE_GROUP_NAME_PATTERN" | sed -n '$p' | cut -d" " -f3-`
             result=$?
-            if [ ! -n "$group_define" ] && ! [ "$result" -eq 0 ] ; then
+            if [ ! -n "$group_define" ] || ! [ "$result" -eq 0 ] ; then
                 log_debug "cib is not configured."
                 return 1
             fi
             tmp_array=(`echo $group_define`)
             ln=`echo $((${#group_define}))`
             last_word=`echo ${group_define} | cut -c ${ln}`
-            if [ $last_word != "\\" ]; then
+            if [[ $last_word != "\\" ]]; then
                 RA_COUNT=${#tmp_array[*]}
             else
                 RA_COUNT=`expr ${#tmp_array[*]} - 1`
@@ -614,7 +618,7 @@ compare_status_file () {
 
     if [ $2 -eq 0 ]; then
         # If state of this time node is "Started" and state of last time node is "Started",
-        if [ $last_node_status = $NODE_STATUS_STARTED ]; then
+        if [[ $last_node_status = $NODE_STATUS_STARTED ]]; then
             return 0
         # If state of this time node is "Started" and
         # state of last time node is "Started" or "Stopping" or "Starting" or "Unknown",
@@ -624,7 +628,7 @@ compare_status_file () {
         fi
     elif [ $2 -eq 1 ]; then
         # If state of this time node is "Stopped" and state of last time node is "Stopped",
-        if [ $last_node_status = $NODE_STATUS_STOPPED ]; then
+        if [[ $last_node_status = $NODE_STATUS_STOPPED ]]; then
             return 0
         # If state of this time node is "Stopped" and
         # state of last time node is "Started" or "Stopping" or "Starting" or "Unknown",
@@ -654,8 +658,8 @@ change_status_file () {
     if [ $2 -eq 0 ]; then
         node_status="$NODE_STATUS_STARTED"
         # If state of this time node is "Stopping" or "Unknown", notification is not sent.
-        if [ $3 = $NODE_STATUS_STOPPING ] ||
-           [ $3 = $NODE_STATUS_UNKNOWN ]; then
+        if [[ $3 = $NODE_STATUS_STOPPING ]] ||
+           [[ $3 = $NODE_STATUS_UNKNOWN ]]; then
             retval=2
         else
             retval=1
@@ -664,17 +668,17 @@ change_status_file () {
     elif [ $2 -eq 1 ]; then
         node_status="$NODE_STATUS_STOPPED"
         # If state of this time node is "Starting" or "Unknown", notification is not sent.
-        if [ $3 = $NODE_STATUS_STARTING ] ||
-           [ $3 = $NODE_STATUS_UNKNOWN ]; then
+        if [[ $3 = $NODE_STATUS_STARTING ]] ||
+           [[ $3 = $NODE_STATUS_UNKNOWN ]]; then
             retval=2
         else
             retval=1
         fi
     # If state of this time node is "Starting" or "Stopping" or "Unknown",
     else
-        if [ $3 = $NODE_STATUS_STARTED ]; then
+        if [[ $3 = $NODE_STATUS_STARTED ]]; then
             node_status="$NODE_STATUS_STOPPING"
-        elif [ $3 = $NODE_STATUS_STOPPED ]; then
+        elif [[ $3 = $NODE_STATUS_STOPPED ]]; then
             node_status="$NODE_STATUS_STARTING"
         else
             node_status="$3"
@@ -699,7 +703,7 @@ change_status_file () {
 make_notice_data () {
     TMP_RULE=`sudo crm configure show | grep "rule" | grep -i -e "100: #uname eq $1 " -e "100: #uname eq $1$" | grep -vi "stonith"`
     P_HOST=`echo ${TMP_RULE} | awk '{print $6}'`
-    if [ ${STONITH_TYPE} = "ssh"  ] ; then
+    if [[ ${STONITH_TYPE} = "ssh" ]] ; then
        P_HOST=$1
     fi
 
@@ -711,19 +715,19 @@ make_notice_data () {
     HOST_STATUS="NORMAL"
 
     # In the case of stop notification, check whether the opposing node has stopped securety.
-    if [ ${EVENT} = "STOPPED" ] ; then
+    if [[ ${EVENT} = "STOPPED" ]] ; then
         CLUSTER_STATUS="OFFLINE"
         HOST_STATUS="NORMAL"
 
         # adhoc setting for test
-        if [ ${STONITH_TYPE} = "ipmi" ] ; then
+        if [[ ${STONITH_TYPE} = "ipmi" ]] ; then
 
             # Get the value which is required for ipmitool command execution.
             IPMI_RAS=`sudo crm configure show | grep "^primitive.*stonith:external/ipmi" | awk '{print $2}'`
             for IPMI_RA in ${IPMI_RAS}
             do
                 IPMI_HOST=`sudo crm resource param ${IPMI_RA} show hostname`
-                if [ "${IPMI_HOST}" = "${P_HOST}" ]; then
+                if [[ ${IPMI_HOST} = ${P_HOST} ]]; then
                     break
                 fi
             done
@@ -918,7 +922,7 @@ do
             do
                 # Only if node name is not empty string
                 # and it is not own node name, pass it to child process.
-                if [ -n "${nodes_array[$n]}" ] && [ ${nodes_array[$n]} != $MY_NODE_NAME ]; then
+                if [ -n "${nodes_array[$n]}" ] && [[ ${nodes_array[$n]} != $MY_NODE_NAME ]]; then
                     param+="${nodes_array[$n]} "
                 fi
                 work=`expr $work + 1`
@@ -932,7 +936,7 @@ do
             do
                 # Only if node name is not empty string
                 # and it is not own node name, pass it child process.
-                if [ -n "${nodes_array[$n]}" ] && [ ${nodes_array[$n]} != $MY_NODE_NAME ]; then
+                if [ -n "${nodes_array[$n]}" ] && [[ ${nodes_array[$n]} != $MY_NODE_NAME ]]; then
                     param+="${nodes_array[$n]} "
                 fi
                 work=`expr $work + 1`
