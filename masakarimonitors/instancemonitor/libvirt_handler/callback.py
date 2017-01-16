@@ -54,7 +54,7 @@ class Callback(object):
                                      profile=prof)
         return conn
 
-    def _post_event(self, retry_max, retry_interval, event):
+    def _post_event(self, event):
 
         LOG.info(_LI("%s"), "Send a notification.")
 
@@ -67,6 +67,8 @@ class Callback(object):
         region = CONF.keystone.region
         interface = CONF.callback.interface
         api_version = CONF.callback.api_version
+        retry_max = CONF.callback.retry_max
+        retry_interval = CONF.callback.retry_interval
 
         conn = self._get_connection(
             api_version=api_version, region=region,
@@ -98,7 +100,7 @@ class Callback(object):
                 if retry_count < retry_max:
                     LOG.warning(_LW("Retry sending a notification. (%s)"), e)
                     retry_count = retry_count + 1
-                    time.sleep(int(retry_interval))
+                    time.sleep(retry_interval)
                 else:
                     LOG.exception(_LE("%s"), e)
                     break
@@ -140,7 +142,4 @@ class Callback(object):
             }
         }
 
-        retry_max = CONF.callback.retry_max
-        retry_interval = float(CONF.callback.retry_interval)
-
-        self._post_event(retry_max, retry_interval, event)
+        self._post_event(event)
