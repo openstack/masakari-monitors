@@ -15,6 +15,7 @@
 import threading
 import time
 
+import eventlet
 import libvirt
 from oslo_log import log as oslo_logging
 
@@ -121,7 +122,8 @@ class InstancemonitorManager(manager.Manager):
                 self._my_domain_event_generic_callback
         }
         # Connect to libvert - If be disconnected, reprocess.
-        while True:
+        self.running = True
+        while self.running:
             vc = libvirt.openReadOnly(uri)
 
             # Event callback settings
@@ -132,8 +134,8 @@ class InstancemonitorManager(manager.Manager):
 
             # Connection monitoring.
             vc.setKeepAlive(5, 3)
-            while vc.isAlive() == 1:
-                time.sleep(1)
+            while vc.isAlive() == 1 and self.running:
+                eventlet.greenthread.sleep(1)
 
             # If connection between libvirtd was lost,
             # clear callback connection.
@@ -146,6 +148,9 @@ class InstancemonitorManager(manager.Manager):
             vc.close()
             del vc
             time.sleep(3)
+
+    def stop(self):
+        self.running = False
 
     def main(self):
         """Main method.
