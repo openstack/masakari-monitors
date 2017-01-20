@@ -17,6 +17,9 @@ monitor_host_opts = [
     cfg.StrOpt('monitoring_driver',
                default='default',
                help='Driver that hostmonitor uses for monitoring hosts.'),
+    cfg.IntOpt('monitoring_interval',
+               default=60,
+               help='Monitoring interval(in seconds) of node status.'),
 ]
 
 
