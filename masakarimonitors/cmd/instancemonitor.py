@@ -32,8 +32,6 @@ def main():
     logging.setup(CONF, "masakarimonitors")
     utils.monkey_patch()
 
-    launcher = service.process_launcher()
     server = service.Service.create(binary='masakarimonitors-instancemonitor')
-    launcher.launch_service(server)
-
-    launcher.wait()
+    service.serve(server)
+    service.wait()
