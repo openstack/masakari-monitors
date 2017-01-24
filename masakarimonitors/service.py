@@ -101,6 +101,7 @@ class Service(service.Service):
 
     def stop(self):
         LOG.info(_LI('Stopping %s'), self.binary)
+        self.manager.stop()
         super(Service, self).stop()
 
     def basic_config_check(self):
