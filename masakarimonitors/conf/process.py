@@ -15,6 +15,9 @@ from oslo_config import cfg
 
 
 monitor_process_opts = [
+    cfg.IntOpt('check_interval',
+               default=5,
+               help='Interval in seconds for checking a process.'),
     cfg.StrOpt('process_list_path',
                default='/etc/masakarimonitors/process_list.yaml',
                help='The file path of process list.'),

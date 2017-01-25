@@ -36,6 +36,10 @@ MOCK_PROCESS_LIST = [
     },
 ]
 
+PS_RESULT = "\n" \
+            "UID  PID   PPID C STIME TTY TIME     CMD\n" \
+            "root 11187 1    0 18:52 ?   00:00:00 mock_process_name_A\n"
+
 
 class TestHandleProcess(testtools.TestCase):
 
@@ -61,3 +65,15 @@ class TestHandleProcess(testtools.TestCase):
         mock_execute.assert_called_once_with(
             MOCK_PROCESS_LIST[0].get('start_command'),
             run_as_root=MOCK_PROCESS_LIST[0].get('run_as_root'))
+
+    @mock.patch.object(utils, 'execute')
+    def test_monitor_processes(self,
+                               mock_execute):
+        process_list = MOCK_PROCESS_LIST
+        obj = handle_process.HandleProcess()
+        obj.set_process_list(process_list)
+
+        mock_execute.return_value = (PS_RESULT, '')
+
+        down_process_list = obj.monitor_processes()
+        self.assertEqual([], down_process_list)

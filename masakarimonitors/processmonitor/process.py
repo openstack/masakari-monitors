@@ -14,6 +14,7 @@
 
 import yaml
 
+import eventlet
 from oslo_log import log as oslo_logging
 
 import masakarimonitors.conf
@@ -46,6 +47,9 @@ class ProcessmonitorManager(manager.Manager):
             LOG.exception(_LE("Exception caught: %s"), e)
             return
 
+    def stop(self):
+        self.running = False
+
     def main(self):
         """Main method."""
 
@@ -61,6 +65,24 @@ class ProcessmonitorManager(manager.Manager):
 
             # Initial start of processes.
             self.process_handler.start_processes()
+
+            self.running = True
+            while self.running:
+                # Monitor processes.
+                down_process_list = self.process_handler.monitor_processes()
+
+                if len(down_process_list) != 0:
+                    # Restart down processes.
+                    pass
+
+                # Reload process list and set to the process handler.
+                process_list = self._load_process_list()
+                if process_list is None:
+                    LOG.error(_LE("Failed to reload process list file."))
+                    break
+                self.process_handler.set_process_list(process_list)
+
+                eventlet.greenthread.sleep(CONF.process.check_interval)
 
         except Exception as e:
             LOG.exception(_LE("Exception caught: %s"), e)

@@ -77,3 +77,30 @@ class HandleProcess(object):
             LOG.info(
                 _LI("Start of process with executing command: %s"), cmd_str)
             self._execute_cmd(cmd_str, process['run_as_root'])
+
+    def monitor_processes(self):
+        """Monitor processes.
+
+        This method monitors the processes using process name written in the
+        process list.
+
+        :returns: List of down process
+        """
+        down_process_list = []
+        for process in self.process_list:
+            process_name = process['process_name']
+
+            try:
+                # Execute monitoring command.
+                out, err = utils.execute('ps', '-ef', run_as_root=False)
+                if process_name in out:
+                    LOG.debug("Process '%s' is found." % process_name)
+                else:
+                    # Append down_process_list.
+                    down_process_list.append(process)
+                    LOG.warning(
+                        _LW("Process '%s' is not found."), process_name)
+            except Exception as e:
+                LOG.error(_LW("Monitoring command raised exception: %s"), e)
+
+        return down_process_list
