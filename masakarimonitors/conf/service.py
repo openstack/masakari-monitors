@@ -34,6 +34,10 @@ Possible values:
                default='masakarimonitors.processmonitor.process'
                        '.ProcessmonitorManager',
                help='Full class name for the Manager for processmonitor.'),
+    cfg.StrOpt('hostmonitor_manager',
+               default='masakarimonitors.hostmonitor.host'
+                       '.HostmonitorManager',
+               help='Full class name for the Manager for hostmonitor.'),
     ]
 
 
