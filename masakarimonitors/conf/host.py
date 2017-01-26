@@ -49,6 +49,33 @@ If ipmi RA is not set in pacemaker, this value should be set True.
     cfg.IntOpt('ipmi_retry_interval',
                default=10,
                help='Retry interval(in seconds) of the ipmitool command.'),
+    cfg.IntOpt('stonith_wait',
+               default=30,
+               help='Standby time(in seconds) until activate STONITH.'),
+    cfg.IntOpt('tcpdump_timeout',
+               default=5,
+               help='Timeout value(in seconds) of the tcpdump command when'
+                    ' monitors the corosync communication.'),
+    cfg.StrOpt('corosync_multicast_interfaces',
+               help='''
+The name of interface that corosync is using for mutual communication
+between hosts.
+If there are multiple interfaces, specify them in comma-separated
+like 'enp0s3,enp0s8'.
+The number of interfaces you specify must be equal to the number of
+corosync_multicast_ports values and must be in correct order with relevant
+ports in corosync_multicast_ports.
+'''),
+    cfg.StrOpt('corosync_multicast_ports',
+               help='''
+The port numbers that corosync is using for mutual communication
+between hosts.
+If there are multiple port numbers, specify them in comma-separated
+like '5405,5406'.
+The number of port numbers you specify must be equal to the number of
+corosync_multicast_interfaces values and must be in correct order with
+relevant interfaces in corosync_multicast_interfaces.
+'''),
 ]
 
 

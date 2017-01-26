@@ -35,7 +35,11 @@ class TestHandleHost(testtools.TestCase):
     @mock.patch.object(parse_cib_xml.ParseCibXml, 'have_quorum')
     @mock.patch.object(parse_cib_xml.ParseCibXml, 'set_cib_xml')
     @mock.patch.object(utils, 'execute')
+    @mock.patch.object(handle_host.HandleHost, '_check_pacemaker_services')
+    @mock.patch.object(handle_host.HandleHost, '_check_hb_line')
     def test_monitor_hosts(self,
+                           mock_check_hb_line,
+                           mock_check_pacemaker_services,
                            mock_execute,
                            mock_set_cib_xml,
                            mock_have_quorum,
@@ -43,6 +47,8 @@ class TestHandleHost(testtools.TestCase):
 
         obj = handle_host.HandleHost()
 
+        mock_check_hb_line.return_value = 0
+        mock_check_pacemaker_services.return_value = False
         mock_execute.return_value = (EXECUTE_RETURN, '')
         mock_set_cib_xml.return_value = None
         mock_have_quorum.return_value = 0
@@ -50,3 +56,14 @@ class TestHandleHost(testtools.TestCase):
 
         ret = obj.monitor_hosts()
         self.assertEqual(None, ret)
+
+    @mock.patch.object(utils, 'execute')
+    def test_check_hb_line(self,
+                           mock_execute):
+
+        obj = handle_host.HandleHost()
+
+        mock_execute.return_value = ('', '')
+
+        ret = obj._check_hb_line()
+        self.assertEqual(2, ret)

@@ -46,6 +46,92 @@ class HandleHost(driver.DriverBase):
         self.status_holder = hold_host_status.HostHoldStatus()
         self.notifier = masakari.SendNotification()
 
+    def _check_pacemaker_services(self, target_service):
+        try:
+            cmd_str = 'systemctl status ' + target_service
+            command = cmd_str.split(' ')
+
+            # Execute command.
+            out, err = utils.execute(*command, run_as_root=True)
+
+            if err:
+                raise Exception
+
+            return True
+
+        except Exception:
+            return False
+
+    def _check_hb_line(self):
+        """Check whether the corosync communication is normal.
+
+        :returns: 0 if normal, 1 if abnormal, 2 if configuration file is
+            wrong or neither pacemaker nor pacemaker-remote is running.
+        """
+        # Check whether the pacemaker services is normal.
+        corosync_status = self._check_pacemaker_services('corosync')
+        pacemaker_status = self._check_pacemaker_services('pacemaker')
+        pacemaker_remote_status = self._check_pacemaker_services(
+            'pacemaker_remote')
+
+        if corosync_status is False or pacemaker_status is False:
+            if pacemaker_remote_status is False:
+                LOG.error(
+                    _LE("Neither pacemaker nor pacemaker-remote is running."))
+                return 2
+            else:
+                LOG.info(_LI("Works on pacemaker-remote."))
+                return 0
+
+        # Check whether the neccesary parameters are set.
+        if CONF.host.corosync_multicast_interfaces is None or \
+            CONF.host.corosync_multicast_ports is None:
+            msg = ("corosync_multicast_interfaces or "
+                   "corosync_multicast_ports is not set.")
+            LOG.error(_LE("%s"), msg)
+            return 2
+
+        # Check whether the corosync communication is normal.
+        corosync_multicast_interfaces = \
+            CONF.host.corosync_multicast_interfaces.split(',')
+        corosync_multicast_ports = \
+            CONF.host.corosync_multicast_ports.split(',')
+
+        if len(corosync_multicast_interfaces) != len(corosync_multicast_ports):
+            msg = ("Incorrect parameters corosync_multicast_interfaces or "
+                   "corosync_multicast_ports.")
+            LOG.error(_LE("%s"), msg)
+            return 2
+
+        is_nic_normal = False
+        for num in range(0, len(corosync_multicast_interfaces)):
+            cmd_str = ("timeout %s tcpdump -n -c 1 -p -i %s port %s") \
+                % (CONF.host.tcpdump_timeout,
+                   corosync_multicast_interfaces[num],
+                   corosync_multicast_ports[num])
+            command = cmd_str.split(' ')
+
+            try:
+                # Execute crmadmin command.
+                out, err = utils.execute(*command, run_as_root=True)
+
+                # If command doesn't raise exception, nic is normal.
+                msg = ("Corosync communication using '%s' is normal.") \
+                    % corosync_multicast_interfaces[num]
+                LOG.info(_LI("%s"), msg)
+                is_nic_normal = True
+                break
+            except Exception:
+                msg = ("Corosync communication using '%s' is failed.") \
+                    % corosync_multicast_interfaces[num]
+                LOG.warning(_LW("%s"), msg)
+
+        if is_nic_normal is False:
+            LOG.error(_LE("Corosync communication is failed."))
+            return 1
+
+        return 0
+
     def _check_host_status_by_crmadmin(self):
         try:
             # Execute crmadmin command.
@@ -256,11 +342,29 @@ class HandleHost(driver.DriverBase):
             self.running = True
             while self.running:
 
-                # Check the host status is stable or unstable by crmadmin.
-                if self._check_host_status_by_crmadmin() != 0:
+                # Check whether corosync communication between hosts
+                # is normal.
+                ret = self._check_hb_line()
+                if ret == 1:
+                    # Because my host may be fenced by stonith due to split
+                    # brain condition, sleep for a certain time.
+                    eventlet.greenthread.sleep(CONF.host.stonith_wait)
+                elif ret == 2:
                     LOG.warning(_LW("hostmonitor skips monitoring hosts."))
                     eventlet.greenthread.sleep(CONF.host.monitoring_interval)
                     continue
+
+                # Check the host status is stable or unstable by crmadmin.
+                # It only checks when this process runs on the full cluster
+                # stack of corosync.
+                pacemaker_remote_status = self._check_pacemaker_services(
+                    'pacemaker_remote')
+                if pacemaker_remote_status is False:
+                    if self._check_host_status_by_crmadmin() != 0:
+                        LOG.warning(_LW("hostmonitor skips monitoring hosts."))
+                        eventlet.greenthread.sleep(
+                            CONF.host.monitoring_interval)
+                        continue
 
                 # Check the host status is online or offline by cibadmin.
                 if self._check_host_status_by_cibadmin() != 0:
