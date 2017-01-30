@@ -66,14 +66,14 @@ class Callback(object):
                                              'type': type})
 
         # Set conf value.
-        project_domain_name = CONF.keystone.project_domain_name
-        project_name = CONF.keystone.project_name
-        username = CONF.keystone.username
-        password = CONF.keystone.password
-        auth_url = CONF.keystone.auth_url
-        region = CONF.keystone.region
-        interface = CONF.callback.interface
-        api_version = CONF.callback.api_version
+        project_domain_name = CONF.api.project_domain_name
+        project_name = CONF.api.project_name
+        username = CONF.api.username
+        password = CONF.api.password
+        auth_url = CONF.api.auth_url
+        region = CONF.api.region
+        interface = CONF.api.api_interface
+        api_version = CONF.api.api_version
         retry_max = CONF.callback.retry_max
         retry_interval = CONF.callback.retry_interval
 
