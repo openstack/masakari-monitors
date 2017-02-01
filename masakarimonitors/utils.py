@@ -21,12 +21,14 @@ import shutil
 import sys
 import tempfile
 
+from oslo_concurrency import processutils
 from oslo_log import log as logging
 from oslo_utils import importutils
 import six
 
 import masakarimonitors.conf
 from masakarimonitors.i18n import _LE
+from masakarimonitors import privsep
 
 
 CONF = masakarimonitors.conf.CONF
@@ -91,3 +93,16 @@ def tempdir(**kwargs):
             shutil.rmtree(tmpdir)
         except OSError as e:
             LOG.error(_LE('Could not remove tmpdir: %s'), e)
+
+
+@privsep.monitors_priv.entrypoint
+def privsep_execute(*cmd, **kwargs):
+    return processutils.execute(*cmd, **kwargs)
+
+
+def execute(*cmd, **kwargs):
+    """Convenience wrapper around oslo's execute() method."""
+    if 'run_as_root' in kwargs and kwargs.get('run_as_root'):
+        return privsep_execute(*cmd, **kwargs)
+    else:
+        return processutils.execute(*cmd, **kwargs)

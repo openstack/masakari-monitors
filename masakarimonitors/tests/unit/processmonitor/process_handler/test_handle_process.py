@@ -14,17 +14,17 @@
 
 import mock
 import testtools
-import yaml
 
 import eventlet
 
-from masakarimonitors.processmonitor import process as processmonitor_manager
 from masakarimonitors.processmonitor.process_handler import handle_process
+from masakarimonitors import utils
 
 eventlet.monkey_patch(os=False)
 
 MOCK_PROCESS_LIST = [
     {
+        'id': 1,
         'process_name': 'mock_process_name_A',
         'start_command': 'mock_start_command',
         'pre_start_command': 'mock_pre_start_command',
@@ -37,22 +37,27 @@ MOCK_PROCESS_LIST = [
 ]
 
 
-class TestProcessmonitorManager(testtools.TestCase):
+class TestHandleProcess(testtools.TestCase):
 
     def setUp(self):
-        super(TestProcessmonitorManager, self).setUp()
+        super(TestHandleProcess, self).setUp()
 
-    @mock.patch.object(handle_process.HandleProcess, 'start_processes')
-    @mock.patch.object(handle_process.HandleProcess, 'set_process_list')
-    @mock.patch.object(yaml, 'load')
-    def test_main(self,
-                  mock_load,
-                  mock_set_process_list,
-                  mock_start_processes):
+    def test_set_process_list(self):
+        process_list = MOCK_PROCESS_LIST
+        obj = handle_process.HandleProcess()
+        obj.set_process_list(process_list)
 
-        mock_load.return_value = MOCK_PROCESS_LIST
-        mock_set_process_list.return_value = None
-        mock_start_processes.return_value = None
+    @mock.patch.object(utils, 'execute')
+    def test_start_processes(self,
+                             mock_execute):
+        process_list = MOCK_PROCESS_LIST
+        obj = handle_process.HandleProcess()
+        obj.set_process_list(process_list)
 
-        obj = processmonitor_manager.ProcessmonitorManager()
-        obj.main()
+        mock_execute.return_value = ('test_stdout', 'test_stderr')
+
+        obj.start_processes()
+
+        mock_execute.assert_called_once_with(
+            MOCK_PROCESS_LIST[0].get('start_command'),
+            run_as_root=MOCK_PROCESS_LIST[0].get('run_as_root'))

@@ -19,6 +19,7 @@ from oslo_log import log as oslo_logging
 import masakarimonitors.conf
 from masakarimonitors.i18n import _LE
 from masakarimonitors import manager
+from masakarimonitors.processmonitor.process_handler import handle_process
 
 LOG = oslo_logging.getLogger(__name__)
 CONF = masakarimonitors.conf.CONF
@@ -30,6 +31,7 @@ class ProcessmonitorManager(manager.Manager):
     def __init__(self, *args, **kwargs):
         super(ProcessmonitorManager, self).__init__(
             service_name="processmonitor", *args, **kwargs)
+        self.process_handler = handle_process.HandleProcess()
 
     def _load_process_list(self):
         try:
@@ -53,6 +55,12 @@ class ProcessmonitorManager(manager.Manager):
             if process_list is None:
                 LOG.error(_LE("Failed to load process list file."))
                 return
+
+            # Set process_list object to the process handler.
+            self.process_handler.set_process_list(process_list)
+
+            # Initial start of processes.
+            self.process_handler.start_processes()
 
         except Exception as e:
             LOG.exception(_LE("Exception caught: %s"), e)
