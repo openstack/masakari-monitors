@@ -23,6 +23,7 @@ from oslo_utils import timeutils
 from masakarimonitors.instancemonitor.libvirt_handler import callback
 from masakarimonitors.instancemonitor.libvirt_handler \
     import eventfilter_table as evft
+from masakarimonitors.objects import event_constants as ec
 
 
 LOG = oslo_logging.getLogger(__name__)
@@ -43,7 +44,7 @@ class EventFilter(object):
         :pram uuID: UUID
         """
 
-        noticeType = 'VM'
+        noticeType = ec.EventConstants.TYPE_VM
         hostname = socket.gethostname()
         currentTime = timeutils.utcnow()
 
