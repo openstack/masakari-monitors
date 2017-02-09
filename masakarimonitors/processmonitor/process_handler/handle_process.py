@@ -80,11 +80,23 @@ class HandleProcess(object):
         """
         for process in self.process_list:
             cmd_str = process['start_command']
+            pre_cmd_str = process['pre_start_command']
+            post_cmd_str = process['post_start_command']
+
+            # Execute pre start command.
+            if pre_cmd_str:
+                ret = self._execute_cmd(pre_cmd_str, process['run_as_root'])
+                if ret != 0:
+                    continue
 
             # Execute start command.
             LOG.info(
                 _LI("Start of process with executing command: %s"), cmd_str)
             self._execute_cmd(cmd_str, process['run_as_root'])
+
+            # Execute post start command.
+            if post_cmd_str:
+                ret = self._execute_cmd(post_cmd_str, process['run_as_root'])
 
     def monitor_processes(self):
         """Monitor processes.
@@ -150,22 +162,43 @@ class HandleProcess(object):
                 continue
 
             cmd_str = down_process['restart_command']
+            pre_cmd_str = down_process['pre_restart_command']
+            post_cmd_str = down_process['post_restart_command']
 
             LOG.info(
                 _LI("Retart of process with executing command: %s"), cmd_str)
 
             for retries in range(0, CONF.process.restart_retries + 1):
 
+                # Execute pre start command.
+                if pre_cmd_str:
+                    ret = self._execute_cmd(pre_cmd_str,
+                                            down_process['run_as_root'])
+                    if ret != 0:
+                        # Failed to restart process.
+                        eventlet.greenthread.sleep(
+                            CONF.process.restart_interval)
+                        continue
+
                 # Execute start command.
                 ret = self._execute_cmd(cmd_str, down_process['run_as_root'])
-
-                if ret == 0:
-                    # Succeeded in restarting process.
-                    break
-                else:
+                if ret != 0:
                     # Failed to restart process.
                     eventlet.greenthread.sleep(CONF.process.restart_interval)
                     continue
+
+                # Execute post start command.
+                if post_cmd_str:
+                    ret = self._execute_cmd(post_cmd_str,
+                                            down_process['run_as_root'])
+                    if ret != 0:
+                        # Failed to restart process.
+                        eventlet.greenthread.sleep(
+                            CONF.process.restart_interval)
+                        continue
+
+                # Succeeded in restarting process.
+                break
 
             if retries == CONF.process.restart_retries:
                 # Send a notification.

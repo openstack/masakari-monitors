@@ -72,12 +72,20 @@ class TestHandleProcess(testtools.TestCase):
         obj = handle_process.HandleProcess()
         obj.set_process_list(process_list)
 
-        mock_execute.return_value = ('test_stdout', 'test_stderr')
+        mock_execute.side_effect = [('test_stdout', ''),
+                                    ('test_stdout', ''),
+                                    ('test_stdout', 'test_stderr')]
 
         obj.start_processes()
 
-        mock_execute.assert_called_once_with(
+        mock_execute.assert_any_call(
+            MOCK_PROCESS_LIST[0].get('pre_start_command'),
+            run_as_root=MOCK_PROCESS_LIST[0].get('run_as_root'))
+        mock_execute.assert_any_call(
             MOCK_PROCESS_LIST[0].get('start_command'),
+            run_as_root=MOCK_PROCESS_LIST[0].get('run_as_root'))
+        mock_execute.assert_any_call(
+            MOCK_PROCESS_LIST[0].get('post_start_command'),
             run_as_root=MOCK_PROCESS_LIST[0].get('run_as_root'))
 
     @mock.patch.object(utils, 'execute')
@@ -100,10 +108,18 @@ class TestHandleProcess(testtools.TestCase):
         obj.set_process_list(process_list)
         down_process_list = MOCK_DOWN_PROCESS_LIST
 
-        mock_execute.return_value = ('test_stdout', '')
+        mock_execute.side_effect = [('test_stdout', ''),
+                                    ('test_stdout', ''),
+                                    ('test_stdout', '')]
 
         obj.restart_processes(down_process_list)
 
-        mock_execute.assert_called_once_with(
-            MOCK_PROCESS_LIST[0].get('restart_command'),
+        mock_execute.assert_any_call(
+            MOCK_DOWN_PROCESS_LIST[0].get('pre_restart_command'),
+            run_as_root=MOCK_DOWN_PROCESS_LIST[0].get('run_as_root'))
+        mock_execute.assert_any_call(
+            MOCK_DOWN_PROCESS_LIST[0].get('restart_command'),
+            run_as_root=MOCK_DOWN_PROCESS_LIST[0].get('run_as_root'))
+        mock_execute.assert_any_call(
+            MOCK_DOWN_PROCESS_LIST[0].get('post_restart_command'),
             run_as_root=MOCK_DOWN_PROCESS_LIST[0].get('run_as_root'))
