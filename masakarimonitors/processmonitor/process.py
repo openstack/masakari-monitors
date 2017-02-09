@@ -74,6 +74,9 @@ class ProcessmonitorManager(manager.Manager):
                 if len(down_process_list) != 0:
                     # Restart down processes.
                     self.process_handler.restart_processes(down_process_list)
+                else:
+                    # Since no down process, clear the restart_failure_list
+                    self.process_handler.restart_failure_list[:] = []
 
                 # Reload process list and set to the process handler.
                 process_list = self._load_process_list()

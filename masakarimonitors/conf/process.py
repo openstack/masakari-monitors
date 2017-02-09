@@ -25,6 +25,14 @@ monitor_process_opts = [
     cfg.IntOpt('restart_interval',
                default=5,
                help='Interval in seconds for restarting a process.'),
+    cfg.IntOpt('api_retry_max',
+               default=12,
+               help='Number of retries for send a notification in'
+                    ' processmonitor.'),
+    cfg.IntOpt('api_retry_interval',
+               default=10,
+               help='Interval between re-sending a notification in'
+                    ' processmonitor(in seconds).'),
     cfg.StrOpt('process_list_path',
                default='/etc/masakarimonitors/process_list.yaml',
                help='The file path of process list.'),

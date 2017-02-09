@@ -12,13 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import socket
+
 import eventlet
 from oslo_log import log as oslo_logging
+from oslo_utils import timeutils
 
 import masakarimonitors.conf
+from masakarimonitors.ha import masakari
 from masakarimonitors.i18n import _LE
 from masakarimonitors.i18n import _LI
 from masakarimonitors.i18n import _LW
+from masakarimonitors.objects import event_constants as ec
 from masakarimonitors import utils
 
 LOG = oslo_logging.getLogger(__name__)
@@ -30,6 +35,8 @@ class HandleProcess(object):
 
     def __init__(self):
         self.process_list = None
+        self.restart_failure_list = []
+        self.notifier = masakari.SendNotification()
 
     def set_process_list(self, process_list):
         """Set process list object.
@@ -106,6 +113,24 @@ class HandleProcess(object):
 
         return down_process_list
 
+    def _make_event(self, process_name):
+
+        hostname = socket.gethostname()
+        current_time = timeutils.utcnow()
+        event = {
+            'notification': {
+                'type': ec.EventConstants.TYPE_PROCESS,
+                'hostname': hostname,
+                'generated_time': current_time,
+                'payload': {
+                    'event': ec.EventConstants.EVENT_STOPPED,
+                    'process_name': process_name
+                }
+            }
+        }
+
+        return event
+
     def restart_processes(self, down_process_list):
         """Restart processes.
 
@@ -114,7 +139,16 @@ class HandleProcess(object):
 
         :param down_process_list: down process list object
         """
+        tmp_restart_failure_list = []
         for down_process in down_process_list:
+            # The process which failed to restart previously doesn't restart.
+            if down_process['process_name'] in self.restart_failure_list:
+                msg = "Process '%s' doesn't be restarted because it failed" \
+                      " to restart previously." % down_process['process_name']
+                LOG.warning(_LW("%s"), msg)
+                tmp_restart_failure_list.append(down_process['process_name'])
+                continue
+
             cmd_str = down_process['restart_command']
 
             LOG.info(
@@ -135,4 +169,14 @@ class HandleProcess(object):
 
             if retries == CONF.process.restart_retries:
                 # Send a notification.
-                pass
+                event = self._make_event(down_process['process_name'])
+                self.notifier.send_notification(
+                    CONF.process.api_retry_max,
+                    CONF.process.api_retry_interval,
+                    event)
+                # Add the process name which failed to restart to the
+                # failure list.
+                tmp_restart_failure_list.append(down_process['process_name'])
+
+        # Replace the old restart_failure_list with new one
+        self.restart_failure_list = tmp_restart_failure_list[:]
