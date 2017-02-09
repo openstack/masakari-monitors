@@ -36,6 +36,20 @@ MOCK_PROCESS_LIST = [
     },
 ]
 
+MOCK_DOWN_PROCESS_LIST = [
+    {
+        'id': 1,
+        'process_name': 'mock_process_name_A',
+        'start_command': 'mock_start_command',
+        'pre_start_command': 'mock_pre_start_command',
+        'post_start_command': 'mock_post_start_command',
+        'restart_command': 'mock_restart_command',
+        'pre_restart_command': 'mock_pre_restart_command',
+        'post_restart_command': 'mock_post_restart_command',
+        'run_as_root': True
+    },
+]
+
 PS_RESULT = "\n" \
             "UID  PID   PPID C STIME TTY TIME     CMD\n" \
             "root 11187 1    0 18:52 ?   00:00:00 mock_process_name_A\n"
@@ -77,3 +91,19 @@ class TestHandleProcess(testtools.TestCase):
 
         down_process_list = obj.monitor_processes()
         self.assertEqual([], down_process_list)
+
+    @mock.patch.object(utils, 'execute')
+    def test_restart_processes(self,
+                               mock_execute):
+        process_list = MOCK_PROCESS_LIST
+        obj = handle_process.HandleProcess()
+        obj.set_process_list(process_list)
+        down_process_list = MOCK_DOWN_PROCESS_LIST
+
+        mock_execute.return_value = ('test_stdout', '')
+
+        obj.restart_processes(down_process_list)
+
+        mock_execute.assert_called_once_with(
+            MOCK_PROCESS_LIST[0].get('restart_command'),
+            run_as_root=MOCK_DOWN_PROCESS_LIST[0].get('run_as_root'))

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import eventlet
 from oslo_log import log as oslo_logging
 
 import masakarimonitors.conf
@@ -104,3 +105,34 @@ class HandleProcess(object):
                 LOG.error(_LW("Monitoring command raised exception: %s"), e)
 
         return down_process_list
+
+    def restart_processes(self, down_process_list):
+        """Restart processes.
+
+        This method restarts the processes using restart command written in
+        the process list.
+
+        :param down_process_list: down process list object
+        """
+        for down_process in down_process_list:
+            cmd_str = down_process['restart_command']
+
+            LOG.info(
+                _LI("Retart of process with executing command: %s"), cmd_str)
+
+            for retries in range(0, CONF.process.restart_retries + 1):
+
+                # Execute start command.
+                ret = self._execute_cmd(cmd_str, down_process['run_as_root'])
+
+                if ret == 0:
+                    # Succeeded in restarting process.
+                    break
+                else:
+                    # Failed to restart process.
+                    eventlet.greenthread.sleep(CONF.process.restart_interval)
+                    continue
+
+            if retries == CONF.process.restart_retries:
+                # Send a notification.
+                pass

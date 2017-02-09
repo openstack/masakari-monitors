@@ -18,6 +18,13 @@ monitor_process_opts = [
     cfg.IntOpt('check_interval',
                default=5,
                help='Interval in seconds for checking a process.'),
+    cfg.IntOpt('restart_retries',
+               default=3,
+               help='Number of retries when the failure of restarting a'
+                    ' process.'),
+    cfg.IntOpt('restart_interval',
+               default=5,
+               help='Interval in seconds for restarting a process.'),
     cfg.StrOpt('process_list_path',
                default='/etc/masakarimonitors/process_list.yaml',
                help='The file path of process list.'),
