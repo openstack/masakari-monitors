@@ -27,7 +27,7 @@ from oslo_utils import importutils
 import six
 
 import masakarimonitors.conf
-from masakarimonitors.i18n import _LE
+from masakarimonitors.i18n import _, _LE
 from masakarimonitors import privsep
 
 
@@ -59,7 +59,12 @@ def monkey_patch():
             return inspect.ismethod(obj) or inspect.isfunction(obj)
     # Get list of modules and decorators
     for module_and_decorator in CONF.monkey_patch_modules:
-        module, decorator_name = module_and_decorator.split(':')
+        md_value = module_and_decorator.split(':')
+        if len(md_value) != 2:
+            msg = _("'monkey_patch_modules' config option is not configured "
+                    "correctly")
+            raise Exception(msg)
+        module, decorator_name = md_value
         # import decorator function
         decorator = importutils.import_class(decorator_name)
         __import__(module)

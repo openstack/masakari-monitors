@@ -31,7 +31,7 @@ Related options:
 """),
     cfg.ListOpt(
         'monkey_patch_modules',
-        default=['masakarimonitors.cmd'],
+        default=[],
         help="""
 List of modules/decorators to monkey patch.
 
