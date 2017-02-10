@@ -20,6 +20,35 @@ monitor_host_opts = [
     cfg.IntOpt('monitoring_interval',
                default=60,
                help='Monitoring interval(in seconds) of node status.'),
+    cfg.IntOpt('api_retry_max',
+               default=12,
+               help='Number of retries for send a notification in'
+                    ' processmonitor.'),
+    cfg.IntOpt('api_retry_interval',
+               default=10,
+               help='Trial interval of time of the notification processing'
+                    ' is error(in seconds).'),
+    cfg.BoolOpt('disable_ipmi_check',
+                default=False,
+                help='''
+Do not check whether the host is completely down.
+
+Possible values:
+
+* True: Do not check whether the host is completely down.
+* False: Do check whether the host is completely down.
+
+If ipmi RA is not set in pacemaker, this value should be set True.
+'''),
+    cfg.IntOpt('ipmi_timeout',
+               default=5,
+               help='Timeout value(in seconds) of the ipmitool command.'),
+    cfg.IntOpt('ipmi_retry_max',
+               default=3,
+               help='Number of ipmitool command retries.'),
+    cfg.IntOpt('ipmi_retry_interval',
+               default=10,
+               help='Retry interval(in seconds) of the ipmitool command.'),
 ]
 
 

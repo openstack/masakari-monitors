@@ -23,6 +23,74 @@ from masakarimonitors.hostmonitor.host_handler import parse_cib_xml
 eventlet.monkey_patch(os=False)
 
 CIB_XML = '<cib have-quorum="1">' \
+          '  <configuration>' \
+          '    <crm_config>test</crm_config>' \
+          '    <nodes>' \
+          '      <node id="1084754452" uname="masakari-node"/>' \
+          '      <node id="1084754453" uname="compute-node"/>' \
+          '    </nodes>' \
+          '    <resources>' \
+          '      <group id="grpStonith1">' \
+          '        <primitive id="stnt11" type="external/stonith-helper">' \
+          '          <instance_attributes id="stnt11-instance_attributes">' \
+          '            <nvpair name="hostlist" value="masakari-node"/>' \
+          '          </instance_attributes>' \
+          '          <operations>' \
+          '            <op name="start"/>' \
+          '            <op name="monitor"/>' \
+          '            <op name="stop"/>' \
+          '          </operations>' \
+          '        </primitive>' \
+          '        <primitive id="stnt12" type="external/ipmi">' \
+          '          <instance_attributes id="stnt12-instance_attributes">' \
+          '            <nvpair name="pcmk_reboot_timeout" value="60s"/>' \
+          '            <nvpair name="hostname" value="masakari-node"/>' \
+          '            <nvpair name="ipaddr" value="192.168.10.20"/>' \
+          '            <nvpair name="userid" value="admin"/>' \
+          '            <nvpair name="passwd" value="password"/>' \
+          '            <nvpair name="interface" value="lanplus"/>' \
+          '          </instance_attributes>' \
+          '          <operations>' \
+          '            <op name="start"/>' \
+          '            <op name="monitor"/>' \
+          '            <op name="stop"/>' \
+          '          </operations>' \
+          '        </primitive>' \
+          '      </group>' \
+          '      <group id="grpStonith2">' \
+          '        <primitive id="stnt21" type="external/stonith-helper">' \
+          '          <instance_attributes id="stnt21-instance_attributes">' \
+          '            <nvpair name="hostlist" value="compute-node"/>' \
+          '          </instance_attributes>' \
+          '          <operations>' \
+          '            <op name="start"/>' \
+          '            <op name="monitor"/>' \
+          '            <op name="stop"/>' \
+          '          </operations>' \
+          '        </primitive>' \
+          '        <primitive id="stnt22" type="external/ipmi">' \
+          '          <instance_attributes id="stnt22-instance_attributes">' \
+          '            <nvpair name="pcmk_reboot_timeout" value="60s"/>' \
+          '            <nvpair name="hostname" value="compute-node"/>' \
+          '            <nvpair name="ipaddr" value="192.168.10.21"/>' \
+          '            <nvpair name="userid" value="admin"/>' \
+          '            <nvpair name="passwd" value="password"/>' \
+          '            <nvpair name="interface" value="lanplus"/>' \
+          '          </instance_attributes>' \
+          '          <operations>' \
+          '            <op name="start"/>' \
+          '            <op name="monitor"/>' \
+          '            <op name="stop"/>' \
+          '          </operations>' \
+          '        </primitive>' \
+          '      </group>' \
+          '    </resources>' \
+          '    <constraints>' \
+          '      <rsc_location id="loc_grpStonith1" rsc="grpStonith1">' \
+          '        <rule test="hoge"/>' \
+          '      </rsc_location>' \
+          '    </constraints>' \
+          '  </configuration>' \
           '  <status>' \
           '    <node_state uname="masakari-node" crmd="online">' \
           '      <test hoge="hoge"/>' \
@@ -63,3 +131,15 @@ class TestParseCibXml(testtools.TestCase):
 
         for node_state_tag in node_state_tag_list:
             self.assertEqual('online', node_state_tag.get('crmd'))
+
+    def test_get_stonith_ipmi_params(self):
+
+        obj = parse_cib_xml.ParseCibXml()
+        obj.set_cib_xml(CIB_XML)
+
+        ipmi_values = obj.get_stonith_ipmi_params('compute-node')
+
+        self.assertEqual('192.168.10.21', ipmi_values['ipaddr'])
+        self.assertEqual('admin', ipmi_values['userid'])
+        self.assertEqual('password', ipmi_values['passwd'])
+        self.assertEqual('lanplus', ipmi_values['interface'])

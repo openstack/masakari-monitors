@@ -16,14 +16,17 @@ import socket
 
 import eventlet
 from oslo_log import log as oslo_logging
+from oslo_utils import timeutils
 
 import masakarimonitors.conf
+from masakarimonitors.ha import masakari
 import masakarimonitors.hostmonitor.host_handler.driver as driver
 from masakarimonitors.hostmonitor.host_handler import hold_host_status
 from masakarimonitors.hostmonitor.host_handler import parse_cib_xml
 from masakarimonitors.i18n import _LE
 from masakarimonitors.i18n import _LI
 from masakarimonitors.i18n import _LW
+from masakarimonitors.objects import event_constants as ec
 from masakarimonitors import utils
 
 LOG = oslo_logging.getLogger(__name__)
@@ -41,6 +44,7 @@ class HandleHost(driver.DriverBase):
         self.my_hostname = socket.gethostname()
         self.xml_parser = parse_cib_xml.ParseCibXml()
         self.status_holder = hold_host_status.HostHoldStatus()
+        self.notifier = masakari.SendNotification()
 
     def _check_host_status_by_crmadmin(self):
         try:
@@ -81,6 +85,87 @@ class HandleHost(driver.DriverBase):
 
         return out
 
+    def _is_poweroff(self, hostname):
+        ipmi_values = self.xml_parser.get_stonith_ipmi_params(hostname)
+        if ipmi_values is None:
+            LOG.error(_LE("Failed to get params of ipmi RA."))
+            return False
+
+        cmd_str = ("timeout %s ipmitool -U %s -P %s -I %s -H %s "
+                   "power status") \
+            % (str(CONF.host.ipmi_timeout), ipmi_values['userid'],
+               ipmi_values['passwd'], ipmi_values['interface'],
+               ipmi_values['ipaddr'])
+        command = cmd_str.split(' ')
+
+        retry_count = 0
+        while True:
+            try:
+                # Execute ipmitool command.
+                out, err = utils.execute(*command, run_as_root=False)
+
+                if err:
+                    msg = ("ipmitool command output stderr: %s") % err
+                    raise Exception(msg)
+
+                msg = ("ipmitool command output stdout: %s") % out
+
+                if 'Power is off' in out:
+                    LOG.info(_LI("%s"), msg)
+                    return True
+                else:
+                    raise Exception(msg)
+
+            except Exception as e:
+                if retry_count < CONF.host.ipmi_retry_max:
+                    LOG.warning(_LW("Retry executing ipmitool command. (%s)"),
+                                e)
+                    retry_count = retry_count + 1
+                    eventlet.greenthread.sleep(CONF.host.ipmi_retry_interval)
+                else:
+                    LOG.error(_LE("Exception caught: %s"), e)
+                    return False
+
+    def _make_event(self, hostname, current_status):
+
+        if current_status == 'online':
+            # Set values that host has started.
+            event_type = ec.EventConstants.EVENT_STARTED
+            cluster_status = current_status.upper()
+            host_status = ec.EventConstants.HOST_STATUS_NORMAL
+
+        else:
+            # Set values that host has stopped.
+            event_type = ec.EventConstants.EVENT_STOPPED
+            cluster_status = current_status.upper()
+
+            if not CONF.host.disable_ipmi_check:
+                if self._is_poweroff(hostname):
+                    # Set value that host status is normal.
+                    host_status = ec.EventConstants.HOST_STATUS_NORMAL
+                else:
+                    # Set value that host status is unknown.
+                    host_status = ec.EventConstants.HOST_STATUS_UNKNOWN
+            else:
+                # Set value that host status is normal.
+                host_status = ec.EventConstants.HOST_STATUS_NORMAL
+
+        current_time = timeutils.utcnow()
+        event = {
+            'notification': {
+                'type': ec.EventConstants.TYPE_COMPUTE_HOST,
+                'hostname': hostname,
+                'generated_time': current_time,
+                'payload': {
+                    'event': event_type,
+                    'cluster_status': cluster_status,
+                    'host_status': host_status
+                }
+            }
+        }
+
+        return event
+
     def _check_if_status_changed(self, node_state_tag_list):
 
         # Check if host status changed.
@@ -111,9 +196,22 @@ class HandleHost(driver.DriverBase):
 
             # If host status changed, send a notification.
             if current_status != old_status:
-                # TODO(takahara.kengo)
-                # Implement the notification processing.
-                pass
+                if current_status != 'online' and current_status != 'offline':
+                    # If current_status is not 'online' or 'offline',
+                    # hostmonitor doesn't send a notification.
+                    msg = ("Since host status is '%s',"
+                           " hostmonitor doesn't send a notification.") \
+                        % current_status
+                    LOG.info(_LI("%s"), msg)
+                else:
+                    event = self._make_event(node_state_tag.get('uname'),
+                                             current_status)
+
+                    # Send a notification.
+                    self.notifier.send_notification(
+                        CONF.host.api_retry_max,
+                        CONF.host.api_retry_interval,
+                        event)
 
             # Update host status.
             self.status_holder.set_host_status(node_state_tag)
