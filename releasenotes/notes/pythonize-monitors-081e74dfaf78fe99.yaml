@@ -1,0 +1,8 @@
+---
+features:
+  - Added the masakari-hostmonitor and masakari-processmonitor which were
+    implemented in python.
+deprecations:
+  - The masakari-hostmonitor and masakari-processmonitor which were implemented
+    in bash shell script are deprecated as of the Ocata release and will be
+    removed in the Queens release.
