@@ -22,8 +22,7 @@ from oslo_service import service
 from oslo_utils import importutils
 
 import masakarimonitors.conf
-from masakarimonitors.i18n import _LE
-from masakarimonitors.i18n import _LI
+from masakarimonitors.i18n import _, _LE, _LI
 from masakarimonitors import utils
 
 
