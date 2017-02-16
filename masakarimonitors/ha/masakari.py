@@ -14,6 +14,7 @@
 
 import eventlet
 from openstack import connection
+from openstack import exceptions
 from openstack import profile
 from oslo_log import log as oslo_logging
 
@@ -96,6 +97,14 @@ class SendNotification(object):
                 break
 
             except Exception as e:
+                if isinstance(e, exceptions.HttpException):
+                    # If http_status is 409, skip the retry processing.
+                    if e.http_status == 409:
+                        msg = ("Stop retrying to send a notification because "
+                               "same notification have been already sent.")
+                        LOG.info(_LI("%s"), msg)
+                        break
+
                 if retry_count < api_retry_max:
                     LOG.warning(_LW("Retry sending a notification. (%s)"), e)
                     retry_count = retry_count + 1
