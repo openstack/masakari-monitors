@@ -449,6 +449,10 @@ fi
 
 # Initial processing (check proc.list and read conf file)
 . $SCRIPT_COMMON_SH
+
+# Output warning message.
+log_info "WARNING : $0 is deprecated as of the Ocata release and will be removed in the Queens release. Use masakari-processmonitor implemented in python instead of $0."
+
 log_debug "processmonitor start!!"
 check_proc_file_common
 set_conf_value

@@ -811,6 +811,9 @@ else
     SCRIPT_CONF_FILE=$1
 fi
 
+# Output warning message.
+log_info "WARNING : $0 is deprecated as of the Ocata release and will be removed in the Queens release. Use masakari-hostmonitor implemented in python instead of $0."
+
 # main route
 log_info "begin"
 
