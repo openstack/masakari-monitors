@@ -13,15 +13,16 @@
 # limitations under the License.
 
 import mock
+import socket
 import testtools
+import uuid
 
 import eventlet
-from openstack import connection
-from openstack import profile
 from oslo_utils import timeutils
 
+from masakarimonitors.ha import masakari
 from masakarimonitors.instancemonitor.libvirt_handler import callback
-from masakarimonitors.tests.unit.instancemonitor import fakes
+from masakarimonitors.objects import event_constants as ec
 
 eventlet.monkey_patch(os=False)
 
@@ -31,38 +32,36 @@ class TestCallback(testtools.TestCase):
     def setUp(self):
         super(TestCallback, self).setUp()
 
-    @mock.patch.object(connection, 'Connection')
-    @mock.patch.object(profile.Profile, 'set_interface')
-    @mock.patch.object(profile.Profile, 'set_version')
-    @mock.patch.object(profile.Profile, 'set_region')
-    @mock.patch.object(profile.Profile, 'set_name')
-    @mock.patch.object(profile.Profile, '_add_service')
-    def test_vir_event_filter(self,
-                              mock_add_service,
-                              mock_set_name,
-                              mock_set_region,
-                              mock_set_version,
-                              mock_set_interface,
-                              mock_Connection):
+    @mock.patch.object(masakari.SendNotification, 'send_notification')
+    def test_libvirt_event_callback(self, mock_send_notification):
+
+        mock_send_notification.return_value = None
 
         obj = callback.Callback()
 
-        mock_add_service.return_value = None
-        mock_set_name.return_value = None
-        mock_set_region.return_value = None
-        mock_set_version.return_value = None
-        mock_set_interface.return_value = None
-        mock_Connection.return_value = fakes.FakeConnection()
+        event_id = 0
+        details = 5
+        domain_uuid = uuid.uuid4()
+        notice_type = ec.EventConstants.TYPE_VM
+        hostname = socket.gethostname()
+        current_time = timeutils.utcnow()
 
-        eventID_val = 0
-        detail_val = 5
-        uuID = 'test_uuid'
-        noticeType = 'VM'
-        hostname = 'masakari-node'
-        currentTime = timeutils.utcnow()
-        obj.libvirt_event_callback(eventID_val,
-                                   detail_val,
-                                   uuID,
-                                   noticeType,
-                                   hostname,
-                                   currentTime)
+        obj.libvirt_event_callback(event_id, details, domain_uuid,
+            notice_type, hostname, current_time)
+
+        retry_max = 12
+        retry_interval = 10
+        event = {
+            'notification': {
+                'type': notice_type,
+                'hostname': hostname,
+                'generated_time': current_time,
+                'payload': {
+                    'event': event_id,
+                    'instance_uuid': domain_uuid,
+                    'vir_domain_event': details
+                }
+            }
+        }
+        mock_send_notification.assert_called_once_with(
+            retry_max, retry_interval, event)
