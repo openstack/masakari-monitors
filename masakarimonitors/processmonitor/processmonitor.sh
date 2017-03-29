@@ -293,13 +293,13 @@ send_notification () {
     RESP=`openstack ${AUTH_INFO} notification create ${TYPE} ${P_HOST} "${TIME}" "${PAYLOAD}"`
     result=$?
 
-    if [ $result -eq 1 ]; then
+    if [ $result -eq 0 ]; then
+        log_info "info : Succeeded in sending a notification."
+        log_info "info : $RESP"
+    else
         log_info "info : Failed to send a notification. [exit-code: $result]"
         log_info "info : $RESP"
         MASAKARI_API_SEND_FAIL_FLG="on"
-    else
-        log_info "info : Succeeded in sending a notification."
-        log_info "info : $RESP"
     fi
 
     return

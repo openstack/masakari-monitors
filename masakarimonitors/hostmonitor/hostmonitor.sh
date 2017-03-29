@@ -792,11 +792,11 @@ send_notification () {
     RESP=`openstack ${AUTH_INFO} notification create ${TYPE} ${P_HOST} "${TIME}" "${PAYLOAD}"`
     result=$?
 
-    if [ $result -eq 1 ]; then
-        log_info "$1 info : Failed to send a notification. [exit-code: $result]"
+    if [ $result -eq 0 ]; then
+        log_info "$1 info : Succeeded in sending a notification."
         log_info "$1 info : $RESP"
     else
-        log_info "$1 info : Succeeded in sending a notification."
+        log_info "$1 info : Failed to send a notification. [exit-code: $result]"
         log_info "$1 info : $RESP"
     fi
 
@@ -835,8 +835,9 @@ do
 
     # Check whether HB line is normal.
     check_hb_line
-    if [ $? -ne 0 ]; then
-        case $? in
+    ret=$?
+    if [ $ret -ne 0 ]; then
+        case $ret in
         1)
             sleep $STONITH_WAIT
             ;;
@@ -853,8 +854,9 @@ do
     # cluster stack of corosync.
     if ! is_pacemaker_remote ; then
         check_hb_status
-        if [ $? -ne 0 ]; then
-            case $? in
+        ret=$?
+        if [ $ret -ne 0 ]; then
+            case $ret in
                 1)
                     script_finalize 0
                     ;;
