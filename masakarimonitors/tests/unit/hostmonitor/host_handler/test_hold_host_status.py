@@ -22,7 +22,7 @@ from masakarimonitors.hostmonitor.host_handler import hold_host_status
 eventlet.monkey_patch(os=False)
 
 NODE_STATE_XML = '<node_state uname="masakari-node" crmd="online">' \
-                 '  <test hoge="hoge"/>' \
+                 '  <test foo="foo"/>' \
                  '</node_state>'
 NODE_STATE_TAG = ElementTree.fromstring(NODE_STATE_XML)
 

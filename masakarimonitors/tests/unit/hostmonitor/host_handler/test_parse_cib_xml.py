@@ -87,16 +87,16 @@ CIB_XML = '<cib have-quorum="1">' \
           '    </resources>' \
           '    <constraints>' \
           '      <rsc_location id="loc_grpStonith1" rsc="grpStonith1">' \
-          '        <rule test="hoge"/>' \
+          '        <rule test="foo"/>' \
           '      </rsc_location>' \
           '    </constraints>' \
           '  </configuration>' \
           '  <status>' \
           '    <node_state uname="masakari-node" crmd="online">' \
-          '      <test hoge="hoge"/>' \
+          '      <test foo="foo"/>' \
           '    </node_state>' \
           '    <node_state crmd="online" uname="compute-node">' \
-          '      <test hoge="hoge"/>' \
+          '      <test foo="foo"/>' \
           '    </node_state>' \
           '  </status>' \
           '</cib>'
