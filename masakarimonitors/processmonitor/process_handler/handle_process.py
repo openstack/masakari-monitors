@@ -166,7 +166,7 @@ class HandleProcess(object):
             post_cmd_str = down_process['post_restart_command']
 
             LOG.info(
-                _LI("Retart of process with executing command: %s"), cmd_str)
+                _LI("Restart of process with executing command: %s"), cmd_str)
 
             for retries in range(0, CONF.process.restart_retries + 1):
 
