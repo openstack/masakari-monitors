@@ -80,8 +80,8 @@ class SendNotification(object):
             project_name=CONF.api.project_name,
             username=CONF.api.username,
             password=CONF.api.password,
-            project_domain_id=CONF.api.project_domain_name,
-            user_domain_id=CONF.api.project_domain_name)
+            project_domain_id=CONF.api.project_domain_id,
+            user_domain_id=CONF.api.user_domain_id)
 
         # Send a notification.
         retry_count = 0
