@@ -112,7 +112,7 @@ class HandleHost(driver.DriverBase):
             command = cmd_str.split(' ')
 
             try:
-                # Execute crmadmin command.
+                # Execute tcpdump command.
                 out, err = utils.execute(*command, run_as_root=True)
 
                 # If command doesn't raise exception, nic is normal.
