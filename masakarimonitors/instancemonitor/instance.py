@@ -19,7 +19,6 @@ import eventlet
 import libvirt
 from oslo_log import log as oslo_logging
 
-from masakarimonitors.i18n import _LW
 from masakarimonitors.instancemonitor.libvirt_handler import eventfilter
 from masakarimonitors import manager
 
@@ -95,7 +94,7 @@ class InstancemonitorManager(manager.Manager):
                                   -1, -1, dom.UUIDString())
 
     def _err_handler(self, ctxt, err):
-        LOG.warning(_LW("Error from libvirt : %s"), err[2])
+        LOG.warning("Error from libvirt : %s", err[2])
 
     def _virt_event(self, uri):
         # Run a background thread with the event loop
@@ -139,7 +138,7 @@ class InstancemonitorManager(manager.Manager):
 
             # If connection between libvirtd was lost,
             # clear callback connection.
-            LOG.warning(_LW("Libvirt Connection Closed Unexpectedly."))
+            LOG.warning("Libvirt Connection Closed Unexpectedly.")
             for cid in callback_ids:
                 try:
                     vc.domainEventDeregisterAny(cid)

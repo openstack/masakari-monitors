@@ -23,9 +23,6 @@ from masakarimonitors.ha import masakari
 import masakarimonitors.hostmonitor.host_handler.driver as driver
 from masakarimonitors.hostmonitor.host_handler import hold_host_status
 from masakarimonitors.hostmonitor.host_handler import parse_cib_xml
-from masakarimonitors.i18n import _LE
-from masakarimonitors.i18n import _LI
-from masakarimonitors.i18n import _LW
 from masakarimonitors.objects import event_constants as ec
 from masakarimonitors import utils
 
@@ -77,10 +74,10 @@ class HandleHost(driver.DriverBase):
         if corosync_status is False or pacemaker_status is False:
             if pacemaker_remote_status is False:
                 LOG.error(
-                    _LE("Neither pacemaker nor pacemaker-remote is running."))
+                    "Neither pacemaker nor pacemaker-remote is running.")
                 return 2
             else:
-                LOG.info(_LI("Works on pacemaker-remote."))
+                LOG.info("Works on pacemaker-remote.")
                 return 0
 
         # Check whether the neccesary parameters are set.
@@ -88,7 +85,7 @@ class HandleHost(driver.DriverBase):
             CONF.host.corosync_multicast_ports is None:
             msg = ("corosync_multicast_interfaces or "
                    "corosync_multicast_ports is not set.")
-            LOG.error(_LE("%s"), msg)
+            LOG.error("%s", msg)
             return 2
 
         # Check whether the corosync communication is normal.
@@ -100,7 +97,7 @@ class HandleHost(driver.DriverBase):
         if len(corosync_multicast_interfaces) != len(corosync_multicast_ports):
             msg = ("Incorrect parameters corosync_multicast_interfaces or "
                    "corosync_multicast_ports.")
-            LOG.error(_LE("%s"), msg)
+            LOG.error("%s", msg)
             return 2
 
         is_nic_normal = False
@@ -118,16 +115,16 @@ class HandleHost(driver.DriverBase):
                 # If command doesn't raise exception, nic is normal.
                 msg = ("Corosync communication using '%s' is normal.") \
                     % corosync_multicast_interfaces[num]
-                LOG.info(_LI("%s"), msg)
+                LOG.info("%s", msg)
                 is_nic_normal = True
                 break
             except Exception:
                 msg = ("Corosync communication using '%s' is failed.") \
                     % corosync_multicast_interfaces[num]
-                LOG.warning(_LW("%s"), msg)
+                LOG.warning("%s", msg)
 
         if is_nic_normal is False:
-            LOG.error(_LE("Corosync communication is failed."))
+            LOG.error("Corosync communication is failed.")
             return 1
 
         return 0
@@ -151,8 +148,8 @@ class HandleHost(driver.DriverBase):
                     "crmadmin command output unexpected host status.")
 
         except Exception as e:
-            LOG.warning(_LW("Exception caught: %s"), e)
-            LOG.warning(_LW("'%s' is unstable state on cluster."),
+            LOG.warning("Exception caught: %s", e)
+            LOG.warning("'%s' is unstable state on cluster.",
                         self.my_hostname)
             return 1
 
@@ -166,7 +163,7 @@ class HandleHost(driver.DriverBase):
                 raise Exception(msg)
 
         except Exception as e:
-            LOG.warning(_LW("Exception caught: %s"), e)
+            LOG.warning("Exception caught: %s", e)
             return
 
         return out
@@ -174,7 +171,7 @@ class HandleHost(driver.DriverBase):
     def _is_poweroff(self, hostname):
         ipmi_values = self.xml_parser.get_stonith_ipmi_params(hostname)
         if ipmi_values is None:
-            LOG.error(_LE("Failed to get params of ipmi RA."))
+            LOG.error("Failed to get params of ipmi RA.")
             return False
 
         cmd_str = ("timeout %s ipmitool -U %s -P %s -I %s -H %s "
@@ -197,19 +194,18 @@ class HandleHost(driver.DriverBase):
                 msg = ("ipmitool command output stdout: %s") % out
 
                 if 'Power is off' in out:
-                    LOG.info(_LI("%s"), msg)
+                    LOG.info("%s", msg)
                     return True
                 else:
                     raise Exception(msg)
 
             except Exception as e:
                 if retry_count < CONF.host.ipmi_retry_max:
-                    LOG.warning(_LW("Retry executing ipmitool command. (%s)"),
-                                e)
+                    LOG.warning("Retry executing ipmitool command. (%s)", e)
                     retry_count = retry_count + 1
                     eventlet.greenthread.sleep(CONF.host.ipmi_retry_interval)
                 else:
-                    LOG.error(_LE("Exception caught: %s"), e)
+                    LOG.error("Exception caught: %s", e)
                     return False
 
     def _make_event(self, hostname, current_status):
@@ -271,14 +267,14 @@ class HandleHost(driver.DriverBase):
                 msg = ("Recognized '%s' as a new member of cluster."
                        " Host status is '%s'.") \
                     % (node_state_tag.get('uname'), current_status)
-                LOG.info(_LI("%s"), msg)
+                LOG.info("%s", msg)
                 self.status_holder.set_host_status(node_state_tag)
                 continue
 
             # Output host status.
             msg = ("'%s' is '%s'.") % (node_state_tag.get('uname'),
                                        current_status)
-            LOG.info(_LI("%s"), msg)
+            LOG.info("%s", msg)
 
             # If host status changed, send a notification.
             if current_status != old_status:
@@ -288,7 +284,7 @@ class HandleHost(driver.DriverBase):
                     msg = ("Since host status is '%s',"
                            " hostmonitor doesn't send a notification.") \
                         % current_status
-                    LOG.info(_LI("%s"), msg)
+                    LOG.info("%s", msg)
                 else:
                     event = self._make_event(node_state_tag.get('uname'),
                                              current_status)
@@ -315,7 +311,7 @@ class HandleHost(driver.DriverBase):
         # Check if pacemaker cluster have quorum.
         if self.xml_parser.have_quorum() == 0:
             msg = "Pacemaker cluster doesn't have quorum."
-            LOG.warning(_LW("%s"), msg)
+            LOG.warning("%s", msg)
 
         # Get node_state tag list.
         node_state_tag_list = self.xml_parser.get_node_state_tag_list()
@@ -350,7 +346,7 @@ class HandleHost(driver.DriverBase):
                     # brain condition, sleep for a certain time.
                     eventlet.greenthread.sleep(CONF.host.stonith_wait)
                 elif ret == 2:
-                    LOG.warning(_LW("hostmonitor skips monitoring hosts."))
+                    LOG.warning("hostmonitor skips monitoring hosts.")
                     eventlet.greenthread.sleep(CONF.host.monitoring_interval)
                     continue
 
@@ -361,20 +357,20 @@ class HandleHost(driver.DriverBase):
                     'pacemaker_remote')
                 if pacemaker_remote_status is False:
                     if self._check_host_status_by_crmadmin() != 0:
-                        LOG.warning(_LW("hostmonitor skips monitoring hosts."))
+                        LOG.warning("hostmonitor skips monitoring hosts.")
                         eventlet.greenthread.sleep(
                             CONF.host.monitoring_interval)
                         continue
 
                 # Check the host status is online or offline by cibadmin.
                 if self._check_host_status_by_cibadmin() != 0:
-                    LOG.warning(_LW("hostmonitor skips monitoring hosts."))
+                    LOG.warning("hostmonitor skips monitoring hosts.")
                     eventlet.greenthread.sleep(CONF.host.monitoring_interval)
                     continue
 
                 eventlet.greenthread.sleep(CONF.host.monitoring_interval)
 
         except Exception as e:
-            LOG.exception(_LE("Exception caught: %s"), e)
+            LOG.exception("Exception caught: %s", e)
 
         return

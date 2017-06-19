@@ -22,7 +22,7 @@ from oslo_service import service
 from oslo_utils import importutils
 
 import masakarimonitors.conf
-from masakarimonitors.i18n import _, _LE, _LI
+from masakarimonitors.i18n import _
 from masakarimonitors import utils
 
 
@@ -56,7 +56,7 @@ class Service(service.Service):
                }
 
     def start(self):
-        LOG.info(_LI('Starting %s'), self.binary)
+        LOG.info('Starting %s', self.binary)
         self.basic_config_check()
         self.manager.init_host()
         self.manager.main()
@@ -99,7 +99,7 @@ class Service(service.Service):
         self.stop()
 
     def stop(self):
-        LOG.info(_LI('Stopping %s'), self.binary)
+        LOG.info('Stopping %s', self.binary)
         self.manager.stop()
         super(Service, self).stop()
 
@@ -110,7 +110,7 @@ class Service(service.Service):
             with utils.tempdir():
                 pass
         except Exception as e:
-            LOG.error(_LE('Temporary directory is invalid: %s'), e)
+            LOG.error('Temporary directory is invalid: %s', e)
             sys.exit(1)
 
     def reset(self):

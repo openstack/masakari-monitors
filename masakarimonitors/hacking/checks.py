@@ -41,6 +41,12 @@ underscore_import_check = re.compile(r"(.)*import _(.)*")
 underscore_import_check_multi = re.compile(r"(.)*i18n\s+import(.)* _, (.)*")
 # We need this for cases where they have created their own _ function.
 custom_underscore_check = re.compile(r"(.)*_\s*=\s*(.)*")
+log_translation = re.compile(
+    r"(.)*LOG\."
+    r"(audit|debug|error|info|warn|warning|critical|exception)"
+    r"\("
+    r"(_|_LC|_LE|_LI|_LW)"
+    r"\(")
 
 
 def check_explicit_underscore_import(logical_line, filename):
@@ -66,5 +72,14 @@ def check_explicit_underscore_import(logical_line, filename):
         yield(0, "M301: Found use of _() without explicit import of _ !")
 
 
+def no_translate_logs(logical_line):
+    """Check that logging doesn't translate messages
+    M302
+    """
+    if log_translation.match(logical_line):
+        yield(0, "M302 Don't translate log messages!")
+
+
 def factory(register):
     register(check_explicit_underscore_import)
+    register(no_translate_logs)

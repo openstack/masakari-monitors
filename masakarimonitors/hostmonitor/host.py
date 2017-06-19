@@ -18,7 +18,6 @@ from stevedore import driver
 from oslo_log import log as oslo_logging
 
 import masakarimonitors.conf
-from masakarimonitors.i18n import _LE
 from masakarimonitors import manager
 
 LOG = oslo_logging.getLogger(__name__)
@@ -48,8 +47,7 @@ class HostmonitorManager(manager.Manager):
             )
         except Exception as e:
             LOG.exception(
-                _LE("Exception caught during initializing hostmonitor: %s"),
-                e)
+                "Exception caught during initializing hostmonitor: %s", e)
             os._exit(1)
 
     def stop(self):
@@ -63,6 +61,6 @@ class HostmonitorManager(manager.Manager):
             self.driver.driver.monitor_hosts()
 
         except Exception as e:
-            LOG.exception(_LE("Exception caught: %s"), e)
+            LOG.exception("Exception caught: %s", e)
 
         return
