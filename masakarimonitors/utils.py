@@ -27,7 +27,7 @@ from oslo_utils import importutils
 import six
 
 import masakarimonitors.conf
-from masakarimonitors.i18n import _, _LE
+from masakarimonitors.i18n import _
 from masakarimonitors import privsep
 
 
@@ -97,7 +97,7 @@ def tempdir(**kwargs):
         try:
             shutil.rmtree(tmpdir)
         except OSError as e:
-            LOG.error(_LE('Could not remove tmpdir: %s'), e)
+            LOG.error('Could not remove tmpdir: %s', e)
 
 
 @privsep.monitors_priv.entrypoint

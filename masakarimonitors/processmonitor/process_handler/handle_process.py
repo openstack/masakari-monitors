@@ -20,9 +20,6 @@ from oslo_utils import timeutils
 
 import masakarimonitors.conf
 from masakarimonitors.ha import masakari
-from masakarimonitors.i18n import _LE
-from masakarimonitors.i18n import _LI
-from masakarimonitors.i18n import _LW
 from masakarimonitors.objects import event_constants as ec
 from masakarimonitors import utils
 
@@ -58,16 +55,16 @@ class HandleProcess(object):
 
             if out:
                 msg = ("CMD '%s' output stdout: %s") % (cmd_str, out)
-                LOG.info(_LI("%s"), msg)
+                LOG.info("%s", msg)
 
             if err:
                 msg = ("CMD '%s' output stderr: %s") % (cmd_str, err)
-                LOG.warning(_LW("%s"), msg)
+                LOG.warning("%s", msg)
                 return 1
 
         except Exception as e:
             msg = ("CMD '%s' raised exception: %s") % (cmd_str, e)
-            LOG.error(_LE("%s"), e)
+            LOG.error("%s", e)
             return 1
 
         return 0
@@ -90,8 +87,7 @@ class HandleProcess(object):
                     continue
 
             # Execute start command.
-            LOG.info(
-                _LI("Start of process with executing command: %s"), cmd_str)
+            LOG.info("Start of process with executing command: %s", cmd_str)
             self._execute_cmd(cmd_str, process['run_as_root'])
 
             # Execute post start command.
@@ -118,10 +114,9 @@ class HandleProcess(object):
                 else:
                     # Append down_process_list.
                     down_process_list.append(process)
-                    LOG.warning(
-                        _LW("Process '%s' is not found."), process_name)
+                    LOG.warning("Process '%s' is not found.", process_name)
             except Exception as e:
-                LOG.error(_LW("Monitoring command raised exception: %s"), e)
+                LOG.error("Monitoring command raised exception: %s", e)
 
         return down_process_list
 
@@ -157,7 +152,7 @@ class HandleProcess(object):
             if down_process['process_name'] in self.restart_failure_list:
                 msg = "Process '%s' doesn't be restarted because it failed" \
                       " to restart previously." % down_process['process_name']
-                LOG.warning(_LW("%s"), msg)
+                LOG.warning("%s", msg)
                 tmp_restart_failure_list.append(down_process['process_name'])
                 continue
 
@@ -165,8 +160,7 @@ class HandleProcess(object):
             pre_cmd_str = down_process['pre_restart_command']
             post_cmd_str = down_process['post_restart_command']
 
-            LOG.info(
-                _LI("Restart of process with executing command: %s"), cmd_str)
+            LOG.info("Restart of process with executing command: %s", cmd_str)
 
             for retries in range(0, CONF.process.restart_retries + 1):
 

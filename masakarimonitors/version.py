@@ -14,8 +14,6 @@
 
 from pbr import version as pbr_version
 
-from masakarimonitors.i18n import _LE
-
 MONITORS_VENDOR = "OpenStack Foundation"
 MONITORS_PRODUCT = "OpenStack Masakari Monitors"
 MONITORS_PACKAGE = None  # OS distro package version suffix
@@ -59,7 +57,7 @@ def _load_config():
             MONITORS_PACKAGE = cfg.get("Masakarimonitors", "package")
     except Exception as ex:
         LOG = logging.getLogger(__name__)
-        LOG.error(_LE("Failed to load %(cfgfile)s: %(ex)s"),
+        LOG.error("Failed to load %(cfgfile)s: %(ex)s",
                   {'cfgfile': cfgfile, 'ex': ex})
 
 

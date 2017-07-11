@@ -20,9 +20,6 @@ from oslo_log import log as oslo_logging
 
 from masakariclient.sdk.ha import ha_service
 import masakarimonitors.conf
-from masakarimonitors.i18n import _LE
-from masakarimonitors.i18n import _LI
-from masakarimonitors.i18n import _LW
 
 LOG = oslo_logging.getLogger(__name__)
 CONF = masakarimonitors.conf.CONF
@@ -69,7 +66,7 @@ class SendNotification(object):
         :param event: dictionary of event that included in notification.
         """
 
-        LOG.info(_LI("Send a notification. %s"), event)
+        LOG.info("Send a notification. %s", event)
 
         # Get connection.
         conn = self._get_connection(
@@ -93,7 +90,7 @@ class SendNotification(object):
                     generated_time=event['notification']['generated_time'],
                     payload=event['notification']['payload'])
 
-                LOG.info(_LI("Response: %s"), response)
+                LOG.info("Response: %s", response)
                 break
 
             except Exception as e:
@@ -102,13 +99,13 @@ class SendNotification(object):
                     if e.http_status == 409:
                         msg = ("Stop retrying to send a notification because "
                                "same notification have been already sent.")
-                        LOG.info(_LI("%s"), msg)
+                        LOG.info("%s", msg)
                         break
 
                 if retry_count < api_retry_max:
-                    LOG.warning(_LW("Retry sending a notification. (%s)"), e)
+                    LOG.warning("Retry sending a notification. (%s)", e)
                     retry_count = retry_count + 1
                     eventlet.greenthread.sleep(api_retry_interval)
                 else:
-                    LOG.exception(_LE("Exception caught: %s"), e)
+                    LOG.exception("Exception caught: %s", e)
                     break

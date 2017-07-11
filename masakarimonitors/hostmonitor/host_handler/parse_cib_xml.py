@@ -16,8 +16,6 @@ from xml.etree import ElementTree
 
 from oslo_log import log as oslo_logging
 
-from masakarimonitors.i18n import _LE
-
 LOG = oslo_logging.getLogger(__name__)
 
 
@@ -77,13 +75,13 @@ class ParseCibXml(object):
         # Get status tag.
         status_tag = self._get_status_tag()
         if status_tag is None:
-            LOG.error(_LE("Cib xml doesn't have status tag."))
+            LOG.error("Cib xml doesn't have status tag.")
             return []
 
         # Get node_state tag list.
         node_state_tag_list = self._get_node_states(status_tag)
         if len(node_state_tag_list) == 0:
-            LOG.error(_LE("Cib xml doesn't have node_state tag."))
+            LOG.error("Cib xml doesn't have node_state tag.")
 
         return node_state_tag_list
 
@@ -157,7 +155,7 @@ class ParseCibXml(object):
                 configuration_tag = child
                 break
         if configuration_tag is None:
-            LOG.error(_LE("Cib xml doesn't have configuration tag."))
+            LOG.error("Cib xml doesn't have configuration tag.")
             return None
 
         # Get resources tag from configuration tag.
@@ -168,7 +166,7 @@ class ParseCibXml(object):
                 resources_tag = child
                 break
         if resources_tag is None:
-            LOG.error(_LE("Cib xml doesn't have resources tag."))
+            LOG.error("Cib xml doesn't have resources tag.")
             return None
 
         # They are set at nvpair tag which exists under the

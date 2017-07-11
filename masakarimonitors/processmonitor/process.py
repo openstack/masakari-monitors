@@ -18,7 +18,6 @@ import eventlet
 from oslo_log import log as oslo_logging
 
 import masakarimonitors.conf
-from masakarimonitors.i18n import _LE
 from masakarimonitors import manager
 from masakarimonitors.processmonitor.process_handler import handle_process
 
@@ -41,10 +40,10 @@ class ProcessmonitorManager(manager.Manager):
 
             return process_list
         except yaml.YAMLError as e:
-            LOG.exception(_LE("YAMLError caught: %s"), e)
+            LOG.exception("YAMLError caught: %s", e)
             return
         except Exception as e:
-            LOG.exception(_LE("Exception caught: %s"), e)
+            LOG.exception("Exception caught: %s", e)
             return
 
     def stop(self):
@@ -57,7 +56,7 @@ class ProcessmonitorManager(manager.Manager):
             # Load process list.
             process_list = self._load_process_list()
             if process_list is None:
-                LOG.error(_LE("Failed to load process list file."))
+                LOG.error("Failed to load process list file.")
                 return
 
             # Set process_list object to the process handler.
@@ -81,14 +80,14 @@ class ProcessmonitorManager(manager.Manager):
                 # Reload process list and set to the process handler.
                 process_list = self._load_process_list()
                 if process_list is None:
-                    LOG.error(_LE("Failed to reload process list file."))
+                    LOG.error("Failed to reload process list file.")
                     break
                 self.process_handler.set_process_list(process_list)
 
                 eventlet.greenthread.sleep(CONF.process.check_interval)
 
         except Exception as e:
-            LOG.exception(_LE("Exception caught: %s"), e)
+            LOG.exception("Exception caught: %s", e)
             return
 
         return

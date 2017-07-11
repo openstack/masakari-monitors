@@ -66,7 +66,7 @@ class HackingTestCase(testtools.TestCase):
             "msg = _('My message')",
             "masakarimonitors/tests/other_files.py"))), 0)
         self.assertEqual(len(list(checks.check_explicit_underscore_import(
-            "from masakarimonitors.i18n import _, _LW",
+            "from masakarimonitors.i18n import _",
             "masakarimonitors/tests/other_files2.py"))), 0)
         self.assertEqual(len(list(checks.check_explicit_underscore_import(
             "msg = _('My message')",
@@ -77,3 +77,19 @@ class HackingTestCase(testtools.TestCase):
         self.assertEqual(len(list(checks.check_explicit_underscore_import(
             "msg = _('My message')",
             "masakarimonitors/tests/other_files3.py"))), 0)
+
+    def test_no_translate_logs(self):
+        self.assertEqual(1, len(list(checks.no_translate_logs(
+            "LOG.error(_LE('foo'))"))))
+
+        self.assertEqual(0, len(list(checks.no_translate_logs(
+            "LOG.debug('foo')"))))
+
+        self.assertEqual(1, len(list(checks.no_translate_logs(
+            "LOG.info(_LI('foo'))"))))
+
+        self.assertEqual(1, len(list(checks.no_translate_logs(
+            "LOG.warning(_LW('foo'))"))))
+
+        self.assertEqual(1, len(list(checks.no_translate_logs(
+            "LOG.critical(_LC('foo'))"))))
