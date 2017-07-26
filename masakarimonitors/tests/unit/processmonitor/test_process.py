@@ -78,7 +78,7 @@ class TestProcessmonitorManager(testtools.TestCase):
     @mock.patch.object(handle_process.HandleProcess, 'start_processes')
     @mock.patch.object(handle_process.HandleProcess, 'set_process_list')
     @mock.patch.object(yaml, 'load')
-    @mock.patch('__builtin__.file')
+    @mock.patch('six.moves.builtins.open')
     def test_main(self,
                   mock_file,
                   mock_load,
@@ -88,7 +88,6 @@ class TestProcessmonitorManager(testtools.TestCase):
                   mock_restart_processes,
                   mock_sleep):
 
-        mock_file.return_value = None
         mock_load.side_effect = [self._get_mock_process_list(0),
                                  self._get_mock_process_list(0),
                                  self._get_mock_process_list(1)]
@@ -111,7 +110,7 @@ class TestProcessmonitorManager(testtools.TestCase):
     @mock.patch.object(handle_process.HandleProcess, 'start_processes')
     @mock.patch.object(handle_process.HandleProcess, 'set_process_list')
     @mock.patch.object(yaml, 'load')
-    @mock.patch('__builtin__.file')
+    @mock.patch('six.moves.builtins.open')
     def test_main_exception(self,
                             mock_file,
                             mock_load,
@@ -120,7 +119,6 @@ class TestProcessmonitorManager(testtools.TestCase):
                             mock_monitor_processes,
                             mock_restart_processes):
 
-        mock_file.return_value = None
         mock_load.return_value = self._get_mock_process_list(0)
         mock_set_process_list.return_value = None
         mock_start_processes.side_effect = Exception("Test exception.")
@@ -135,13 +133,12 @@ class TestProcessmonitorManager(testtools.TestCase):
 
     @mock.patch.object(handle_process.HandleProcess, 'set_process_list')
     @mock.patch.object(yaml, 'load')
-    @mock.patch('__builtin__.file')
+    @mock.patch('six.moves.builtins.open')
     def test_load_process_list_yaml_error(self,
                                          mock_file,
                                          mock_load,
                                          mock_set_process_list):
 
-        mock_file.return_value = None
         mock_load.side_effect = yaml.YAMLError
 
         obj = processmonitor_manager.ProcessmonitorManager()
@@ -151,13 +148,12 @@ class TestProcessmonitorManager(testtools.TestCase):
 
     @mock.patch.object(handle_process.HandleProcess, 'set_process_list')
     @mock.patch.object(yaml, 'load')
-    @mock.patch('__builtin__.file')
+    @mock.patch('six.moves.builtins.open')
     def test_load_process_list_exception(self,
                                          mock_file,
                                          mock_load,
                                          mock_set_process_list):
 
-        mock_file.return_value = None
         mock_load.side_effect = Exception("Test exception.")
 
         obj = processmonitor_manager.ProcessmonitorManager()
