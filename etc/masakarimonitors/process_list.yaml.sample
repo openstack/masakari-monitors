@@ -26,7 +26,7 @@
     start_command: systemctl start nova-compute
     pre_start_command:
     post_start_command:
-    restart_command: systemctl restart service nova-compute
+    restart_command: systemctl restart nova-compute
     pre_restart_command:
     post_restart_command:
     run_as_root: True
