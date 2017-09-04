@@ -25,12 +25,20 @@ monitor_callback_opts = [
                     ' is error(in seconds).'),
 ]
 
+libvirt_opts = [
+    cfg.StrOpt('connection_uri',
+               default='qemu:///system',
+               help='Override the default libvirt URI.')
+]
+
 
 def register_opts(conf):
     conf.register_opts(monitor_callback_opts, group='callback')
+    conf.register_opts(libvirt_opts, group='libvirt')
 
 
 def list_opts():
     return {
-        'callback': monitor_callback_opts
+        'callback': monitor_callback_opts,
+        'libvirt': libvirt_opts
     }

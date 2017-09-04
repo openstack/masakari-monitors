@@ -17,12 +17,14 @@ import time
 
 import eventlet
 import libvirt
+from oslo_config import cfg
 from oslo_log import log as oslo_logging
 
 from masakarimonitors.instancemonitor.libvirt_handler import eventfilter
 from masakarimonitors import manager
 
 LOG = oslo_logging.getLogger(__name__)
+CONF = cfg.CONF
 
 
 class InstancemonitorManager(manager.Manager):
@@ -120,7 +122,7 @@ class InstancemonitorManager(manager.Manager):
             libvirt.VIR_DOMAIN_EVENT_ID_CONTROL_ERROR:
                 self._my_domain_event_generic_callback
         }
-        # Connect to libvert - If be disconnected, reprocess.
+        # Connect to libvirt - If be disconnected, reprocess.
         self.running = True
         while self.running:
             vc = libvirt.openReadOnly(uri)
@@ -156,7 +158,7 @@ class InstancemonitorManager(manager.Manager):
 
         Set the URI, error handler, and executes event loop processing.
         """
-        uri = "qemu:///system"
+        uri = CONF.libvirt.connection_uri
         LOG.debug("Using uri:" + uri)
 
         # set error handler & do event loop
