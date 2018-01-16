@@ -20,7 +20,7 @@ api_group = cfg.OptGroup(
     API_GROUP,
     title='Api Options',
     help="""
-Configration options for sending notifications.
+Configuration options for sending notifications.
 """)
 
 monitor_api_opts = [
