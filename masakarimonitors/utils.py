@@ -21,6 +21,7 @@ import shutil
 import sys
 import tempfile
 
+from oslo_concurrency import lockutils
 from oslo_concurrency import processutils
 from oslo_log import log as logging
 from oslo_utils import importutils
@@ -111,3 +112,23 @@ def execute(*cmd, **kwargs):
         return privsep_execute(*cmd, **kwargs)
     else:
         return processutils.execute(*cmd, **kwargs)
+
+
+def synchronized(name, semaphores=None, blocking=False):
+    def wrap(f):
+        @six.wraps(f)
+        def inner(*args, **kwargs):
+            lock_str = 'masakarimonitors-%s' % name
+            int_lock = lockutils.internal_lock(lock_str,
+                                               semaphores=semaphores)
+            msg = "Lock blocking: %s on resource %s " % (lock_str, f.__name__)
+            """Acquiring lock: %(lock_str)s on resource """
+            if not int_lock.acquire(blocking=blocking):
+                raise Exception(msg)
+            try:
+                return f(*args, **kwargs)
+            finally:
+                """Releasing lock: %(lock_str)s on resource """
+                int_lock.release()
+        return inner
+    return wrap

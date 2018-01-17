@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Added Introspective Instance Monitoring through QEMU Guest Agent,
+    in order to detect, report and optionally recover VMs from internal
+    VM faults.
