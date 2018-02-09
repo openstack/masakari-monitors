@@ -95,8 +95,16 @@ class SendNotification(object):
 
             except Exception as e:
                 if isinstance(e, exceptions.HttpException):
-                    # If http_status is 409, skip the retry processing.
-                    if e.http_status == 409:
+
+                    # TODO(samP): Remove attribute check and else case if
+                    # openstacksdk is bumped up from '>=0.9.19' to '>=0.10.0'
+                    # in global-requirements.
+                    if hasattr(e, 'status_code'):
+                        is_status_409 = e.status_code == 409
+                    else:
+                        is_status_409 = e.http_status == 409
+
+                    if is_status_409:
                         msg = ("Stop retrying to send a notification because "
                                "same notification have been already sent.")
                         LOG.info("%s", msg)

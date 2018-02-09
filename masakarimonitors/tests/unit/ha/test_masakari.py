@@ -14,6 +14,7 @@
 
 import mock
 import testtools
+import uuid
 
 import eventlet
 from openstack import connection
@@ -27,6 +28,16 @@ from masakarimonitors.objects import event_constants as ec
 
 PROFILE_TYPE = "ha"
 PROFILE_NAME = "masakari"
+
+
+class FakeResponse(object):
+
+    def __init__(self, status_code=200, headers=None):
+        self.status_code = status_code
+        self.headers = {
+            'content-type': 'application/json',
+            'x-openstack-request-id': uuid.uuid4().hex,
+        }
 
 
 class TestSendNotification(testtools.TestCase):
@@ -98,9 +109,17 @@ class TestSendNotification(testtools.TestCase):
         mock_Profile.return_value = mock_prof
         mock_conn = mock.Mock()
         mock_Connection.return_value = mock_conn
-        mock_conn.ha.create_notification.side_effect = \
-            exceptions.HttpException(http_status=409)
 
+        # TODO(samP): Remove attribute check and else case if
+        # openstacksdk is bumped up from '>=0.9.19' to '>=0.10.0'
+        # in global-requirements.
+        if hasattr(exceptions.HttpException(), 'status_code'):
+            response = FakeResponse(status_code=409)
+            status_ex = exceptions.HttpException(response=response)
+        else:
+            status_ex = exceptions.HttpException(http_status=409)
+
+        mock_conn.ha.create_notification.side_effect = status_ex
         notifier = masakari.SendNotification()
         notifier.send_notification(
             self.api_retry_max, self.api_retry_interval, self.event)
@@ -142,8 +161,17 @@ class TestSendNotification(testtools.TestCase):
         mock_Profile.return_value = mock_prof
         mock_conn = mock.Mock()
         mock_Connection.return_value = mock_conn
-        mock_conn.ha.create_notification.side_effect = \
-            exceptions.HttpException(http_status=500)
+
+        # TODO(samP): Remove attribute check and else case if
+        # openstacksdk is bumped up from '>=0.9.19' to '>=0.10.0'
+        # in global-requirements.
+        if hasattr(exceptions.HttpException(), 'status_code'):
+            response = FakeResponse(status_code=500)
+            status_ex = exceptions.HttpException(response=response)
+        else:
+            status_ex = exceptions.HttpException(http_status=500)
+
+        mock_conn.ha.create_notification.side_effect = status_ex
         mock_sleep.return_value = None
 
         notifier = masakari.SendNotification()
