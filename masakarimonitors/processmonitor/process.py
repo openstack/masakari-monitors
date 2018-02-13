@@ -35,7 +35,7 @@ class ProcessmonitorManager(manager.Manager):
 
     def _load_process_list(self):
         try:
-            process_list = yaml.load(open(CONF.process.process_list_path))
+            process_list = yaml.safe_load(open(CONF.process.process_list_path))
             LOG.debug("Loaded process list. %s" % process_list)
 
             return process_list
