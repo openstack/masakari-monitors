@@ -13,9 +13,19 @@
 # limitations under the License.
 
 import eventlet
+from keystoneauth1.identity.generic import password as ks_password
+from keystoneauth1 import session as ks_session
 from openstack import connection
 from openstack import exceptions
-from openstack import profile
+from openstack import version
+if version.__version__.find('0.9.19') == 0 or \
+    version.__version__.find('0.10.0') == 0:
+    from openstack import profile
+    _new_sdk = False
+else:
+    from masakariclient.sdk.ha.v1 import _proxy
+    from openstack import service_description
+    _new_sdk = True
 from oslo_log import log as oslo_logging
 
 from masakariclient.sdk.ha import ha_service
@@ -30,29 +40,60 @@ PROFILE_NAME = "masakari"
 
 class SendNotification(object):
 
-    def _get_connection(self, api_version, region, interface, auth_url,
-                        project_name, username, password, project_domain_id,
-                        user_domain_id):
+    def _make_client_new(self):
+        auth = ks_password.Password(
+            auth_url=CONF.api.auth_url,
+            username=CONF.api.username,
+            password=CONF.api.password,
+            user_domain_id=CONF.api.user_domain_id,
+            project_name=CONF.api.project_name,
+            project_domain_id=CONF.api.project_domain_id)
+        session = ks_session.Session(auth=auth)
 
-        # Create profile object.
-        prof = profile.Profile()
-        prof._add_service(ha_service.HAService(version=api_version))
-        prof.set_name(PROFILE_TYPE, PROFILE_NAME)
-        prof.set_region(PROFILE_TYPE, region)
-        prof.set_version(PROFILE_TYPE, api_version)
-        prof.set_interface(PROFILE_TYPE, interface)
-
-        # Get connection.
+        desc = service_description.ServiceDescription(
+            service_type='ha', proxy_class=_proxy.Proxy)
         conn = connection.Connection(
-            auth_url=auth_url,
-            project_name=project_name,
-            username=username,
-            password=password,
-            project_domain_id=project_domain_id,
-            user_domain_id=user_domain_id,
+            session=session, extra_services=[desc])
+        conn.add_service(desc)
+
+        if version.__version__.find('0.11.0') == 0:
+            client = conn.ha
+        else:
+            client = conn.ha.proxy_class(
+                session=session, service_type='ha')
+
+        return client
+
+    def _make_client_old(self):
+        # Make profile.
+        prof = profile.Profile()
+        prof._add_service(ha_service.HAService(
+            version=CONF.api.api_version))
+        prof.set_name(PROFILE_TYPE, PROFILE_NAME)
+        prof.set_region(PROFILE_TYPE, CONF.api.region)
+        prof.set_version(PROFILE_TYPE, CONF.api.api_version)
+        prof.set_interface(PROFILE_TYPE, CONF.api.api_interface)
+
+        # Make connection.
+        conn = connection.Connection(
+            auth_url=CONF.api.auth_url,
+            project_name=CONF.api.project_name,
+            username=CONF.api.username,
+            password=CONF.api.password,
+            project_domain_id=CONF.api.project_domain_id,
+            user_domain_id=CONF.api.user_domain_id,
             profile=prof)
 
-        return conn
+        # Make client.
+        client = conn.ha
+
+        return client
+
+    def _make_client(self):
+        if _new_sdk:
+            return self._make_client_new()
+        else:
+            return self._make_client_old()
 
     def send_notification(self, api_retry_max, api_retry_interval, event):
         """Send a notification.
@@ -68,23 +109,14 @@ class SendNotification(object):
 
         LOG.info("Send a notification. %s", event)
 
-        # Get connection.
-        conn = self._get_connection(
-            api_version=CONF.api.api_version,
-            region=CONF.api.region,
-            interface=CONF.api.api_interface,
-            auth_url=CONF.api.auth_url,
-            project_name=CONF.api.project_name,
-            username=CONF.api.username,
-            password=CONF.api.password,
-            project_domain_id=CONF.api.project_domain_id,
-            user_domain_id=CONF.api.user_domain_id)
+        # Get client.
+        client = self._make_client()
 
         # Send a notification.
         retry_count = 0
         while True:
             try:
-                response = conn.ha.create_notification(
+                response = client.create_notification(
                     type=event['notification']['type'],
                     hostname=event['notification']['hostname'],
                     generated_time=event['notification']['generated_time'],
