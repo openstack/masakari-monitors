@@ -12,6 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import textwrap
+
+import mock
+import pep8
 import testtools
 
 from masakarimonitors.hacking import checks
@@ -49,6 +53,30 @@ class HackingTestCase(testtools.TestCase):
     just assertTrue if the check is expected to fail and assertFalse if it
     should pass.
     """
+
+    # We are patching pep8 so that only the check under test is actually
+    # installed.
+    @mock.patch('pep8._checks',
+                {'physical_line': {}, 'logical_line': {}, 'tree': {}})
+    def _run_check(self, code, checker, filename=None):
+        pep8.register_check(checker)
+
+        lines = textwrap.dedent(code).strip().splitlines(True)
+
+        checker = pep8.Checker(filename=filename, lines=lines)
+        checker.check_all()
+        checker.report._deferred_print.sort()
+        return checker.report._deferred_print
+
+    def _assert_has_errors(self, code, checker, expected_errors=None,
+                           filename=None):
+        actual_errors = [e[:3] for e in
+                         self._run_check(code, checker, filename)]
+        self.assertEqual(expected_errors or [], actual_errors)
+
+    def _assert_has_no_errors(self, code, checker, filename=None):
+        self._assert_has_errors(code, checker, filename=filename)
+
     def test_check_explicit_underscore_import(self):
         self.assertEqual(len(list(checks.check_explicit_underscore_import(
             "LOG.info(_('My info message'))",
@@ -93,3 +121,25 @@ class HackingTestCase(testtools.TestCase):
 
         self.assertEqual(1, len(list(checks.no_translate_logs(
             "LOG.critical(_LC('foo'))"))))
+
+    def test_yield_followed_by_space(self):
+        code = """
+                  yield(x, y)
+                  yield{"type": "test"}
+                  yield[a, b, c]
+                  yield"test"
+                  yield'test'
+               """
+        errors = [(x + 1, 0, 'M303') for x in range(5)]
+        self._assert_has_errors(code, checks.yield_followed_by_space,
+                                expected_errors=errors)
+        code = """
+                  yield x
+                  yield (x, y)
+                  yield {"type": "test"}
+                  yield [a, b, c]
+                  yield "test"
+                  yield 'test'
+                  yieldx_func(a, b)
+               """
+        self._assert_has_no_errors(code, checks.yield_followed_by_space)
