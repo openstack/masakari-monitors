@@ -14,6 +14,7 @@
 
 """Starter script for Masakari Instance Monitor."""
 
+import pbr.version
 import sys
 
 from oslo_log import log as logging
@@ -31,6 +32,21 @@ def main():
     config.parse_args(sys.argv)
     logging.setup(CONF, "masakarimonitors")
     utils.monkey_patch()
+
+    # From openstacksdk version 0.11.1 onwards, there is no way
+    # you can add service to the connection. Hence we need to monkey patch
+    # _find_service_filter_class method from sdk to allow
+    # to point to the correct service filter class implemented in
+    # masakari-monitors.
+    sdk_ver = pbr.version.VersionInfo('openstacksdk').version_string()
+    if sdk_ver in ['0.11.1', '0.11.2', '0.11.3']:
+        utils.monkey_patch_for_openstacksdk("openstack._meta:masakarimonitors."
+                                            "cmd."
+                                            "masakari_service_filter_class")
+    if sdk_ver in ['0.12.0']:
+        utils.monkey_patch_for_openstacksdk("openstack._meta.connection:"
+                                            "masakarimonitors.cmd."
+                                            "masakari_service_filter_class")
 
     server = service.Service.create(binary='masakarimonitors-instancemonitor')
     service.serve(server)

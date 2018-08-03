@@ -16,15 +16,14 @@
 
 import contextlib
 import inspect
-import pyclbr
-import shutil
-import sys
-import tempfile
-
 from oslo_concurrency import processutils
 from oslo_log import log as logging
 from oslo_utils import importutils
+import pyclbr
+import shutil
 import six
+import sys
+import tempfile
 
 import masakarimonitors.conf
 from masakarimonitors.i18n import _
@@ -34,6 +33,20 @@ from masakarimonitors import privsep
 CONF = masakarimonitors.conf.CONF
 
 LOG = logging.getLogger(__name__)
+
+
+def monkey_patch_for_openstacksdk(module_and_decorator_name):
+    module, decorator_name = module_and_decorator_name.split(':')
+    # import decorator function
+    decorator = importutils.import_class(decorator_name)
+    __import__(module)
+    # Retrieve module information using pyclbr
+    module_data = pyclbr.readmodule_ex(module)
+    for key in module_data.keys():
+        # set the decorator for the function
+        if isinstance(module_data[key], pyclbr.Function):
+            if key == "_find_service_filter_class":
+                setattr(sys.modules[module], key, decorator)
 
 
 def monkey_patch():

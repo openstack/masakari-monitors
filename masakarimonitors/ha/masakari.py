@@ -13,12 +13,18 @@
 # limitations under the License.
 
 import eventlet
+import pbr.version
+
+from keystoneauth1.identity.generic import password as ks_password
+from keystoneauth1 import session as ks_session
 from openstack import connection
+sdk_ver = pbr.version.VersionInfo('openstacksdk').version_string()
+if sdk_ver in ['0.11.0']:
+    from masakariclient.sdk.ha.v1 import _proxy
+    from openstack import service_description
 from openstack import exceptions
-from openstack import profile
 from oslo_log import log as oslo_logging
 
-from masakariclient.sdk.ha import ha_service
 import masakarimonitors.conf
 
 LOG = oslo_logging.getLogger(__name__)
@@ -34,23 +40,25 @@ class SendNotification(object):
                         project_name, username, password, project_domain_id,
                         user_domain_id):
 
-        # Create profile object.
-        prof = profile.Profile()
-        prof._add_service(ha_service.HAService(version=api_version))
-        prof.set_name(PROFILE_TYPE, PROFILE_NAME)
-        prof.set_region(PROFILE_TYPE, region)
-        prof.set_version(PROFILE_TYPE, api_version)
-        prof.set_interface(PROFILE_TYPE, interface)
-
-        # Get connection.
-        conn = connection.Connection(
+        auth = ks_password.Password(
             auth_url=auth_url,
-            project_name=project_name,
             username=username,
             password=password,
-            project_domain_id=project_domain_id,
             user_domain_id=user_domain_id,
-            profile=prof)
+            project_name=project_name,
+            project_domain_id=project_domain_id)
+        session = ks_session.Session(auth=auth)
+
+        # Get connection.
+        if sdk_ver >= '0.11.1':
+            conn = connection.Connection(session=session, interface=interface,
+                                         region_name=region)
+        elif sdk_ver in ['0.11.0']:
+            desc = service_description.ServiceDescription(service_type='ha',
+                                                    proxy_class=_proxy.Proxy)
+            conn = connection.Connection(session=session, interface=interface,
+                                         region_name=region)
+            conn.add_service(desc)
 
         return conn
 

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from keystoneauth1 import session
 import mock
 import testtools
 import uuid
@@ -19,10 +20,8 @@ import uuid
 import eventlet
 from openstack import connection
 from openstack import exceptions
-from openstack import profile
 from oslo_utils import timeutils
 
-from masakariclient.sdk.ha import ha_service
 from masakarimonitors.ha import masakari
 from masakarimonitors.objects import event_constants as ec
 
@@ -60,55 +59,31 @@ class TestSendNotification(testtools.TestCase):
         }
 
     @mock.patch.object(connection, 'Connection')
-    @mock.patch.object(profile, 'Profile')
     def test_send_notification(self,
-                               mock_Profile,
-                               mock_Connection):
-
-        mock_prof = mock.Mock()
-        mock_Profile.return_value = mock_prof
-        mock_conn = mock.Mock()
-        mock_Connection.return_value = mock_conn
+                               mock_connection):
+        mock_session = mock.Mock(spec=session.Session)
+        mock_session.auth = mock.Mock()
+        mock_session.auth.auth_url = 'https://auth.example.com'
+        mock_connection = connection.Connection(session=mock_session)
 
         notifier = masakari.SendNotification()
         notifier.send_notification(
             self.api_retry_max, self.api_retry_interval, self.event)
 
-        mock_prof._add_service.assert_called_once_with(
-            ha_service.HAService(version='v1'))
-        mock_prof.set_name.assert_called_once_with(
-            PROFILE_TYPE, PROFILE_NAME)
-        mock_prof.set_region.assert_called_once_with(
-            PROFILE_TYPE, 'RegionOne')
-        mock_prof.set_version.assert_called_once_with(
-            PROFILE_TYPE, 'v1')
-        mock_prof.set_interface.assert_called_once_with(
-            PROFILE_TYPE, 'public')
-
-        mock_Connection.assert_called_once_with(
-            auth_url=None,
-            project_name=None,
-            username=None,
-            password=None,
-            project_domain_id=None,
-            user_domain_id=None,
-            profile=mock_prof)
-        mock_conn.ha.create_notification.assert_called_once_with(
+        mock_connection.ha.create_notification.assert_called_once_with(
             type=self.event['notification']['type'],
             hostname=self.event['notification']['hostname'],
             generated_time=self.event['notification']['generated_time'],
             payload=self.event['notification']['payload'])
 
     @mock.patch.object(connection, 'Connection')
-    @mock.patch.object(profile, 'Profile')
     def test_send_notification_409_error(self,
-                                         mock_Profile,
-                                         mock_Connection):
+                                         mock_connection):
 
-        mock_prof = mock.Mock()
-        mock_Profile.return_value = mock_prof
-        mock_conn = mock.Mock()
-        mock_Connection.return_value = mock_conn
+        mock_session = mock.Mock(spec=session.Session)
+        mock_session.auth = mock.Mock()
+        mock_session.auth.auth_url = 'https://auth.example.com'
+        mock_connection = connection.Connection(session=mock_session)
 
         # TODO(samP): Remove attribute check and else case if
         # openstacksdk is bumped up from '>=0.9.19' to '>=0.10.0'
@@ -119,31 +94,12 @@ class TestSendNotification(testtools.TestCase):
         else:
             status_ex = exceptions.HttpException(http_status=409)
 
-        mock_conn.ha.create_notification.side_effect = status_ex
+        mock_connection.ha.create_notification.side_effect = status_ex
         notifier = masakari.SendNotification()
         notifier.send_notification(
             self.api_retry_max, self.api_retry_interval, self.event)
 
-        mock_prof._add_service.assert_called_once_with(
-            ha_service.HAService(version='v1'))
-        mock_prof.set_name.assert_called_once_with(
-            PROFILE_TYPE, PROFILE_NAME)
-        mock_prof.set_region.assert_called_once_with(
-            PROFILE_TYPE, 'RegionOne')
-        mock_prof.set_version.assert_called_once_with(
-            PROFILE_TYPE, 'v1')
-        mock_prof.set_interface.assert_called_once_with(
-            PROFILE_TYPE, 'public')
-
-        mock_Connection.assert_called_once_with(
-            auth_url=None,
-            project_name=None,
-            username=None,
-            password=None,
-            project_domain_id=None,
-            user_domain_id=None,
-            profile=mock_prof)
-        mock_conn.ha.create_notification.assert_called_once_with(
+        mock_connection.ha.create_notification.assert_called_once_with(
             type=self.event['notification']['type'],
             hostname=self.event['notification']['hostname'],
             generated_time=self.event['notification']['generated_time'],
@@ -151,16 +107,14 @@ class TestSendNotification(testtools.TestCase):
 
     @mock.patch.object(eventlet.greenthread, 'sleep')
     @mock.patch.object(connection, 'Connection')
-    @mock.patch.object(profile, 'Profile')
     def test_send_notification_500_error(self,
-                                         mock_Profile,
-                                         mock_Connection,
+                                         mock_connection,
                                          mock_sleep):
 
-        mock_prof = mock.Mock()
-        mock_Profile.return_value = mock_prof
-        mock_conn = mock.Mock()
-        mock_Connection.return_value = mock_conn
+        mock_session = mock.Mock(spec=session.Session)
+        mock_session.auth = mock.Mock()
+        mock_session.auth.auth_url = 'https://auth.example.com'
+        mock_connection = connection.Connection(session=mock_session)
 
         # TODO(samP): Remove attribute check and else case if
         # openstacksdk is bumped up from '>=0.9.19' to '>=0.10.0'
@@ -171,36 +125,17 @@ class TestSendNotification(testtools.TestCase):
         else:
             status_ex = exceptions.HttpException(http_status=500)
 
-        mock_conn.ha.create_notification.side_effect = status_ex
+        mock_connection.ha.create_notification.side_effect = status_ex
         mock_sleep.return_value = None
 
         notifier = masakari.SendNotification()
         notifier.send_notification(
             self.api_retry_max, self.api_retry_interval, self.event)
 
-        mock_prof._add_service.assert_called_once_with(
-            ha_service.HAService(version='v1'))
-        mock_prof.set_name.assert_called_once_with(
-            PROFILE_TYPE, PROFILE_NAME)
-        mock_prof.set_region.assert_called_once_with(
-            PROFILE_TYPE, 'RegionOne')
-        mock_prof.set_version.assert_called_once_with(
-            PROFILE_TYPE, 'v1')
-        mock_prof.set_interface.assert_called_once_with(
-            PROFILE_TYPE, 'public')
-
-        mock_Connection.assert_called_once_with(
-            auth_url=None,
-            project_name=None,
-            username=None,
-            password=None,
-            project_domain_id=None,
-            user_domain_id=None,
-            profile=mock_prof)
-        mock_conn.ha.create_notification.assert_called_with(
+        mock_connection.ha.create_notification.assert_called_with(
             type=self.event['notification']['type'],
             hostname=self.event['notification']['hostname'],
             generated_time=self.event['notification']['generated_time'],
             payload=self.event['notification']['payload'])
         self.assertEqual(self.api_retry_max + 1,
-                         mock_conn.ha.create_notification.call_count)
+                         mock_connection.ha.create_notification.call_count)
