@@ -36,7 +36,9 @@ class SendNotification(object):
             project_name=CONF.api.project_name,
             project_domain_id=CONF.api.project_domain_id)
         session = ks_session.Session(auth=auth)
-        conn = connection.Connection(session=session)
+        conn = connection.Connection(session=session,
+                                     interface=CONF.api.api_interface,
+                                     region_name=CONF.api.region)
 
         return conn.instance_ha
 
