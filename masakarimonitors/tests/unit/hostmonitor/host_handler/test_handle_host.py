@@ -680,7 +680,7 @@ class TestHandleHost(testtools.TestCase):
 
         obj = handle_host.HandleHost()
 
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             Exception, "Failed to get nodes tag from crm_mon xml.",
             obj._check_host_status_by_crm_mon)
         mock_get_crmmon_xml.assert_called_once_with()
@@ -777,7 +777,7 @@ class TestHandleHost(testtools.TestCase):
 
         obj = handle_host.HandleHost()
 
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             Exception, "Failed to get node_state tag from cib xml.",
             obj._check_host_status_by_cibadmin)
         mock_get_cib_xml.assert_called_once_with()
