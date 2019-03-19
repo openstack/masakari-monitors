@@ -40,6 +40,10 @@ Possible values:
 
 If ipmi RA is not set in pacemaker, this value should be set True.
 '''),
+    cfg.BoolOpt('restrict_to_remotes',
+               default=False,
+               help='Only monitor pacemaker-remotes, ignore the status of'
+                    ' full cluster members.'),
     cfg.IntOpt('ipmi_timeout',
                default=5,
                help='Timeout value(in seconds) of the ipmitool command.'),
