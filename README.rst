@@ -52,32 +52,6 @@ Configure masakari-monitors
    $ masakari-hostmonitor
    $ masakari-instancemonitor
 
-If you are intend to use bash scripts of masakari-processmonitor and
-masakari-hostmonitor, use following steps to install them.
-However, those bash shell scripts are deprecated as of the Ocata release and
-will be removed in the Queens release.
-Use above masakari-hostmonitors implemented in python instead.
-
-#. Clone masakari using::
-
-   $ git clone https://github.com/openstack/masakari-monitors.git
-
-#. Create masakarimonitors directory in /etc/.
-
-#. Remove '.sample' from files hostmonitor.conf.sample,
-   processmonitor.conf.sample and proc.list.sample which exist at
-   masakari-monitors/etc/.
-
-#. Copy hostmonitor.conf, processmonitor.conf and proc.list files from
-   masakari-monitors/etc/ to /etc/masakarimonitors folder and make necessary
-   changes to the hostmonitor.conf, processmonitor.conf and proc.list files.
-
-#. To run bash scripts of masakari-processmonitor and masakari-hostmonitor
-   simply use following binary::
-
-   $ masakari-processmonitor.sh /etc/masakarimonitors/processmonitor.conf /etc/masakarimonitors/proc.list
-   $ masakari-hostmonitor.sh /etc/masakarimonitors/hostmonitor.conf
-
 
 Features
 --------
