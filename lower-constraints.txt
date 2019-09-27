@@ -33,7 +33,7 @@ jsonpatch==1.21
 jsonpointer==2.0
 jsonschema==2.6.0
 keystoneauth1==3.4.0
-libvirt-python==3.5.0
+libvirt-python==3.7.0
 linecache2==1.0.0
 MarkupSafe==1.0
 monotonic==1.4
