@@ -17,20 +17,21 @@ Contents:
    reference/conf
    reference/conf-file
 
-For Contributors
-================
+.. only:: html
 
-* If you are a new contributor to Masakari Monitors please refer: :doc:`contributor/contributing`
+   For Contributors
+   ================
 
-  .. toctree::
-     :hidden:
+   * If you are a new contributor to Masakari Monitors please refer: :doc:`contributor/contributing`
 
-     contributor/contributing
+      .. toctree::
+         :hidden:
 
-Indices and tables
-==================
+         contributor/contributing
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   Indices and tables
+   ==================
 
+   * :ref:`genindex`
+   * :ref:`modindex`
+   * :ref:`search`
