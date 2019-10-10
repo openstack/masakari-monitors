@@ -23,11 +23,24 @@ from masakarimonitors.ha import masakari
 import masakarimonitors.hostmonitor.host_handler.driver as driver
 from masakarimonitors.hostmonitor.host_handler import hold_host_status
 from masakarimonitors.hostmonitor.host_handler import parse_cib_xml
+from masakarimonitors.hostmonitor.host_handler import parse_crmmon_xml
 from masakarimonitors.objects import event_constants as ec
 from masakarimonitors import utils
 
 LOG = oslo_logging.getLogger(__name__)
 CONF = masakarimonitors.conf.CONF
+
+
+class CibSchemaCompliantTag(dict):
+    """Create a dict which has the same attributes as a cib node tag.
+
+    Given a crm node tag convert it to a dict with corresponding cib tag
+    attributes.
+    """
+    def __init__(self, crmon_entry):
+        self['uname'] = crmon_entry.get('name')
+        online = crmon_entry.get('online')
+        self['crmd'] = 'online' if online == 'true' else 'offline'
 
 
 class HandleHost(driver.DriverBase):
@@ -40,6 +53,7 @@ class HandleHost(driver.DriverBase):
         super(HandleHost, self).__init__()
         self.my_hostname = socket.gethostname()
         self.xml_parser = parse_cib_xml.ParseCibXml()
+        self.crmmon_xml_parser = parse_crmmon_xml.ParseCrmMonXml()
         self.status_holder = hold_host_status.HostHoldStatus()
         self.notifier = masakari.SendNotification()
 
@@ -160,6 +174,22 @@ class HandleHost(driver.DriverBase):
 
             if err:
                 msg = ("cibadmin command output stderr: %s") % err
+                raise Exception(msg)
+
+        except Exception as e:
+            LOG.warning("Exception caught: %s", e)
+            return
+
+        return out
+
+    def _get_crmmon_xml(self):
+        """Get summary of cluster's current state in XML format."""
+        try:
+            # Execute crm_mon command.
+            out, err = utils.execute('crm_mon', '-X', run_as_root=True)
+
+            if err:
+                msg = ("crmmon command output stderr: %s") % err
                 raise Exception(msg)
 
         except Exception as e:
@@ -298,6 +328,31 @@ class HandleHost(driver.DriverBase):
             # Update host status.
             self.status_holder.set_host_status(node_state_tag)
 
+    def _check_host_status_by_crm_mon(self):
+        crmmon_xml = self._get_crmmon_xml()
+        if crmmon_xml is None:
+            # crm_mon command failure.
+            return 1
+
+        # Set to the ParseCrmMonXml object.
+        self.crmmon_xml_parser.set_crmmon_xml(crmmon_xml)
+
+        # Get node_state tag list.
+        node_state_tag_list = self.crmmon_xml_parser.get_node_state_tag_list()
+        if len(node_state_tag_list) == 0:
+            # If crmmon xml doesn't have node_state tag,
+            # it is an unexpected result.
+            raise Exception(
+                "Failed to get nodes tag from crm_mon xml.")
+
+        node_state_tag_list = [CibSchemaCompliantTag(n)
+                               for n in node_state_tag_list
+                               if n.get('type') == 'remote']
+        # Check if status changed.
+        self._check_if_status_changed(node_state_tag_list)
+
+        return 0
+
     def _check_host_status_by_cibadmin(self):
         # Get xml of cib info.
         cib_xml = self._get_cib_xml()
@@ -362,8 +417,13 @@ class HandleHost(driver.DriverBase):
                             CONF.host.monitoring_interval)
                         continue
 
-                # Check the host status is online or offline by cibadmin.
-                if self._check_host_status_by_cibadmin() != 0:
+                # Check the host status is online or offline.
+                if CONF.host.restrict_to_remotes:
+                    status_func = self._check_host_status_by_crm_mon
+                else:
+                    status_func = self._check_host_status_by_cibadmin
+
+                if status_func() != 0:
                     LOG.warning("hostmonitor skips monitoring hosts.")
                     eventlet.greenthread.sleep(CONF.host.monitoring_interval)
                     continue

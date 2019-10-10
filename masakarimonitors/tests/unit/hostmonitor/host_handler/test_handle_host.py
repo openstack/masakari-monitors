@@ -25,6 +25,7 @@ from masakarimonitors.ha import masakari
 from masakarimonitors.hostmonitor.host_handler import handle_host
 from masakarimonitors.hostmonitor.host_handler import hold_host_status
 from masakarimonitors.hostmonitor.host_handler import parse_cib_xml
+from masakarimonitors.hostmonitor.host_handler import parse_crmmon_xml
 from masakarimonitors.objects import event_constants as ec
 from masakarimonitors import utils
 
@@ -48,6 +49,52 @@ STATUS_TAG_XML = '  <status>' \
                  '      <test foo="foo"/>' \
                  '    </node_state>' \
                  '  </status>'
+CRMMON_NODES_TAG_XML = """
+<nodes>
+  <node name="member1" id="1002" online="true" standby="false"
+        standby_onfail="false" maintenance="false" pending="false"
+        unclean="false" shutdown="false" expected_up="true" is_dc="false"
+        resources_running="2" type="member" />
+  <node name="member2" id="1001" online="true" standby="false"
+        standby_onfail="false" maintenance="false" pending="false"
+        unclean="false" shutdown="false" expected_up="true" is_dc="true"
+        resources_running="1" type="member" />
+  <node name="remote1" id="remotehostname1" online="true" standby="false"
+        standby_onfail="false" maintenance="false" pending="false"
+        unclean="false" shutdown="false" expected_up="false"
+        is_dc="false" resources_running="0" type="remote" />
+  <node name="remote2" id="remotehostname2" online="true" standby="false"
+        standby_onfail="false" maintenance="false" pending="false"
+        unclean="false" shutdown="false" expected_up="false" is_dc="false"
+        resources_running="0" type="remote" />
+  <node name="remote3" id="remotehostname3" online="true" standby="false"
+        standby_onfail="false" maintenance="false" pending="false"
+        unclean="false" shutdown="false" expected_up="false" is_dc="false"
+        resources_running="0" type="remote" />
+  <node name="member3" id="1000" online="true" standby="false"
+        standby_onfail="false" maintenance="false" pending="false"
+        unclean="false" shutdown="false" expected_up="true" is_dc="false"
+        resources_running="4" type="member" />
+</nodes>
+"""
+
+
+class TestCibSchemaCompliantTag(testtools.TestCase):
+
+    def setUp(self):
+        super(TestCibSchemaCompliantTag, self).setUp()
+
+    def test_init_offline(self):
+        tag = handle_host.CibSchemaCompliantTag(
+            {'name': 'test1', 'online': 'false'})
+        self.assertEqual(tag['uname'], 'test1')
+        self.assertEqual(tag['crmd'], 'offline')
+
+    def test_init_online(self):
+        tag = handle_host.CibSchemaCompliantTag(
+            {'name': 'test1', 'online': 'true'})
+        self.assertEqual(tag['uname'], 'test1')
+        self.assertEqual(tag['crmd'], 'online')
 
 
 class TestHandleHost(testtools.TestCase):
@@ -308,6 +355,28 @@ class TestHandleHost(testtools.TestCase):
         self.assertIsNone(ret)
         mock_execute.assert_called_once_with(
             'cibadmin', '--query', run_as_root=True)
+
+    @mock.patch.object(utils, 'execute')
+    def test_get_crmmon_xml(self, mock_execute):
+        mock_execute.return_value = ('test_stdout', '')
+
+        obj = handle_host.HandleHost()
+        ret = obj._get_crmmon_xml()
+
+        self.assertEqual('test_stdout', ret)
+        mock_execute.assert_called_once_with(
+            'crm_mon', '-X', run_as_root=True)
+
+    @mock.patch.object(utils, 'execute')
+    def test_get_crmmon_xml_stderr(self, mock_execute):
+        mock_execute.return_value = ('test_stdout', 'test_stderr')
+
+        obj = handle_host.HandleHost()
+        ret = obj._get_crmmon_xml()
+
+        self.assertIsNone(ret)
+        mock_execute.assert_called_once_with(
+            'crm_mon', '-X', run_as_root=True)
 
     @mock.patch.object(utils, 'execute')
     @mock.patch.object(parse_cib_xml.ParseCibXml, 'get_stonith_ipmi_params')
@@ -571,6 +640,65 @@ class TestHandleHost(testtools.TestCase):
             CONF.host.api_retry_max, CONF.host.api_retry_interval, test_event)
 
     @mock.patch.object(handle_host.HandleHost, '_check_if_status_changed')
+    @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml,
+                       'get_node_state_tag_list')
+    @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml, 'set_crmmon_xml')
+    @mock.patch.object(handle_host.HandleHost, '_get_crmmon_xml')
+    def test_check_host_status_by_crm_mon(
+        self, mock_get_crmmon_xml, mock_set_crmmon_xml,
+        mock_get_node_state_tag_list, mock_check_if_status_changed):
+        mock_get_crmmon_xml.return_value = CRMMON_NODES_TAG_XML
+        mock_set_crmmon_xml.return_value = None
+        status_tag = ElementTree.fromstring(CRMMON_NODES_TAG_XML)
+        node_state_tag_list = status_tag.getchildren()
+        mock_get_node_state_tag_list.return_value = node_state_tag_list
+        mock_check_if_status_changed.return_value = None
+
+        obj = handle_host.HandleHost()
+        ret = obj._check_host_status_by_crm_mon()
+
+        self.assertEqual(0, ret)
+        mock_get_node_state_tag_list.assert_called_once_with()
+        mock_set_crmmon_xml.assert_called_once_with(CRMMON_NODES_TAG_XML)
+        mock_get_node_state_tag_list.assert_called_once_with()
+        mock_check_if_status_changed.assert_called_once_with(
+            [
+                {'uname': 'remote1', 'crmd': 'online'},
+                {'uname': 'remote2', 'crmd': 'online'},
+                {'uname': 'remote3', 'crmd': 'online'}])
+
+    @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml,
+                       'get_node_state_tag_list')
+    @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml, 'set_crmmon_xml')
+    @mock.patch.object(handle_host.HandleHost, '_get_crmmon_xml')
+    def test_check_host_status_by_crm_mon_not_have_node_state_tag(
+        self, mock_get_crmmon_xml, mock_set_crmmon_xml,
+        mock_get_node_state_tag_list):
+        mock_get_crmmon_xml.return_value = CRMMON_NODES_TAG_XML
+        mock_set_crmmon_xml.return_value = None
+        mock_get_node_state_tag_list.return_value = []
+
+        obj = handle_host.HandleHost()
+
+        self.assertRaisesRegexp(
+            Exception, "Failed to get nodes tag from crm_mon xml.",
+            obj._check_host_status_by_crm_mon)
+        mock_get_crmmon_xml.assert_called_once_with()
+        mock_set_crmmon_xml.assert_called_once_with(CRMMON_NODES_TAG_XML)
+        mock_get_node_state_tag_list.assert_called_once_with()
+
+    @mock.patch.object(handle_host.HandleHost, '_get_crmmon_xml')
+    def test_check_host_status_by_crm_mon_xml_is_None(
+        self, mock_get_crmmon_xml):
+        mock_get_crmmon_xml.return_value = None
+
+        obj = handle_host.HandleHost()
+        ret = obj._check_host_status_by_crm_mon()
+
+        self.assertEqual(1, ret)
+        mock_get_crmmon_xml.assert_called_once_with()
+
+    @mock.patch.object(handle_host.HandleHost, '_check_if_status_changed')
     @mock.patch.object(parse_cib_xml.ParseCibXml, 'get_node_state_tag_list')
     @mock.patch.object(parse_cib_xml.ParseCibXml, 'have_quorum')
     @mock.patch.object(parse_cib_xml.ParseCibXml, 'set_cib_xml')
@@ -693,3 +821,30 @@ class TestHandleHost(testtools.TestCase):
         mock_check_pacemaker_services.assert_called_with('pacemaker_remote')
         self.assertEqual(2, mock_check_host_status_by_cibadmin.call_count)
         self.assertEqual(2, mock_check_host_status_by_crmadmin.call_count)
+
+    @mock.patch.object(eventlet.greenthread, 'sleep')
+    @mock.patch.object(handle_host.HandleHost,
+                       '_check_host_status_by_crm_mon')
+    @mock.patch.object(handle_host.HandleHost, '_check_pacemaker_services')
+    @mock.patch.object(handle_host.HandleHost, '_check_hb_line')
+    def test_monitor_hosts_remotes_only(self,
+                                        mock_check_hb_line,
+                                        mock_check_pacemaker_services,
+                                        mock_check_host_status_by_crm_mon,
+                                        mock_sleep):
+
+        CONF.host.restrict_to_remotes = True
+        mock_check_hb_line.side_effect = \
+            [0, Exception("Test exception.")]
+        mock_check_pacemaker_services.return_value = True
+        mock_check_host_status_by_crm_mon.side_effect = 0
+        mock_sleep.return_value = None
+
+        obj = handle_host.HandleHost()
+        obj.monitor_hosts()
+
+        self.assertEqual(1, mock_check_hb_line.call_count)
+        self.assertEqual(1, mock_check_pacemaker_services.call_count)
+        mock_check_pacemaker_services.assert_called_with('pacemaker_remote')
+        self.assertEqual(1, mock_check_host_status_by_crm_mon.call_count)
+        mock_check_host_status_by_crm_mon.assert_called_once_with()
