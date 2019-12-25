@@ -19,9 +19,9 @@ Version 2.0. The full terms and conditions of this license are
 detailed in the LICENSE file.
 
 * Free software: Apache license
-* Documentation: http://docs.openstack.org/developer/masakari-monitors
-* Source: http://git.openstack.org/cgit/openstack/masakari-monitors
-* Bugs: http://bugs.launchpad.net/masakari-monitors
+* Documentation: https://docs.openstack.org/masakari-monitors
+* Source: https://git.openstack.org/cgit/openstack/masakari-monitors
+* Bugs: https://bugs.launchpad.net/masakari-monitors
 
 
 Configure masakari-monitors
