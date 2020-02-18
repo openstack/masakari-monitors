@@ -131,7 +131,7 @@ class HandleProcess(object):
                 'generated_time': current_time,
                 'payload': {
                     'event': ec.EventConstants.EVENT_STOPPED,
-                    'process_name': process_name
+                    'process_name': process_name.split('/')[-1]
                 }
             }
         }

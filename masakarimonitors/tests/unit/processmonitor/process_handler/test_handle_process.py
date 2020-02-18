@@ -16,6 +16,7 @@ import socket
 import testtools
 from unittest import mock
 
+import ddt
 import eventlet
 from oslo_utils import timeutils
 
@@ -28,10 +29,12 @@ from masakarimonitors import utils
 CONF = masakarimonitors.conf.CONF
 eventlet.monkey_patch(os=False)
 
+NOVA_COMPUTE = 'nova-compute'
+
 MOCK_PROCESS_LIST = [
     {
         'id': 1,
-        'process_name': 'mock_process_name_A',
+        'process_name': '/usr/local/bin/nova-compute',
         'start_command': 'mock_start_command',
         'pre_start_command': 'mock_pre_start_command',
         'post_start_command': 'mock_post_start_command',
@@ -45,7 +48,7 @@ MOCK_PROCESS_LIST = [
 MOCK_DOWN_PROCESS_LIST = [
     {
         'id': 1,
-        'process_name': 'mock_process_name_A',
+        'process_name': '/usr/local/bin/nova-compute',
         'start_command': 'mock_start_command',
         'pre_start_command': 'mock_pre_start_command',
         'post_start_command': 'mock_post_start_command',
@@ -56,11 +59,13 @@ MOCK_DOWN_PROCESS_LIST = [
     },
 ]
 
-PS_RESULT = "\n" \
-            "UID  PID   PPID C STIME TTY TIME     CMD\n" \
-            "root 11187 1    0 18:52 ?   00:00:00 mock_process_name_A\n"
+PS_RESULT = \
+    "\n" \
+    "UID  PID   PPID C STIME TTY TIME     CMD\n" \
+    "root 11187 1    0 18:52 ?   00:00:00 /usr/local/bin/nova-compute\n"
 
 
+@ddt.ddt
 class TestHandleProcess(testtools.TestCase):
 
     def setUp(self):
@@ -72,6 +77,14 @@ class TestHandleProcess(testtools.TestCase):
         obj.set_process_list(process_list)
 
         self.assertEqual(process_list, obj.process_list)
+
+    @ddt.data("/usr/local/bin/nova-compute", "nova-compute")
+    def test_make_event(self, process_name):
+        obj = handle_process.HandleProcess()
+        event = obj._make_event(process_name)
+        self.assertEqual(
+            NOVA_COMPUTE,
+            event['notification']['payload']['process_name'])
 
     @mock.patch.object(utils, 'execute')
     def test_start_processes(self,
@@ -227,7 +240,7 @@ class TestHandleProcess(testtools.TestCase):
                 'generated_time': current_time,
                 'payload': {
                     'event': ec.EventConstants.EVENT_STOPPED,
-                    'process_name': down_process_list[0].get('process_name')
+                    'process_name': NOVA_COMPUTE
                 }
             }
         }
@@ -289,7 +302,7 @@ class TestHandleProcess(testtools.TestCase):
                 'generated_time': current_time,
                 'payload': {
                     'event': ec.EventConstants.EVENT_STOPPED,
-                    'process_name': down_process_list[0].get('process_name')
+                    'process_name': NOVA_COMPUTE
                 }
             }
         }
@@ -356,7 +369,7 @@ class TestHandleProcess(testtools.TestCase):
                 'generated_time': current_time,
                 'payload': {
                     'event': ec.EventConstants.EVENT_STOPPED,
-                    'process_name': down_process_list[0].get('process_name')
+                    'process_name': NOVA_COMPUTE
                 }
             }
         }
