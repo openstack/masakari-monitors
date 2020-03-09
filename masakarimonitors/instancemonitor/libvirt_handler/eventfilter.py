@@ -20,6 +20,7 @@ from oslo_log import log as oslo_logging
 from oslo_utils import excutils
 from oslo_utils import timeutils
 
+import masakarimonitors.conf
 from masakarimonitors.instancemonitor.libvirt_handler import callback
 from masakarimonitors.instancemonitor.libvirt_handler \
     import eventfilter_table as evft
@@ -27,6 +28,7 @@ from masakarimonitors.objects import event_constants as ec
 
 
 LOG = oslo_logging.getLogger(__name__)
+CONF = masakarimonitors.conf.CONF
 
 
 class EventFilter(object):
@@ -45,7 +47,7 @@ class EventFilter(object):
         """
 
         noticeType = ec.EventConstants.TYPE_VM
-        hostname = socket.gethostname()
+        hostname = CONF.hostname or socket.gethostname()
         currentTime = timeutils.utcnow()
 
         # All Event Output if debug mode is on.
