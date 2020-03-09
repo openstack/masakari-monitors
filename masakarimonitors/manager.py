@@ -55,7 +55,7 @@ class Manager(PeriodicTasks):
 
     def __init__(self, host=None, service_name='undefined'):
         if not host:
-            host = CONF.host
+            host = CONF.hostname
         self.host = host
         self.service_name = service_name
         super(Manager, self).__init__()

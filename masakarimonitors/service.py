@@ -69,13 +69,13 @@ class Service(service.Service):
     def create(cls, host=None, binary=None, manager=None):
         """Instantiates class and passes back application object.
 
-        :param host: defaults to CONF.host
+        :param host: defaults to CONF.hostname
         :param binary: defaults to basename of executable
         :param manager: defaults to CONF.<Latter part of binary>_manager
 
         """
         if not host:
-            host = CONF.host
+            host = CONF.hostname
         if not binary:
             binary = os.path.basename(sys.argv[0])
 
