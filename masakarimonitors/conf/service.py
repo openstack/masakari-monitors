@@ -17,8 +17,9 @@ import socket
 from oslo_config import cfg
 
 service_opts = [
-    cfg.StrOpt('host',
+    cfg.StrOpt('hostname',
                default=socket.gethostname(),
+               deprecated_name="host",
                help='''
 Hostname, FQDN or IP address of this host. Must be valid within AMQP key.
 

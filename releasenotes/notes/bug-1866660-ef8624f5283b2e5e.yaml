@@ -1,0 +1,11 @@
+---
+features:
+  - |
+    A 'hostname' option has been added to the Masakari monitors configuration
+    file which replaces the 'host' option. The option should be used to specify
+    the Hostname, FQDN or IP address of the host.
+deprecations:
+  - |
+    The 'host' option in the 'DEFAULT' section has been deprecated as it
+    clashes with the name of a section in the same file. It has been replaced
+    by the 'hostname' option.
