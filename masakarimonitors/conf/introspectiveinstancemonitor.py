@@ -43,7 +43,7 @@ Guest monitoring interval of VM status (in seconds).
                help='Failure threshold before sending notification.'),
     cfg.StrOpt('qemu_guest_agent_sock_path',
                default=SOCK,
-               help='''
+               help=r'''
 * The file path of qemu guest agent sock.
 * Please use Python raw string notation as regular expressions.
 e.g.  r'/var/lib/libvirt/qemu/org\.qemu\.guest_agent\..*\.instance-.*\.sock'

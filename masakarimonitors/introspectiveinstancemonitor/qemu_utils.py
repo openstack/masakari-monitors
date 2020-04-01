@@ -84,6 +84,7 @@ def action_on_enter(new_state, triggered_event):
 def action_on_exit(old_state, triggered_event):
     pass
 
+
 STATE_SPACE = [
     {
         'name': 'discovery',

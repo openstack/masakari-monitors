@@ -15,6 +15,7 @@
 
 import re
 
+from hacking import core
 
 """
 Guidelines for writing new hacking checks
@@ -35,7 +36,7 @@ UNDERSCORE_IMPORT_FILES = []
 
 translated_log = re.compile(
     r"(.)*LOG\.(audit|error|info|critical|exception)"
-    "\(\s*_\(\s*('|\")")
+    r"\(\s*_\(\s*('|\")")
 string_translation = re.compile(r"[^_]*_\(\s*('|\")")
 underscore_import_check = re.compile(r"(.)*import _(.)*")
 underscore_import_check_multi = re.compile(r"(.)*i18n\s+import(.)* _, (.)*")
@@ -50,6 +51,7 @@ log_translation = re.compile(
 yield_not_followed_by_space = re.compile(r"^\s*yield(?:\(|{|\[|\"|').*$")
 
 
+@core.flake8ext
 def check_explicit_underscore_import(logical_line, filename):
     """Check for explicit import of the _ function
 
@@ -73,6 +75,7 @@ def check_explicit_underscore_import(logical_line, filename):
         yield (0, "M301: Found use of _() without explicit import of _ !")
 
 
+@core.flake8ext
 def no_translate_logs(logical_line):
     """Check that logging doesn't translate messages
     M302
@@ -81,6 +84,7 @@ def no_translate_logs(logical_line):
         yield (0, "M302 Don't translate log messages!")
 
 
+@core.flake8ext
 def yield_followed_by_space(logical_line):
     """Yield should be followed by a space.
 
@@ -96,9 +100,3 @@ def yield_followed_by_space(logical_line):
     if yield_not_followed_by_space.match(logical_line):
         yield (0,
                "M303: Yield keyword should be followed by a space.")
-
-
-def factory(register):
-    register(check_explicit_underscore_import)
-    register(no_translate_logs)
-    register(yield_followed_by_space)
