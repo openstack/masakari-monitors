@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import mock
 import socket
 import testtools
+from unittest import mock
 
 import eventlet
 from oslo_utils import timeutils

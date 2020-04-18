@@ -14,8 +14,8 @@
 
 import eventlet
 import libvirt
-import mock
 import testtools
+from unittest import mock
 
 from masakarimonitors.introspectiveinstancemonitor import instance
 

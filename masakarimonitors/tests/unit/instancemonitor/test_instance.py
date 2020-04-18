@@ -13,10 +13,10 @@
 # limitations under the License.
 
 import libvirt
-import mock
 import testtools
 import threading
 import time
+from unittest import mock
 import uuid
 
 import eventlet

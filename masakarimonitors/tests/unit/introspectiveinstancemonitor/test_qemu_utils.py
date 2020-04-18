@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import libvirt
-import mock
 import testtools
+from unittest import mock
 import uuid
 
 

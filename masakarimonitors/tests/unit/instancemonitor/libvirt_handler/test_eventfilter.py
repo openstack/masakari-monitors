@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import mock
 import socket
 import testtools
 import threading
+from unittest import mock
 import uuid
 
 import eventlet
