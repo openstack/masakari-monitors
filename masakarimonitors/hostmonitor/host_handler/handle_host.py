@@ -282,28 +282,26 @@ class HandleHost(driver.DriverBase):
 
         # Check if host status changed.
         for node_state_tag in node_state_tag_list:
-
+            hostname = node_state_tag.get('uname')
             # hostmonitor doesn't monitor itself.
-            if node_state_tag.get('uname') == self.my_hostname:
+            if hostname == self.my_hostname:
                 continue
 
             # Get current status and old status.
             current_status = node_state_tag.get('crmd')
-            old_status = self.status_holder.get_host_status(
-                node_state_tag.get('uname'))
+            old_status = self.status_holder.get_host_status(hostname)
 
             # If old_status is None, This is first get of host status.
             if old_status is None:
                 msg = ("Recognized '%s' as a new member of cluster."
                        " Host status is '%s'.") \
-                    % (node_state_tag.get('uname'), current_status)
+                    % (hostname, current_status)
                 LOG.info("%s", msg)
                 self.status_holder.set_host_status(node_state_tag)
                 continue
 
             # Output host status.
-            msg = ("'%s' is '%s'.") % (node_state_tag.get('uname'),
-                                       current_status)
+            msg = ("'%s' is '%s'.") % (hostname, current_status)
             LOG.info("%s", msg)
 
             # If host status changed, send a notification.
@@ -316,8 +314,7 @@ class HandleHost(driver.DriverBase):
                         % current_status
                     LOG.info("%s", msg)
                 else:
-                    event = self._make_event(node_state_tag.get('uname'),
-                                             current_status)
+                    event = self._make_event(hostname, current_status)
 
                     # Send a notification.
                     self.notifier.send_notification(
