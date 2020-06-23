@@ -43,7 +43,7 @@ class ParseCrmMonXml(object):
         # status tag exists in the crmmon tag.
         if self.crmmon_tag is None:
             return None
-        child_list = self.crmmon_tag.getchildren()
+        child_list = list(self.crmmon_tag)
         for child in child_list:
             if child.tag == 'nodes':
                 return child
@@ -53,7 +53,7 @@ class ParseCrmMonXml(object):
         node_state_tag_list = []
 
         # node_state tag exists in the status tag.
-        child_list = nodes_tag.getchildren()
+        child_list = list(nodes_tag)
         for child in child_list:
             if child.tag == 'node':
                 node_state_tag_list.append(child)
