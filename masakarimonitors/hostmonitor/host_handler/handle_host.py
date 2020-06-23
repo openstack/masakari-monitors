@@ -425,8 +425,6 @@ class HandleHost(driver.DriverBase):
 
                 if status_func() != 0:
                     LOG.warning("hostmonitor skips monitoring hosts.")
-                    eventlet.greenthread.sleep(CONF.host.monitoring_interval)
-                    continue
 
                 eventlet.greenthread.sleep(CONF.host.monitoring_interval)
 
