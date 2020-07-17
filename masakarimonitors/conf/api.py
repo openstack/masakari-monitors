@@ -39,8 +39,9 @@ monitor_api_opts = [
 def register_opts(conf):
     conf.register_group(api_group)
     conf.register_opts(monitor_api_opts, group=api_group)
-    conf.register_opts(ks_loading.get_auth_plugin_conf_options('password'),
-                       group=api_group)
+    ks_loading.register_session_conf_options(conf, api_group)
+    ks_loading.register_auth_conf_options(conf, api_group)
+    conf.set_default('auth_type', 'password', group=api_group)
 
 
 def list_opts():
