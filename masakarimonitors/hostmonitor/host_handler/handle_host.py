@@ -79,11 +79,19 @@ class HandleHost(driver.DriverBase):
         :returns: 0 if normal, 1 if abnormal, 2 if configuration file is
             wrong or neither pacemaker nor pacemaker-remote is running.
         """
-        # Check whether the pacemaker services is normal.
-        corosync_status = self._check_pacemaker_services('corosync')
-        pacemaker_status = self._check_pacemaker_services('pacemaker')
-        pacemaker_remote_status = self._check_pacemaker_services(
-            'pacemaker_remote')
+        if CONF.host.pacemaker_node_type == 'autodetect':
+            # Check whether the Corosync/Pacemaker services are running.
+            corosync_status = self._check_pacemaker_services('corosync')
+            pacemaker_status = self._check_pacemaker_services('pacemaker')
+            pacemaker_remote_status = self._check_pacemaker_services(
+                'pacemaker_remote')
+        else:
+            corosync_status = (
+                CONF.host.pacemaker_node_type == 'cluster')
+            pacemaker_status = (
+                CONF.host.pacemaker_node_type == 'cluster')
+            pacemaker_remote_status = (
+                CONF.host.pacemaker_node_type == 'remote')
 
         if corosync_status is False or pacemaker_status is False:
             if pacemaker_remote_status is False:
@@ -402,11 +410,16 @@ class HandleHost(driver.DriverBase):
                     eventlet.greenthread.sleep(CONF.host.monitoring_interval)
                     continue
 
+                if CONF.host.pacemaker_node_type == 'autodetect':
+                    pacemaker_remote_status = self._check_pacemaker_services(
+                        'pacemaker_remote')
+                else:
+                    pacemaker_remote_status = (
+                        CONF.host.pacemaker_node_type == 'remote')
+
                 # Check the host status is stable or unstable by crmadmin.
                 # It only checks when this process runs on the full cluster
                 # stack of corosync.
-                pacemaker_remote_status = self._check_pacemaker_services(
-                    'pacemaker_remote')
                 if pacemaker_remote_status is False:
                     if self._check_host_status_by_crmadmin() != 0:
                         LOG.warning("hostmonitor skips monitoring hosts.")

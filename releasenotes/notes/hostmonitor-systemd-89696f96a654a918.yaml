@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Adds ``pacemaker_node_type`` option to ``hostmonitor`` to allow
+    skipping systemd service status checks which are often impossible in
+    containerised deployments.

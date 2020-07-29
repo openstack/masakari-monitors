@@ -80,6 +80,17 @@ The number of port numbers you specify must be equal to the number of
 corosync_multicast_interfaces values and must be in correct order with
 relevant interfaces in corosync_multicast_interfaces.
 '''),
+    cfg.StrOpt('pacemaker_node_type',
+               default='autodetect',
+               choices=('autodetect', 'cluster', 'remote'),
+               help='''
+Using this option, one can avoid systemd checks that would establish whether
+this hostmonitor is running alongside Corosync and Pacemaker (the ``cluster``
+stack) or Pacemaker Remote (the ``remote`` stack).
+
+The default (``autodetect``) ensures backward compatibility and means systemd
+is used to check the stack.
+'''),
 ]
 
 
