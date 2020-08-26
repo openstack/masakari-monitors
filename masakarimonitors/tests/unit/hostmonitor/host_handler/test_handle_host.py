@@ -612,7 +612,7 @@ class TestHandleHost(testtools.TestCase):
         mock_make_event.return_value = test_event
 
         status_tag = ElementTree.fromstring(STATUS_TAG_XML)
-        node_state_tag_list = status_tag.getchildren()
+        node_state_tag_list = list(status_tag)
 
         obj = handle_host.HandleHost()
         obj._check_if_status_changed(node_state_tag_list)
@@ -650,7 +650,7 @@ class TestHandleHost(testtools.TestCase):
         mock_get_crmmon_xml.return_value = CRMMON_NODES_TAG_XML
         mock_set_crmmon_xml.return_value = None
         status_tag = ElementTree.fromstring(CRMMON_NODES_TAG_XML)
-        node_state_tag_list = status_tag.getchildren()
+        node_state_tag_list = list(status_tag)
         mock_get_node_state_tag_list.return_value = node_state_tag_list
         mock_check_if_status_changed.return_value = None
 
@@ -710,7 +710,7 @@ class TestHandleHost(testtools.TestCase):
         mock_set_cib_xml.return_value = None
         mock_have_quorum.return_value = 1
         status_tag = ElementTree.fromstring(STATUS_TAG_XML)
-        node_state_tag_list = status_tag.getchildren()
+        node_state_tag_list = list(status_tag)
         mock_get_node_state_tag_list.return_value = node_state_tag_list
         mock_check_if_status_changed.return_value = None
 
@@ -737,7 +737,7 @@ class TestHandleHost(testtools.TestCase):
         mock_set_cib_xml.return_value = None
         mock_have_quorum.return_value = 0
         status_tag = ElementTree.fromstring(STATUS_TAG_XML)
-        node_state_tag_list = status_tag.getchildren()
+        node_state_tag_list = list(status_tag)
         mock_get_node_state_tag_list.return_value = node_state_tag_list
         mock_check_if_status_changed.return_value = None
 

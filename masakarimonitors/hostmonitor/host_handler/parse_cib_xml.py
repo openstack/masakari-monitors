@@ -48,7 +48,7 @@ class ParseCibXml(object):
 
     def _get_status_tag(self):
         # status tag exists in the cib tag.
-        child_list = self.cib_tag.getchildren()
+        child_list = list(self.cib_tag)
         for child in child_list:
             if child.tag == 'status':
                 return child
@@ -58,7 +58,7 @@ class ParseCibXml(object):
         node_state_tag_list = []
 
         # node_state tag exists in the status tag.
-        child_list = status_tag.getchildren()
+        child_list = list(status_tag)
         for child in child_list:
             if child.tag == 'node_state':
                 node_state_tag_list.append(child)
@@ -91,7 +91,7 @@ class ParseCibXml(object):
         is_target_ipmi = False
         ipmi_values = {}
 
-        nvpair_tag_list = instance_attributes_tag.getchildren()
+        nvpair_tag_list = list(instance_attributes_tag)
         for nvpair_tag in nvpair_tag_list:
             if nvpair_tag.get('name') == 'hostname' and \
                 nvpair_tag.get('value') == hostname:
@@ -115,7 +115,7 @@ class ParseCibXml(object):
             return None
 
         # Parse instance_attributes tag under the primitive tag.
-        child_list = primitive_tag.getchildren()
+        child_list = list(primitive_tag)
         for child in child_list:
             if child.tag == 'instance_attributes':
                 ipmi_values = self._parse_instance_attributes_tag(
@@ -126,7 +126,7 @@ class ParseCibXml(object):
 
     def _parse_group_tag(self, group_tag, hostname):
         # Parse primitive tag under the group tag.
-        child_list = group_tag.getchildren()
+        child_list = list(group_tag)
         for child in child_list:
             if child.tag == 'primitive':
                 ipmi_values = self._parse_primitive_tag(child, hostname)
@@ -149,7 +149,7 @@ class ParseCibXml(object):
         """
         # Get configuration tag from cib tag.
         configuration_tag = None
-        child_list = self.cib_tag.getchildren()
+        child_list = list(self.cib_tag)
         for child in child_list:
             if child.tag == 'configuration':
                 configuration_tag = child
@@ -160,7 +160,7 @@ class ParseCibXml(object):
 
         # Get resources tag from configuration tag.
         resources_tag = None
-        child_list = configuration_tag.getchildren()
+        child_list = list(configuration_tag)
         for child in child_list:
             if child.tag == 'resources':
                 resources_tag = child
@@ -172,7 +172,7 @@ class ParseCibXml(object):
         # They are set at nvpair tag which exists under the
         # instance_attributes of primitive of group tag.
         ipmi_values = None
-        child_list = resources_tag.getchildren()
+        child_list = list(resources_tag)
         for child in child_list:
             if child.tag == 'group':
                 ipmi_values = self._parse_group_tag(child, hostname)
