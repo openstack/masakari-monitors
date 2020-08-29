@@ -15,6 +15,7 @@
 """Utilities and helper functions."""
 
 import contextlib
+import functools
 import inspect
 import pyclbr
 import shutil
@@ -25,7 +26,6 @@ from oslo_concurrency import lockutils
 from oslo_concurrency import processutils
 from oslo_log import log as logging
 from oslo_utils import importutils
-import six
 
 import masakarimonitors.conf
 from masakarimonitors.i18n import _
@@ -52,12 +52,9 @@ def monkey_patch():
     # If CONF.monkey_patch is not True, this function do nothing.
     if not CONF.monkey_patch:
         return
-    if six.PY2:
-        is_method = inspect.ismethod
-    else:
-        def is_method(obj):
-            # Unbound methods became regular functions on Python 3
-            return inspect.ismethod(obj) or inspect.isfunction(obj)
+
+    def is_method(obj):
+        return inspect.ismethod(obj) or inspect.isfunction(obj)
     # Get list of modules and decorators
     for module_and_decorator in CONF.monkey_patch_modules:
         md_value = module_and_decorator.split(':')
@@ -116,7 +113,7 @@ def execute(*cmd, **kwargs):
 
 def synchronized(name, semaphores=None, blocking=False):
     def wrap(f):
-        @six.wraps(f)
+        @functools.wraps(f)
         def inner(*args, **kwargs):
             lock_str = 'masakarimonitors-%s' % name
             int_lock = lockutils.internal_lock(lock_str,

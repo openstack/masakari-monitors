@@ -78,7 +78,7 @@ class TestProcessmonitorManager(testtools.TestCase):
     @mock.patch.object(handle_process.HandleProcess, 'start_processes')
     @mock.patch.object(handle_process.HandleProcess, 'set_process_list')
     @mock.patch.object(yaml, 'load')
-    @mock.patch('six.moves.builtins.open')
+    @mock.patch('builtins.open')
     def test_main(self,
                   mock_file,
                   mock_load,
@@ -110,7 +110,7 @@ class TestProcessmonitorManager(testtools.TestCase):
     @mock.patch.object(handle_process.HandleProcess, 'start_processes')
     @mock.patch.object(handle_process.HandleProcess, 'set_process_list')
     @mock.patch.object(yaml, 'load')
-    @mock.patch('six.moves.builtins.open')
+    @mock.patch('builtins.open')
     def test_main_exception(self,
                             mock_file,
                             mock_load,
@@ -133,7 +133,7 @@ class TestProcessmonitorManager(testtools.TestCase):
 
     @mock.patch.object(handle_process.HandleProcess, 'set_process_list')
     @mock.patch.object(yaml, 'load')
-    @mock.patch('six.moves.builtins.open')
+    @mock.patch('builtins.open')
     def test_load_process_list_yaml_error(self,
                                          mock_file,
                                          mock_load,
@@ -148,7 +148,7 @@ class TestProcessmonitorManager(testtools.TestCase):
 
     @mock.patch.object(handle_process.HandleProcess, 'set_process_list')
     @mock.patch.object(yaml, 'load')
-    @mock.patch('six.moves.builtins.open')
+    @mock.patch('builtins.open')
     def test_load_process_list_exception(self,
                                          mock_file,
                                          mock_load,
