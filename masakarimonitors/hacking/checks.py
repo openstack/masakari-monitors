@@ -50,6 +50,8 @@ log_translation = re.compile(
     r"\(")
 yield_not_followed_by_space = re.compile(r"^\s*yield(?:\(|{|\[|\"|').*$")
 
+assert_raises_regexp = re.compile(r"assertRaisesRegexp\(")
+
 
 @core.flake8ext
 def check_explicit_underscore_import(logical_line, filename):
@@ -100,3 +102,15 @@ def yield_followed_by_space(logical_line):
     if yield_not_followed_by_space.match(logical_line):
         yield (0,
                "M303: Yield keyword should be followed by a space.")
+
+
+@core.flake8ext
+def assert_raisesRegexp(logical_line):
+    """Check that assertRaisesRegexp is not used.
+
+    M304
+    """
+    res = assert_raises_regexp.search(logical_line)
+    if res:
+        yield (0, "M304: assertRaisesRegex must be used instead "
+                  "of assertRaisesRegexp")
