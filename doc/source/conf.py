@@ -47,7 +47,7 @@ add_function_parentheses = True
 add_module_names = True
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'native'
 
 # -- Options for HTML output --------------------------------------------------
 
@@ -57,7 +57,8 @@ pygments_style = 'sphinx'
 # html_theme = '_theme'
 # html_static_path = ['static']
 html_theme = 'openstackdocs'
-repository_name ='openstack/masakari-monitors'
+openstackdocs_repo_name ='openstack/masakari-monitors'
+openstackdocs_bug_project = 'masakari-monitors'
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = '%sdoc' % project
