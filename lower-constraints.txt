@@ -4,7 +4,7 @@ appdirs==1.4.3
 asn1crypto==0.24.0
 Babel==2.5.3
 certifi==2018.1.18
-cffi==1.11.5
+cffi==1.14.0
 chardet==3.0.4
 cliff==2.11.0
 cmd2==0.8.1
@@ -33,16 +33,16 @@ jsonpatch==1.21
 jsonpointer==2.0
 jsonschema==2.6.0
 keystoneauth1==3.4.0
-libvirt-python==3.7.0
+libvirt-python==6.0.0
 linecache2==1.0.0
-MarkupSafe==1.0
+MarkupSafe==1.1.1
 monotonic==1.4
 mox3==0.25.0
 msgpack==0.5.6
 munch==2.2.0
 netaddr==0.7.19
 netifaces==0.10.6
-lxml==3.4.1
+lxml==4.5.0
 openstacksdk==0.13.0
 os-client-config==1.29.0
 os-service-types==1.2.0
@@ -80,7 +80,7 @@ python-mimeparse==1.6.0
 python-novaclient==10.1.0
 python-subunit==1.0.0
 pytz==2018.3
-PyYAML==3.12
+PyYAML==3.13
 repoze.lru==0.7
 requests==2.18.4
 requestsexceptions==1.4.0
