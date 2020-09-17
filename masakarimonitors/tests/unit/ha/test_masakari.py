@@ -17,14 +17,16 @@ from unittest import mock
 import uuid
 
 import eventlet
-from keystoneauth1.identity.generic import password as ks_password
-from keystoneauth1 import session as ks_session
+from keystoneauth1 import loading as ks_loading
 from openstack import connection
 from openstack import exceptions
 from oslo_utils import timeutils
 
+import masakarimonitors.conf
 from masakarimonitors.ha import masakari
 from masakarimonitors.objects import event_constants as ec
+
+CONF = masakarimonitors.conf.CONF
 
 PROFILE_TYPE = "ha"
 PROFILE_NAME = "masakari"
@@ -60,10 +62,10 @@ class TestSendNotification(testtools.TestCase):
         }
 
     @mock.patch.object(connection, 'Connection')
-    @mock.patch.object(ks_session, 'Session')
-    @mock.patch.object(ks_password, 'Password')
+    @mock.patch.object(ks_loading, 'load_session_from_conf_options')
+    @mock.patch.object(ks_loading, 'load_auth_from_conf_options')
     def test_send_notification(
-        self, mock_password, mock_session, mock_connection):
+        self, mock_auth, mock_session, mock_connection):
 
         mock_conn = mock.Mock()
         mock_conn.instance_ha.return_value = mock.Mock()
@@ -80,11 +82,15 @@ class TestSendNotification(testtools.TestCase):
             generated_time=self.event['notification']['generated_time'],
             payload=self.event['notification']['payload'])
 
+        mock_auth.assert_called_once_with(CONF, 'api')
+        mock_session.assert_called_once_with(CONF, 'api',
+                                             auth=mock_auth.return_value)
+
     @mock.patch.object(connection, 'Connection')
-    @mock.patch.object(ks_session, 'Session')
-    @mock.patch.object(ks_password, 'Password')
+    @mock.patch.object(ks_loading, 'load_session_from_conf_options')
+    @mock.patch.object(ks_loading, 'load_auth_from_conf_options')
     def test_send_notification_409_error(
-        self, mock_password, mock_session, mock_connection):
+        self, mock_auth, mock_session, mock_connection):
 
         mock_conn = mock.Mock()
         mock_conn.instance_ha.return_value = mock.Mock()
@@ -113,10 +119,10 @@ class TestSendNotification(testtools.TestCase):
 
     @mock.patch.object(eventlet.greenthread, 'sleep')
     @mock.patch.object(connection, 'Connection')
-    @mock.patch.object(ks_session, 'Session')
-    @mock.patch.object(ks_password, 'Password')
+    @mock.patch.object(ks_loading, 'load_session_from_conf_options')
+    @mock.patch.object(ks_loading, 'load_auth_from_conf_options')
     def test_send_notification_500_error(
-        self, mock_password, mock_session, mock_connection, mock_sleep):
+        self, mock_auth, mock_session, mock_connection, mock_sleep):
 
         mock_conn = mock.Mock()
         mock_conn.instance_ha.return_value = mock.Mock()

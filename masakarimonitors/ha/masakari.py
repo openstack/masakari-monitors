@@ -13,8 +13,7 @@
 # limitations under the License.
 
 import eventlet
-from keystoneauth1.identity.generic import password as ks_password
-from keystoneauth1 import session as ks_session
+from keystoneauth1 import loading as ks_loading
 from openstack import connection
 from openstack import exceptions
 from oslo_log import log as oslo_logging
@@ -28,14 +27,9 @@ CONF = masakarimonitors.conf.CONF
 class SendNotification(object):
 
     def _make_client(self):
-        auth = ks_password.Password(
-            auth_url=CONF.api.auth_url,
-            username=CONF.api.username,
-            password=CONF.api.password,
-            user_domain_id=CONF.api.user_domain_id,
-            project_name=CONF.api.project_name,
-            project_domain_id=CONF.api.project_domain_id)
-        session = ks_session.Session(auth=auth)
+        auth = ks_loading.load_auth_from_conf_options(CONF, 'api')
+        session = ks_loading.load_session_from_conf_options(CONF, 'api',
+                                                            auth=auth)
         conn = connection.Connection(session=session,
                                      interface=CONF.api.api_interface,
                                      region_name=CONF.api.region)
