@@ -14,6 +14,7 @@
 
 import socket
 
+from collections import deque
 import eventlet
 from oslo_log import log as oslo_logging
 from oslo_utils import timeutils
@@ -56,6 +57,27 @@ class HandleHost(driver.DriverBase):
         self.crmmon_xml_parser = parse_crmmon_xml.ParseCrmMonXml()
         self.status_holder = hold_host_status.HostHoldStatus()
         self.notifier = masakari.SendNotification()
+        self.monitoring_data = {}
+
+    def _update_monitoring_data(self, hostname, status):
+        health_history = self.monitoring_data.setdefault(
+            hostname, deque([], maxlen=CONF.host.monitoring_samples))
+        health_history.append(status)
+
+    def get_stabilised_host_status(self, hostname):
+        health_history = self.monitoring_data.get(hostname)
+        if len(health_history) < CONF.host.monitoring_samples:
+            LOG.debug("Not enough monitoring data for host %s.", hostname)
+            return '_being_collected'
+
+        stabilised_status = health_history[0]
+
+        # If and only if the sequence of host status is consistently the same,
+        # will it return that status.
+        if len(health_history) == health_history.count(stabilised_status):
+            return stabilised_status
+        else:
+            return '_uncertain'
 
     def _check_pacemaker_services(self, target_service):
         try:
@@ -287,8 +309,8 @@ class HandleHost(driver.DriverBase):
             if hostname == self.my_hostname:
                 continue
 
-            # Get current status and old status.
             current_status = node_state_tag.get('crmd')
+            self._update_monitoring_data(hostname, current_status)
             old_status = self.status_holder.get_host_status(hostname)
 
             # If old_status is None, This is first get of host status.
@@ -300,21 +322,28 @@ class HandleHost(driver.DriverBase):
                 self.status_holder.set_host_status(node_state_tag)
                 continue
 
+            stabilised_status = self.get_stabilised_host_status(hostname)
+
             # Output host status.
-            msg = ("'%s' is '%s'.") % (hostname, current_status)
+            msg = ("'%s' is '%s' (current: '%s').") % (hostname,
+                                                       stabilised_status,
+                                                       current_status)
             LOG.info("%s", msg)
 
-            # If host status changed, send a notification.
-            if current_status != old_status:
-                if current_status != 'online' and current_status != 'offline':
-                    # If current_status is not 'online' or 'offline',
+            if stabilised_status == '_being_collected':
+                continue
+
+            # If host stabilised status changed, send a notification.
+            if stabilised_status != old_status:
+                if stabilised_status not in ['online', 'offline']:
+                    # If stabilised_status is not 'online' or 'offline',
                     # hostmonitor doesn't send a notification.
                     msg = ("Since host status is '%s',"
                            " hostmonitor doesn't send a notification.") \
-                        % current_status
+                        % stabilised_status
                     LOG.info("%s", msg)
                 else:
-                    event = self._make_event(hostname, current_status)
+                    event = self._make_event(hostname, stabilised_status)
 
                     # Send a notification.
                     self.notifier.send_notification(
@@ -322,8 +351,9 @@ class HandleHost(driver.DriverBase):
                         CONF.host.api_retry_interval,
                         event)
 
-            # Update host status.
-            self.status_holder.set_host_status(node_state_tag)
+                if stabilised_status != '_uncertain':
+                    # Update host status.
+                    self.status_holder.set_host_status(node_state_tag)
 
     def _check_host_status_by_crm_mon(self):
         crmmon_xml = self._get_crmmon_xml()
