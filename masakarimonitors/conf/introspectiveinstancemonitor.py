@@ -48,12 +48,6 @@ Guest monitoring interval of VM status (in seconds).
 * Please use Python raw string notation as regular expressions.
 e.g.  r'/var/lib/libvirt/qemu/org\.qemu\.guest_agent\..*\.instance-.*\.sock'
 '''),
-    cfg.BoolOpt('callback_paused_event',
-               default=True,
-               help='''
-* True: Callback for VM paused events.
-* False: Do not callback for VM paused events.
-'''),
 ]
 
 
