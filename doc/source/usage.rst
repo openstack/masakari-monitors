@@ -2,6 +2,12 @@
 Usage
 ========
 
-To use masakari-monitors in a project::
+Monitors for Masakari:
 
-    import masakarimonitors
+.. toctree::
+   :maxdepth: 1
+
+   hostmonitor
+   instancemonitor
+   introspectiveinstancemonitor
+   processmonitor
