@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo_privsep import capabilities as c
 from oslo_privsep import priv_context
 
 
@@ -20,5 +19,5 @@ monitors_priv = priv_context.PrivContext(
     "masakarimonitors",
     cfg_section="masakarimonitors_privileged",
     pypath=__name__ + ".monitors_priv",
-    capabilities=[c.CAP_NET_ADMIN],
+    capabilities=[],
 )
