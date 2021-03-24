@@ -1,0 +1,17 @@
+---
+features:
+  - |
+    Support for repeated check of node status in hostmonitor.
+
+    Repeated check is more reliable than single check to determine host
+    status, especially when there is network instability in play.
+
+    With this feature, the following config option can be set.
+
+        [host]
+        monitoring_samples = 3
+
+    The above means 3 checks will be done before the node status is decided.
+    The default value is 1 which is backwards compatible.
+
+    `Blueprint retry-check-when-host-failure <https://blueprints.launchpad.net/masakari-monitors/+spec/retry-check-when-host-failure>`__

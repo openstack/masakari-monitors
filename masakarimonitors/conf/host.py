@@ -20,6 +20,14 @@ monitor_host_opts = [
     cfg.IntOpt('monitoring_interval',
                default=60,
                help='Monitoring interval(in seconds) of node status.'),
+    cfg.IntOpt('monitoring_samples',
+               default=1,
+               help='''
+Monitoring probes to collect before making the decision to send Masakari
+notification about the node status. If and only if ``monitoring_samples``
+consecutive reports have the same status, will the Masakari notification
+be sent.
+'''),
     cfg.IntOpt('api_retry_max',
                default=12,
                help='Number of retries for send a notification in'

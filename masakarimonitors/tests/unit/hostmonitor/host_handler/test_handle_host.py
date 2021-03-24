@@ -17,6 +17,7 @@ import testtools
 from unittest import mock
 from xml.etree import ElementTree
 
+from collections import deque
 import eventlet
 from oslo_utils import timeutils
 
@@ -629,13 +630,69 @@ class TestHandleHost(testtools.TestCase):
                                  mock.call(node3),
                                  mock.call(node4),
                                  mock.call(node5)]
-        calls_set_host_status = [mock.call(node_state_node2),
-                                 mock.call(node_state_node3),
-                                 mock.call(node_state_node4),
+        calls_set_host_status = [mock.call(node_state_node4),
                                  mock.call(node_state_node5)]
         mock_get_host_status.assert_has_calls(calls_get_host_status)
         mock_set_host_status.assert_has_calls(calls_set_host_status)
         mock_make_event.assert_called_once_with(node4, 'offline')
+        mock_send_notification.assert_called_once_with(
+            CONF.host.api_retry_max, CONF.host.api_retry_interval, test_event)
+
+    @mock.patch.object(masakari.SendNotification, 'send_notification')
+    @mock.patch.object(handle_host.HandleHost, '_make_event')
+    @mock.patch.object(hold_host_status.HostHoldStatus, 'set_host_status')
+    @mock.patch.object(hold_host_status.HostHoldStatus, 'get_host_status')
+    @mock.patch.object(socket, 'gethostname')
+    def test_check_if_status_changed_with_3_samples(
+        self, mock_gethostname, mock_get_host_status, mock_set_host_status,
+        mock_make_event, mock_send_notification):
+        mock_gethostname.return_value = 'node1'
+        mock_get_host_status.side_effect = \
+            [None, 'online', 'online', 'online']
+        mock_set_host_status.return_value = None
+        test_event = {'notification': 'test'}
+        mock_make_event.return_value = test_event
+
+        status_tag = ElementTree.fromstring(STATUS_TAG_XML)
+        node_state_tag_list = list(status_tag)
+        CONF.host.monitoring_samples = 3
+
+        obj = handle_host.HandleHost()
+        obj.monitoring_data = {
+            "node1": deque(['online', 'online', 'online'], maxlen=3),
+            "node2": deque(['offline', 'online', 'online'], maxlen=3),
+            "node3": deque(['offline'], maxlen=3),
+            "node4": deque(['online', 'offline', 'offline'], maxlen=3),
+            "node5": deque(['online', 'online', 'online'], maxlen=3),
+        }
+        obj._check_if_status_changed(node_state_tag_list)
+
+        self.assertEqual(deque(['online', 'online', 'online'], maxlen=3),
+                         obj.monitoring_data.get('node2'))
+        self.assertEqual('online', obj.get_stabilised_host_status('node2'))
+        self.assertIn(mock.call(node_state_tag_list[1]),
+                      mock_set_host_status.mock_calls)
+
+        self.assertEqual(deque(['offline', 'online'], maxlen=3),
+                         obj.monitoring_data.get('node3'))
+        self.assertEqual('_being_collected',
+                         obj.get_stabilised_host_status('node3'))
+        self.assertNotIn(mock.call(node_state_tag_list[2]),
+                         mock_set_host_status.mock_calls)
+
+        self.assertEqual(deque(['offline', 'offline', 'offline'], maxlen=3),
+                         obj.monitoring_data.get('node4'))
+        self.assertEqual('offline', obj.get_stabilised_host_status('node4'))
+        self.assertIn(mock.call(node_state_tag_list[3]),
+                      mock_set_host_status.mock_calls)
+
+        self.assertEqual(deque(['online', 'online', 'other'], maxlen=3),
+                         obj.monitoring_data.get('node5'))
+        self.assertEqual('_uncertain', obj.get_stabilised_host_status('node5'))
+        self.assertNotIn(mock.call(node_state_tag_list[4]),
+                         mock_set_host_status.mock_calls)
+
+        mock_make_event.assert_called_once_with("node4", 'offline')
         mock_send_notification.assert_called_once_with(
             CONF.host.api_retry_max, CONF.host.api_retry_interval, test_event)
 
