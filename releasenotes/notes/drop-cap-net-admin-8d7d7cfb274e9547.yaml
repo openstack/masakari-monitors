@@ -1,0 +1,5 @@
+---
+other:
+  - |
+    Masakari hostmonitor and processmonitor will no longer require
+    ``CAP_NET_ADMIN`` capability.
