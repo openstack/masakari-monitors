@@ -8,10 +8,12 @@ features:
 
     With this feature, the following config option can be set.
 
-        [host]
-        monitoring_samples = 3
+    .. code-block:: ini
+
+      [host]
+      monitoring_samples = 3
 
     The above means 3 checks will be done before the node status is decided.
     The default value is 1 which is backwards compatible.
 
-    `Blueprint retry-check-when-host-failure <https://blueprints.launchpad.net/masakari-monitors/+spec/retry-check-when-host-failure>`__
+    `Blueprint retry-check-when-host-failure <https://blueprints.launchpad.net/masakari/+spec/retry-check-when-host-failure>`__
