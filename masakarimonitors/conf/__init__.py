@@ -15,6 +15,7 @@ from oslo_config import cfg
 
 from masakarimonitors.conf import api
 from masakarimonitors.conf import base
+from masakarimonitors.conf import consul
 from masakarimonitors.conf import host
 from masakarimonitors.conf import instance
 from masakarimonitors.conf import introspectiveinstancemonitor
@@ -25,6 +26,7 @@ CONF = cfg.CONF
 
 api.register_opts(CONF)
 base.register_opts(CONF)
+consul.register_opts(CONF)
 host.register_opts(CONF)
 instance.register_opts(CONF)
 introspectiveinstancemonitor.register_opts(CONF)

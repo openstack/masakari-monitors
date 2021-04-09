@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Added hostmonitor driver based on consul. It can detects interfaces
+    connectivity status via multiple consul clusters, and sends notifition
+    to trigger host failure recovery according to defined HA strategy.
