@@ -60,3 +60,9 @@ releasenotes/build
 
 # PyCharm IDE
 .idea/
+
+# configuration sample generation
+etc/masakarimonitors/masakarimonitors.conf.sample
+
+# File/s created by doc build
+doc/source/_static/masakarimonitors.conf.sample

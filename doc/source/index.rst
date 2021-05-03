@@ -9,11 +9,13 @@ Welcome to masakari-monitors's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    readme
    installation
    usage
+   reference/conf
+   reference/conf-file
 
 For Contributors
 ================

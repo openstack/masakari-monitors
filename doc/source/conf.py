@@ -23,6 +23,8 @@ sys.path.insert(0, os.path.abspath('../..'))
 extensions = [
     'sphinx.ext.autodoc',
     'openstackdocstheme',
+    'oslo_config.sphinxconfiggen',
+    'oslo_config.sphinxext',
 ]
 
 # autodoc generation is a bit aggressive and a nuisance when doing heavy
@@ -75,3 +77,8 @@ latex_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 #intersphinx_mapping = {'http://docs.python.org/': None}
+
+# sphinxcontrib.apidoc options
+config_generator_config_file = (
+    '../../etc/masakarimonitors/masakarimonitors-config-generator.conf')
+sample_config_basename = '_static/masakarimonitors'
