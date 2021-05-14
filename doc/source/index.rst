@@ -14,7 +14,16 @@ Contents:
    readme
    installation
    usage
-   contributing
+
+For Contributors
+================
+
+* If you are a new contributor to Masakari Monitors please refer: :doc:`contributor/contributing`
+
+  .. toctree::
+     :hidden:
+
+     contributor/contributing
 
 Indices and tables
 ==================
