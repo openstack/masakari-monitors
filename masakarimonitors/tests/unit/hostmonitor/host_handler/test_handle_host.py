@@ -802,25 +802,25 @@ class TestHandleHost(testtools.TestCase):
     def test_monitor_hosts(self,
                            mock_check_hb_line,
                            mock_check_pacemaker_services,
-                           mock_check_host_status_by_cibadmin,
                            mock_check_host_status_by_crmadmin,
+                           mock_check_host_status_by_cibadmin,
                            mock_sleep):
 
         mock_check_hb_line.side_effect = \
-            [0, 1, 2, 0, Exception("Test exception.")]
-        mock_check_pacemaker_services.side_effect = [True, False, False]
-        mock_check_host_status_by_cibadmin.side_effect = [0, 1]
+            [0, 1, 2, 0, Exception("Test exception."), 0, KeyboardInterrupt()]
+        mock_check_pacemaker_services.side_effect = [True, False, False, True]
         mock_check_host_status_by_crmadmin.side_effect = [0, 1]
+        mock_check_host_status_by_cibadmin.side_effect = [0, 1, 0]
         mock_sleep.return_value = None
 
         obj = handle_host.HandleHost()
-        obj.monitor_hosts()
+        self.assertRaises(KeyboardInterrupt, obj.monitor_hosts)
 
-        self.assertEqual(5, mock_check_hb_line.call_count)
-        self.assertEqual(3, mock_check_pacemaker_services.call_count)
+        self.assertEqual(7, mock_check_hb_line.call_count)
+        self.assertEqual(4, mock_check_pacemaker_services.call_count)
         mock_check_pacemaker_services.assert_called_with('pacemaker_remote')
-        self.assertEqual(2, mock_check_host_status_by_cibadmin.call_count)
         self.assertEqual(2, mock_check_host_status_by_crmadmin.call_count)
+        self.assertEqual(3, mock_check_host_status_by_cibadmin.call_count)
 
     @mock.patch.object(eventlet.greenthread, 'sleep')
     @mock.patch.object(handle_host.HandleHost,
@@ -835,16 +835,15 @@ class TestHandleHost(testtools.TestCase):
 
         CONF.host.restrict_to_remotes = True
         mock_check_hb_line.side_effect = \
-            [0, Exception("Test exception.")]
+            [0, Exception("Test exception."), 0, KeyboardInterrupt()]
         mock_check_pacemaker_services.return_value = True
-        mock_check_host_status_by_crm_mon.side_effect = 0
+        mock_check_host_status_by_crm_mon.return_value = 0
         mock_sleep.return_value = None
 
         obj = handle_host.HandleHost()
-        obj.monitor_hosts()
+        self.assertRaises(KeyboardInterrupt, obj.monitor_hosts)
 
-        self.assertEqual(1, mock_check_hb_line.call_count)
-        self.assertEqual(1, mock_check_pacemaker_services.call_count)
+        self.assertEqual(4, mock_check_hb_line.call_count)
+        self.assertEqual(2, mock_check_pacemaker_services.call_count)
         mock_check_pacemaker_services.assert_called_with('pacemaker_remote')
-        self.assertEqual(1, mock_check_host_status_by_crm_mon.call_count)
-        mock_check_host_status_by_crm_mon.assert_called_once_with()
+        self.assertEqual(2, mock_check_host_status_by_crm_mon.call_count)
