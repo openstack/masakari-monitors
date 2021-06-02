@@ -424,10 +424,9 @@ class HandleHost(driver.DriverBase):
 
         This method monitors hosts.
         """
-        try:
-            self.running = True
-            while self.running:
-
+        self.running = True
+        while self.running:
+            try:
                 # Check whether corosync communication between hosts
                 # is normal.
                 ret = self._check_hb_line()
@@ -466,9 +465,7 @@ class HandleHost(driver.DriverBase):
                 if status_func() != 0:
                     LOG.warning("hostmonitor skips monitoring hosts.")
 
-                eventlet.greenthread.sleep(CONF.host.monitoring_interval)
+            except Exception as e:
+                LOG.exception("Exception caught: %s", e)
 
-        except Exception as e:
-            LOG.exception("Exception caught: %s", e)
-
-        return
+            eventlet.greenthread.sleep(CONF.host.monitoring_interval)
