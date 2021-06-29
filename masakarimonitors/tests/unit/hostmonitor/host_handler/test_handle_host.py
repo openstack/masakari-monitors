@@ -149,7 +149,7 @@ class TestHandleHost(testtools.TestCase):
         mock_check_pacemaker_services.assert_any_call('pacemaker_remote')
         cmd_str = ("timeout %s tcpdump -n -c 1 -p -i %s port %s") \
             % (CONF.host.tcpdump_timeout, interfaces, ports)
-        command = cmd_str.split(' ')
+        command = cmd_str.split()
         mock_execute.assert_called_once_with(*command, run_as_root=True)
 
     @mock.patch.object(handle_host.HandleHost, '_check_pacemaker_services')
@@ -281,7 +281,7 @@ class TestHandleHost(testtools.TestCase):
         mock_check_pacemaker_services.assert_any_call('pacemaker_remote')
         cmd_str = ("timeout %s tcpdump -n -c 1 -p -i %s port %s") \
             % (CONF.host.tcpdump_timeout, interfaces, ports)
-        command = cmd_str.split(' ')
+        command = cmd_str.split()
         mock_execute.assert_called_once_with(*command, run_as_root=True)
 
     @mock.patch.object(utils, 'execute')
@@ -400,7 +400,7 @@ class TestHandleHost(testtools.TestCase):
             % (str(CONF.host.ipmi_timeout), ipmi_values['userid'],
                ipmi_values['passwd'], ipmi_values['interface'],
                ipmi_values['ipaddr'])
-        command = cmd_str.split(' ')
+        command = cmd_str.split()
         mock_execute.assert_called_once_with(*command, run_as_root=False)
 
     @mock.patch.object(utils, 'execute')
@@ -440,7 +440,7 @@ class TestHandleHost(testtools.TestCase):
             % (str(CONF.host.ipmi_timeout), ipmi_values['userid'],
                ipmi_values['passwd'], ipmi_values['interface'],
                ipmi_values['ipaddr'])
-        command = cmd_str.split(' ')
+        command = cmd_str.split()
         calls = [mock.call(*command, run_as_root=False),
                  mock.call(*command, run_as_root=False),
                  mock.call(*command, run_as_root=False),
@@ -471,7 +471,7 @@ class TestHandleHost(testtools.TestCase):
             % (str(CONF.host.ipmi_timeout), ipmi_values['userid'],
                ipmi_values['passwd'], ipmi_values['interface'],
                ipmi_values['ipaddr'])
-        command = cmd_str.split(' ')
+        command = cmd_str.split()
         calls = [mock.call(*command, run_as_root=False),
                  mock.call(*command, run_as_root=False),
                  mock.call(*command, run_as_root=False),

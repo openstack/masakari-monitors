@@ -82,7 +82,7 @@ class HandleHost(driver.DriverBase):
     def _check_pacemaker_services(self, target_service):
         try:
             cmd_str = 'systemctl status ' + target_service
-            command = cmd_str.split(' ')
+            command = cmd_str.split()
 
             # Execute command.
             out, err = utils.execute(*command, run_as_root=True)
@@ -150,7 +150,7 @@ class HandleHost(driver.DriverBase):
                 % (CONF.host.tcpdump_timeout,
                    corosync_multicast_interfaces[num],
                    corosync_multicast_ports[num])
-            command = cmd_str.split(' ')
+            command = cmd_str.split()
 
             try:
                 # Execute tcpdump command.
@@ -239,7 +239,7 @@ class HandleHost(driver.DriverBase):
             % (str(CONF.host.ipmi_timeout), ipmi_values['userid'],
                ipmi_values['passwd'], ipmi_values['interface'],
                ipmi_values['ipaddr'])
-        command = cmd_str.split(' ')
+        command = cmd_str.split()
 
         retry_count = 0
         while True:

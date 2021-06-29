@@ -45,7 +45,7 @@ class HandleProcess(object):
     def _execute_cmd(self, cmd_str, run_as_root):
 
         # Split command string and delete empty elements.
-        command = cmd_str.split(' ')
+        command = cmd_str.split()
         command = filter(lambda x: x != '', command)
 
         try:
