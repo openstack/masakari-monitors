@@ -164,7 +164,7 @@ class HandleProcess(object):
 
             for retries in range(0, CONF.process.restart_retries + 1):
 
-                # Execute pre start command.
+                # Execute pre restart command.
                 if pre_cmd_str:
                     ret = self._execute_cmd(pre_cmd_str,
                                             down_process['run_as_root'])
@@ -174,14 +174,14 @@ class HandleProcess(object):
                             CONF.process.restart_interval)
                         continue
 
-                # Execute start command.
+                # Execute restart command.
                 ret = self._execute_cmd(cmd_str, down_process['run_as_root'])
                 if ret != 0:
                     # Failed to restart process.
                     eventlet.greenthread.sleep(CONF.process.restart_interval)
                     continue
 
-                # Execute post start command.
+                # Execute post restart command.
                 if post_cmd_str:
                     ret = self._execute_cmd(post_cmd_str,
                                             down_process['run_as_root'])
