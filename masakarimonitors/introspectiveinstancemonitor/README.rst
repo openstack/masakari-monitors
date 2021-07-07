@@ -21,7 +21,7 @@ How does it work?
 - libvirt and QEMU Guest Agent are used as the underlying protocol for
   messaging to and from VM.
 
-  - The host-side qemu-agent sockets are used to detemine whether VMs are
+  - The host-side qemu-agent sockets are used to determine whether VMs are
     configured with QEMU Guest Agent.
 
   - qemu-guest-ping is used as the monitoring heartbeat.
@@ -54,7 +54,7 @@ QEMU Guest Agent Installation notes
 
 Configure masakarimonitors-introspectiveinstancemonitor
 ----------------------------------------------
-#. Clone masakari using::
+#. Clone masakari-monitors using::
 
    $ git clone https://github.com/openstack/masakari-monitors.git
 

@@ -124,7 +124,7 @@ class HandleHost(driver.DriverBase):
                 LOG.info("Works on pacemaker-remote.")
                 return 0
 
-        # Check whether the neccesary parameters are set.
+        # Check whether the necessary parameters are set.
         if CONF.host.corosync_multicast_interfaces is None or \
             CONF.host.corosync_multicast_ports is None:
             msg = ("corosync_multicast_interfaces or "
