@@ -139,7 +139,7 @@ class ParseCibXml(object):
 
         This method gets params of ipmi resource agent(RA) which is set on
         resources tag.
-        The resources tag exsists under the configuration tag.
+        The resources tag exists under the configuration tag.
         And it is assumed that ipmi RA belongs to some resource group.
 
         :params hostname: hostname
