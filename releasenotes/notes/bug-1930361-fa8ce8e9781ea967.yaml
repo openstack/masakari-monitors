@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Fixes hostmonitor hanging forever after certain exceptions.
+    `LP#1930361 <https://launchpad.net/bugs/1930361>`__
