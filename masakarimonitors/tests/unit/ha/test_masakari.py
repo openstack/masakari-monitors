@@ -97,14 +97,8 @@ class TestSendNotification(testtools.TestCase):
         mock_conn.instance_ha.create_notification.return_value = mock.Mock()
         mock_connection.return_value = mock_conn
 
-        # TODO(samP): Remove attribute check and else case if
-        # openstacksdk is bumped up from '>=0.9.19' to '>=0.10.0'
-        # in global-requirements.
-        if hasattr(exceptions.HttpException(), 'status_code'):
-            response = FakeResponse(status_code=409)
-            status_ex = exceptions.HttpException(response=response)
-        else:
-            status_ex = exceptions.HttpException(http_status=409)
+        response = FakeResponse(status_code=409)
+        status_ex = exceptions.HttpException(response=response)
 
         mock_conn.instance_ha.create_notification.side_effect = status_ex
         notifier = masakari.SendNotification()
@@ -129,14 +123,8 @@ class TestSendNotification(testtools.TestCase):
         mock_conn.instance_ha.create_notification.return_value = mock.Mock()
         mock_connection.return_value = mock_conn
 
-        # TODO(samP): Remove attribute check and else case if
-        # openstacksdk is bumped up from '>=0.9.19' to '>=0.10.0'
-        # in global-requirements.
-        if hasattr(exceptions.HttpException(), 'status_code'):
-            response = FakeResponse(status_code=500)
-            status_ex = exceptions.HttpException(response=response)
-        else:
-            status_ex = exceptions.HttpException(http_status=500)
+        response = FakeResponse(status_code=500)
+        status_ex = exceptions.HttpException(response=response)
 
         mock_conn.instance_ha.create_notification.side_effect = status_ex
         mock_sleep.return_value = None
