@@ -21,7 +21,7 @@ from oslo_utils import timeutils
 
 import masakarimonitors.conf
 from masakarimonitors.ha import masakari
-import masakarimonitors.hostmonitor.host_handler.driver as driver
+import masakarimonitors.hostmonitor.driver as driver
 from masakarimonitors.hostmonitor.host_handler import hold_host_status
 from masakarimonitors.hostmonitor.host_handler import parse_cib_xml
 from masakarimonitors.hostmonitor.host_handler import parse_crmmon_xml
