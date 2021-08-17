@@ -1,0 +1,11 @@
+---
+other:
+  - |
+    *Note to packagers*: ``libvirt-python`` package is still required by
+    instance-oriented monitors. It is available in most distros as
+    ``python3-libvirt``.
+    It is no longer listed in ``requirements.txt`` so it will not get
+    installed when installing ``masakari-monitors`` package from PyPI.
+    The change was done to follow how Nova handles this requirement.
+    This is to satisfy both libvirtd compatibility and recent pip
+    sanity checks.

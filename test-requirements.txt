@@ -12,3 +12,13 @@ testrepository>=0.0.18 # Apache-2.0/BSD
 testscenarios>=0.4 # Apache-2.0/BSD
 testtools>=2.2.0 # MIT
 ddt>=1.0.1 # MIT
+
+# Due to the nature of libvirt-python package, in DevStack we use the one
+# provided in the distro alongside libvirtd - to ensure the two are compatible,
+# and also to avoid the pip error when it tries to uninstall the distro version
+# (installed in such a way for Nova in DevStack).
+# Do note libvirt-python is used only for instance-oriented monitors, so, e.g.,
+# it is not used by any host monitor.
+# TODO(yoctozepto): Refactor code to not require libvirt-python for unit tests,
+# basically following how it is handled in nova-compute and ceilometer-compute.
+libvirt-python>=6.0.0  # LGPLv2+
