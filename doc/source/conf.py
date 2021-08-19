@@ -27,6 +27,11 @@ extensions = [
     'oslo_config.sphinxext',
 ]
 
+# sphinxcontrib.apidoc options
+config_generator_config_file = (
+    '../../etc/masakarimonitors/masakarimonitors-config-generator.conf')
+sample_config_basename = '_static/masakarimonitors'
+
 # autodoc generation is a bit aggressive and a nuisance when doing heavy
 # text edit cycles.
 # execute "export SPHINX_DEBUG=1" in your terminal to disable
@@ -65,20 +70,20 @@ openstackdocs_bug_project = 'masakari-monitors'
 # Output file base name for HTML help builder.
 htmlhelp_basename = '%sdoc' % project
 
+# -- Options for LaTeX output -------------------------------------------------
+
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass
 # [howto/manual]).
 latex_documents = [
     ('index',
-     '%s.tex' % project,
+     'doc-%s.tex' % project,
      '%s Documentation' % project,
      'OpenStack Foundation', 'manual'),
 ]
 
-# Example configuration for intersphinx: refer to the Python standard library.
-#intersphinx_mapping = {'http://docs.python.org/': None}
+# Disable usage of xindy https://bugzilla.redhat.com/show_bug.cgi?id=1643664
+latex_use_xindy = False
 
-# sphinxcontrib.apidoc options
-config_generator_config_file = (
-    '../../etc/masakarimonitors/masakarimonitors-config-generator.conf')
-sample_config_basename = '_static/masakarimonitors'
+# Disable smartquotes, they don't work in latex
+smartquotes_excludes = {'builders': ['latex']}
