@@ -1,3 +1,4 @@
+---
 - project:
     templates:
       - check-requirements
@@ -6,3 +7,9 @@
       - release-notes-jobs-python3
       - periodic-stable-jobs
       - periodic-jobs-with-oslo-master
+    check:
+      jobs:
+        - openstack-tox-linters
+    gate:
+      jobs:
+        - openstack-tox-linters
