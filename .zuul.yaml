@@ -11,6 +11,11 @@
     check:
       jobs:
         - openstack-tox-linters
+        - masakari-functional-devstack-multinode
+        - masakari-functional-devstack-ipv6
     gate:
+      queue: masakari
       jobs:
         - openstack-tox-linters
+        - masakari-functional-devstack-multinode
+        - masakari-functional-devstack-ipv6
