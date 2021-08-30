@@ -1,0 +1,7 @@
+---
+deprecations:
+  - |
+    Masakari Process Monitor (``masakari-processmonitor``) is deprecated and
+    may be removed in any later release. Please use modern tools, such as
+    systemd, Docker or Kubernetes (K8s), to control, monitor and ensure the
+    desired processes are running.
