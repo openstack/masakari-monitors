@@ -337,6 +337,12 @@ class HandleHost(driver.DriverBase):
         # Set to the ParseCrmMonXml object.
         self.crmmon_xml_parser.set_crmmon_xml(crmmon_xml)
 
+        # Check if the cluster has quorum.
+        if not self.crmmon_xml_parser.has_quorum():
+            msg = "Pacemaker cluster doesn't have quorum."
+            LOG.warning("%s", msg)
+            return 2
+
         # Get node_state tag list.
         node_state_tag_list = self.crmmon_xml_parser.get_node_state_tag_list()
         if len(node_state_tag_list) == 0:
@@ -367,6 +373,7 @@ class HandleHost(driver.DriverBase):
         if self.xml_parser.have_quorum() == 0:
             msg = "Pacemaker cluster doesn't have quorum."
             LOG.warning("%s", msg)
+            return 2
 
         # Get node_state tag list.
         node_state_tag_list = self.xml_parser.get_node_state_tag_list()

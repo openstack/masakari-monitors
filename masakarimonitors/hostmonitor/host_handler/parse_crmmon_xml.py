@@ -39,6 +39,28 @@ class ParseCrmMonXml(object):
         # Convert xml.etree.ElementTree.Element object.
         self.crmmon_tag = ElementTree.fromstring(crmmon_xml)
 
+    def has_quorum(self):
+        """Answers if cluster has quorum or not.
+
+        :returns: True if cluster has quorum, False otherwise.
+        """
+        current_dc = self._get_current_dc()
+        return current_dc.get('with_quorum') == 'true'
+
+    def _get_summary(self):
+        child_list = list(self.crmmon_tag)
+        for child in child_list:
+            if child.tag == 'summary':
+                return child
+        return None
+
+    def _get_current_dc(self):
+        child_list = list(self._get_summary())
+        for child in child_list:
+            if child.tag == 'current_dc':
+                return child
+        return None
+
     def _get_nodes(self):
         # status tag exists in the crmmon tag.
         if self.crmmon_tag is None:
