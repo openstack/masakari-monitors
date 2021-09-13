@@ -699,13 +699,17 @@ class TestHandleHost(testtools.TestCase):
     @mock.patch.object(handle_host.HandleHost, '_check_if_status_changed')
     @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml,
                        'get_node_state_tag_list')
+    @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml,
+                       'has_quorum')
     @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml, 'set_crmmon_xml')
     @mock.patch.object(handle_host.HandleHost, '_get_crmmon_xml')
     def test_check_host_status_by_crm_mon(
         self, mock_get_crmmon_xml, mock_set_crmmon_xml,
-        mock_get_node_state_tag_list, mock_check_if_status_changed):
+        mock_has_quorum, mock_get_node_state_tag_list,
+        mock_check_if_status_changed):
         mock_get_crmmon_xml.return_value = CRMMON_NODES_TAG_XML
         mock_set_crmmon_xml.return_value = None
+        mock_has_quorum.return_value = True
         status_tag = ElementTree.fromstring(CRMMON_NODES_TAG_XML)
         node_state_tag_list = list(status_tag)
         mock_get_node_state_tag_list.return_value = node_state_tag_list
@@ -715,7 +719,6 @@ class TestHandleHost(testtools.TestCase):
         ret = obj._check_host_status_by_crm_mon()
 
         self.assertEqual(0, ret)
-        mock_get_node_state_tag_list.assert_called_once_with()
         mock_set_crmmon_xml.assert_called_once_with(CRMMON_NODES_TAG_XML)
         mock_get_node_state_tag_list.assert_called_once_with()
         mock_check_if_status_changed.assert_called_once_with(
@@ -724,16 +727,38 @@ class TestHandleHost(testtools.TestCase):
                 {'uname': 'remote2', 'crmd': 'online'},
                 {'uname': 'remote3', 'crmd': 'online'}])
 
+    @mock.patch.object(handle_host.HandleHost, '_check_if_status_changed')
+    @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml,
+                       'has_quorum')
+    @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml, 'set_crmmon_xml')
+    @mock.patch.object(handle_host.HandleHost, '_get_crmmon_xml')
+    def test_check_host_status_by_crm_mon_no_quorum(
+        self, mock_get_crmmon_xml, mock_set_crmmon_xml,
+        mock_has_quorum, mock_check_if_status_changed):
+        mock_get_crmmon_xml.return_value = CRMMON_NODES_TAG_XML
+        mock_set_crmmon_xml.return_value = None
+        mock_has_quorum.return_value = False
+
+        obj = handle_host.HandleHost()
+        ret = obj._check_host_status_by_crm_mon()
+
+        self.assertEqual(2, ret)
+        mock_set_crmmon_xml.assert_called_once_with(CRMMON_NODES_TAG_XML)
+        mock_check_if_status_changed.assert_not_called()
+
+    @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml,
+                       'has_quorum')
     @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml,
                        'get_node_state_tag_list')
     @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml, 'set_crmmon_xml')
     @mock.patch.object(handle_host.HandleHost, '_get_crmmon_xml')
     def test_check_host_status_by_crm_mon_not_have_node_state_tag(
         self, mock_get_crmmon_xml, mock_set_crmmon_xml,
-        mock_get_node_state_tag_list):
+        mock_get_node_state_tag_list, mock_has_quorum):
         mock_get_crmmon_xml.return_value = CRMMON_NODES_TAG_XML
         mock_set_crmmon_xml.return_value = None
         mock_get_node_state_tag_list.return_value = []
+        mock_has_quorum.return_value = True
 
         obj = handle_host.HandleHost()
 
@@ -783,31 +808,24 @@ class TestHandleHost(testtools.TestCase):
             node_state_tag_list)
 
     @mock.patch.object(handle_host.HandleHost, '_check_if_status_changed')
-    @mock.patch.object(parse_cib_xml.ParseCibXml, 'get_node_state_tag_list')
     @mock.patch.object(parse_cib_xml.ParseCibXml, 'have_quorum')
     @mock.patch.object(parse_cib_xml.ParseCibXml, 'set_cib_xml')
     @mock.patch.object(handle_host.HandleHost, '_get_cib_xml')
     def test_check_host_status_by_cibadmin_no_quorum(
         self, mock_get_cib_xml, mock_set_cib_xml, mock_have_quorum,
-        mock_get_node_state_tag_list, mock_check_if_status_changed):
+        mock_check_if_status_changed):
         mock_get_cib_xml.return_value = STATUS_TAG_XML
         mock_set_cib_xml.return_value = None
         mock_have_quorum.return_value = 0
-        status_tag = ElementTree.fromstring(STATUS_TAG_XML)
-        node_state_tag_list = list(status_tag)
-        mock_get_node_state_tag_list.return_value = node_state_tag_list
-        mock_check_if_status_changed.return_value = None
 
         obj = handle_host.HandleHost()
         ret = obj._check_host_status_by_cibadmin()
 
-        self.assertEqual(0, ret)
+        self.assertEqual(2, ret)
         mock_get_cib_xml.assert_called_once_with()
         mock_set_cib_xml.assert_called_once_with(STATUS_TAG_XML)
         mock_have_quorum.assert_called_once_with()
-        mock_get_node_state_tag_list.assert_called_once_with()
-        mock_check_if_status_changed.assert_called_once_with(
-            node_state_tag_list)
+        mock_check_if_status_changed.assert_not_called()
 
     @mock.patch.object(handle_host.HandleHost, '_get_cib_xml')
     def test_check_host_status_by_cibadmin_cib_xml_is_None(

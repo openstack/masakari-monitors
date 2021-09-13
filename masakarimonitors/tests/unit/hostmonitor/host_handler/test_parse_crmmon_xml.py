@@ -20,12 +20,25 @@ from masakarimonitors.hostmonitor.host_handler import parse_crmmon_xml
 
 CRMMON_XML = '<?xml version="1.0"?>' \
              '<crm_mon version="1.1.18">' \
+             '    <summary>' \
+             '        <stack type="corosync" />' \
+             '        <current_dc present="true" with_quorum="true" />' \
+             '    </summary>' \
              '    <nodes>' \
              '        <node name="node-1" id="1001" online="true" />' \
              '        <node name="node-2" id="1002" online="false" />' \
              '        <node name="node-3" id="1003" online="true" />' \
              '    </nodes>' \
              '</crm_mon>'
+
+CRMMON_XML_NO_QUORUM = \
+    '<?xml version="1.0"?>' \
+    '<crm_mon version="1.1.18">' \
+    '    <summary>' \
+    '        <stack type="corosync" />' \
+    '        <current_dc present="true" with_quorum="false" />' \
+    '    </summary>' \
+    '</crm_mon>'
 
 CRMMON_NONODES_XML = '<?xml version="1.0"?>' \
                      '<crm_mon version="1.1.18">' \
@@ -46,6 +59,16 @@ class TestParseCrmMonXml(testtools.TestCase):
     def test_set_crmmon_xml(self):
         obj = parse_crmmon_xml.ParseCrmMonXml()
         obj.set_crmmon_xml(CRMMON_XML)
+
+    def test_has_quorum(self):
+        obj = parse_crmmon_xml.ParseCrmMonXml()
+        obj.set_crmmon_xml(CRMMON_XML)
+        self.assertEqual(True, obj.has_quorum())
+
+    def test_has_quorum_no_quorum(self):
+        obj = parse_crmmon_xml.ParseCrmMonXml()
+        obj.set_crmmon_xml(CRMMON_XML_NO_QUORUM)
+        self.assertEqual(False, obj.has_quorum())
 
     def test_get_node_state_tag_list(self):
         obj = parse_crmmon_xml.ParseCrmMonXml()
