@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fixes hostmonitor reporting hosts down because of Pacemaker cluster
+    partitioning.
+    Now hostmonitor properly respects the status of Pacemaker cluster quorum.
+    `LP#1878548 <https://launchpad.net/bugs/1878548>`__
