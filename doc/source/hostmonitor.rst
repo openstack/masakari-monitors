@@ -16,7 +16,7 @@ How does it work?
 
 - The compute node's status is depending on the heartbeat between the compute
   node and the cluster. Once the node lost the heartbeat, masakari-hostmonitor
-  in other nodes will detect the faiure and send notifications to masakari-api.
+  in other nodes will detect the failure and send notifications to masakari-api.
 
 
 Related configurations

@@ -46,10 +46,10 @@ class IntrospectiveInstanceMonitorManager(manager.Manager):
     def _reset_journal(self, eventID, eventType, detail, uuID):
         """To reset the monitoring to discovery stage
 
-        :param event_id: Event ID
-        :param event_type: Event type
+        :param eventID: Event ID
+        :param eventType: Event type
         :param detail: Event code
-        :param domain_uuid: Uuid
+        :param uuID: Domain uuid
         """
 
         noticeType = ec.EventConstants.TYPE_VM
