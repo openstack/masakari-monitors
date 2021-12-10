@@ -31,7 +31,7 @@ be sent.
     cfg.IntOpt('api_retry_max',
                default=12,
                help='Number of retries for send a notification in'
-                    ' processmonitor.'),
+                    ' hostmonitor.'),
     cfg.IntOpt('api_retry_interval',
                default=10,
                help='Trial interval of time of the notification processing'
