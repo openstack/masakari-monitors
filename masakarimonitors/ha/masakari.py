@@ -26,6 +26,15 @@ CONF = masakarimonitors.conf.CONF
 
 class SendNotification(object):
 
+    def __init__(self):
+        self._masakari_client = None
+
+    @property
+    def masakari_client(self):
+        if not self._masakari_client:
+            self._masakari_client = self._make_client()
+        return self._masakari_client
+
     def _make_client(self):
         auth = ks_loading.load_auth_from_conf_options(CONF, 'api')
         session = ks_loading.load_session_from_conf_options(CONF, 'api',
@@ -50,14 +59,11 @@ class SendNotification(object):
 
         LOG.info("Send a notification. %s", event)
 
-        # Get client.
-        client = self._make_client()
-
         # Send a notification.
         retry_count = 0
         while True:
             try:
-                response = client.create_notification(
+                response = self.masakari_client.create_notification(
                     type=event['notification']['type'],
                     hostname=event['notification']['hostname'],
                     generated_time=event['notification']['generated_time'],
@@ -80,4 +86,5 @@ class SendNotification(object):
                     eventlet.greenthread.sleep(api_retry_interval)
                 else:
                     LOG.exception("Exception caught: %s", e)
+                    self._masakari_client = None
                     break
