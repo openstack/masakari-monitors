@@ -271,8 +271,8 @@ class QemuGuestAgent(object):
                 self._getJournalObject(domain_uuid).processEvent('report')
                 self._getJournalObject(domain_uuid).setSentNotification(True)
             except Exception:
-                LOG.warn('Exception :' + domain_uuid +
-                    ' @ ' + get_function_name())
+                LOG.warning('Exception :' + domain_uuid +
+                            ' @ ' + get_function_name())
                 pass
 
     def _qemuAgentGuestPing(self, domain, timeout, flags=0):
@@ -405,10 +405,10 @@ class QemuGuestAgent(object):
                                 do_qemuAgentGuestPing(domain,
                                     ICONF.guest_monitoring_timeout)
                         except libvirt.libvirtError as le:
-                            LOG.warn(le)
+                            LOG.warning(le)
                             continue
         except Exception as e:
-            LOG.warn(e)
+            LOG.warning(e)
             pass
 
 

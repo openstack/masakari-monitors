@@ -114,3 +114,18 @@ def assert_raisesRegexp(logical_line):
     if res:
         yield (0, "M304: assertRaisesRegex must be used instead "
                   "of assertRaisesRegexp")
+
+
+@core.flake8ext
+def no_log_warn(logical_line):
+    """Disallow 'LOG.warn('
+
+    LOG.warn() is deprecated and LOG.warning should be used instead.
+    https://docs.python.org/3/library/logging.html#logging.warning
+
+    N352
+    """
+
+    msg = ("M305: LOG.warn is deprecated, please use LOG.warning!")
+    if "LOG.warn(" in logical_line:
+        yield (0, msg)
