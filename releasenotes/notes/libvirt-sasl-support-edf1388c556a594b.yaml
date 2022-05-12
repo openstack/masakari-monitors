@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Add support for libvirt auth in instancemonitor. Use the standard
+    methods to provide the actual authentication credentials. The SASL
+    library and pluggable authentication modules should be installed on the
+    instancemonitor host, use the packages provided in the distro alongside
+    libvirt-python.
