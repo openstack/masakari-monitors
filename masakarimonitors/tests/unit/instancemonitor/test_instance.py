@@ -144,7 +144,7 @@ class TestInstancemonitorManager(testtools.TestCase):
 
     @mock.patch.object(eventfilter.EventFilter, 'vir_event_filter')
     def test_my_domain_event_disk_change_callback(
-        self, mock_vir_event_filter):
+            self, mock_vir_event_filter):
         mock_vir_event_filter.return_value = None
         mock_conn, mock_dom, mock_opaque, test_uuid = \
             self._make_callback_params()
@@ -163,7 +163,7 @@ class TestInstancemonitorManager(testtools.TestCase):
 
     @mock.patch.object(eventfilter.EventFilter, 'vir_event_filter')
     def test_my_domain_event_io_error_reason_callback(
-        self, mock_vir_event_filter):
+            self, mock_vir_event_filter):
         mock_vir_event_filter.return_value = None
         mock_conn, mock_dom, mock_opaque, test_uuid = \
             self._make_callback_params()
@@ -204,13 +204,13 @@ class TestInstancemonitorManager(testtools.TestCase):
 
     @mock.patch.object(time, 'sleep')
     @mock.patch.object(eventlet.greenthread, 'sleep')
-    @mock.patch.object(libvirt, 'openReadOnly')
+    @mock.patch.object(libvirt, 'openAuth')
     @mock.patch.object(threading, 'Thread')
     @mock.patch.object(libvirt, 'virEventRegisterDefaultImpl')
     def test_main(self,
                   mock_virEventRegisterDefaultImpl,
                   mock_Thread,
-                  mock_openReadOnly,
+                  mock_openAuth,
                   mock_greenthread_sleep,
                   mock_time_sleep):
 
@@ -218,7 +218,7 @@ class TestInstancemonitorManager(testtools.TestCase):
         mock_event_loop_thread = mock.Mock(return_value=None)
         mock_Thread.return_value = mock_event_loop_thread
         mock_vc = mock.Mock()
-        mock_openReadOnly.return_value = mock_vc
+        mock_openAuth.return_value = mock_vc
         mock_vc.domainEventRegisterAny.side_effect = \
             [0, 0, 0, 0, 0, 0, 0, 0, 0]
         mock_vc.setKeepAlive.return_value = None
@@ -242,7 +242,11 @@ class TestInstancemonitorManager(testtools.TestCase):
         mock_virEventRegisterDefaultImpl.assert_called_once()
         mock_event_loop_thread.setDaemon.assert_called_once_with(True)
         mock_event_loop_thread.start.assert_called_once()
-        mock_openReadOnly.assert_called_once_with("qemu:///system")
+        mock_openAuth.assert_called_once_with(
+            "qemu:///system",
+            [[2, 6, 8, 5, 7, 9],
+             instance.InstancemonitorManager._connect_auth_cb,
+             None], 1)
         self.assertEqual(
             handlers_count, mock_vc.domainEventRegisterAny.call_count)
         mock_vc.setKeepAlive.assert_called_once_with(5, 3)
