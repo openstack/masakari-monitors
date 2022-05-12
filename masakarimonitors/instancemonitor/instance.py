@@ -98,7 +98,25 @@ class InstancemonitorManager(manager.Manager):
     def _err_handler(self, ctxt, err):
         LOG.warning("Error from libvirt : %s", err[2])
 
+    @staticmethod
+    def _connect_auth_cb(creds, user_data):
+        if len(creds) == 0:
+            return 0
+        raise Exception("Can not handle authentication request for %d "
+                        "credentials" % len(creds))
+
     def _virt_event(self, uri):
+        auth = [[libvirt.VIR_CRED_AUTHNAME,
+                 libvirt.VIR_CRED_ECHOPROMPT,
+                 libvirt.VIR_CRED_REALM,
+                 libvirt.VIR_CRED_PASSPHRASE,
+                 libvirt.VIR_CRED_NOECHOPROMPT,
+                 libvirt.VIR_CRED_EXTERNAL],
+                InstancemonitorManager._connect_auth_cb,
+                None]
+
+        flags = libvirt.VIR_CONNECT_RO
+
         # Run a background thread with the event loop
         self._vir_event_loop_native_start()
 
@@ -125,7 +143,7 @@ class InstancemonitorManager(manager.Manager):
         # Connect to libvirt - If be disconnected, reprocess.
         self.running = True
         while self.running:
-            vc = libvirt.openReadOnly(uri)
+            vc = libvirt.openAuth(uri, auth, flags)
 
             # Event callback settings
             callback_ids = []
