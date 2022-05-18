@@ -99,7 +99,7 @@ the hostmonitor if you choice monitor driver based on pacemaker.
     corosync_multicast_ports = 5405,5406
 
 If you want to use or test monitor driver based on consul, please modify
-following configration.
+following configuration.
 
 .. code-block:: ini
 
@@ -125,9 +125,9 @@ SEQUENCE. Action, means which actions it will trigger if host health turns
 into, while 'recovery' means it will trigger one host failure recovery
 workflow. User can define the HA strategy according to the physical
 environment. For example, if there is just 1 cluster to monitor management
-network connectivity, the user just need to configrate
+network connectivity, the user just need to configurate
 ``$(CONSUL_MANAGEMENT_ADDR)`` in consul section of the hostmontior'
-configration file, and change the HA strategy in
+configuration file, and change the HA strategy in
 ``/etc/masakarimonitors/matrix.yaml`` as following:
 
 .. code-block:: yaml
