@@ -48,7 +48,7 @@ class InstancemonitorManager(manager.Manager):
         self.event_loop_thread = threading.Thread(
             target=self._vir_event_loop_native_run,
             name="lib_virt_eventLoop")
-        self.event_loop_thread.setDaemon(True)
+        self.event_loop_thread.daemon = True
         self.event_loop_thread.start()
 
     def _my_domain_event_callback(self, conn, dom, event, detail, opaque):

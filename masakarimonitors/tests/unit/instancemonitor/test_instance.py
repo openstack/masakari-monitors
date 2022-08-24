@@ -240,7 +240,7 @@ class TestInstancemonitorManager(testtools.TestCase):
         handlers_count = 9
         self.assertTrue(exception_flag)
         mock_virEventRegisterDefaultImpl.assert_called_once()
-        mock_event_loop_thread.setDaemon.assert_called_once_with(True)
+        self.assertEqual(True, mock_event_loop_thread.daemon)
         mock_event_loop_thread.start.assert_called_once()
         mock_openAuth.assert_called_once_with(
             "qemu:///system",
