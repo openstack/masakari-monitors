@@ -1,5 +1,6 @@
 ---
 - project:
+    queue: masakari
     templates:
       - check-requirements
       - openstack-cover-jobs
@@ -14,7 +15,6 @@
         - masakari-functional-devstack-multinode
         - masakari-functional-devstack-ipv6
     gate:
-      queue: masakari
       jobs:
         - openstack-tox-linters
         - masakari-functional-devstack-multinode
