@@ -392,21 +392,17 @@ class QemuGuestAgent(object):
             ids = conn.listDomainsID()
             running = map(conn.lookupByID, ids)
 
-            columns = 3
-
-            for row in map(None, *[iter(running)] * columns):
-                for domain in row:
-                    if domain:
-                        try:
-                            if self._hasQemuGuestAgent(domain):
-                                @utils.synchronized(domain.UUIDString())
-                                def do_qemuAgentGuestPing(domain, timeout):
-                                    self._qemuAgentGuestPing(domain, timeout)
-                                do_qemuAgentGuestPing(domain,
-                                    ICONF.guest_monitoring_timeout)
-                        except libvirt.libvirtError as le:
-                            LOG.warning(le)
-                            continue
+            for domain in running:
+                try:
+                    if self._hasQemuGuestAgent(domain):
+                        @utils.synchronized(domain.UUIDString())
+                        def do_qemuAgentGuestPing(domain, timeout):
+                            self._qemuAgentGuestPing(domain, timeout)
+                        do_qemuAgentGuestPing(domain,
+                            ICONF.guest_monitoring_timeout)
+                except libvirt.libvirtError as le:
+                    LOG.warning(le)
+                    continue
         except Exception as e:
             LOG.warning(e)
             pass
