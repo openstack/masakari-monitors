@@ -22,8 +22,8 @@ from masakarimonitors.hacking import checks
 
 
 class HackingTestCase(testtools.TestCase):
-    """This class tests the hacking checks in masakarimonitors.hacking.checks by
-    passing strings to the check methods like the pycodestyle/flake8 parser
+    """This class tests the hacking checks in masakarimonitors.hacking.checks
+    by passing strings to the check methods like the pycodestyle/flake8 parser
     would.
 
     The parser loops over each line in the file and then passes the
