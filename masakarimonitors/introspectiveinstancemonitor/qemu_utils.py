@@ -388,7 +388,7 @@ class QemuGuestAgent(object):
         """
 
         try:
-            conn = libvirt.open(None)  # LIBVIRT_DEFAULT_URI
+            conn = libvirt.open(CONF.libvirt.connection_uri)
             ids = conn.listDomainsID()
             running = map(conn.lookupByID, ids)
 
