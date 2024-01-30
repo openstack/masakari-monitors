@@ -19,6 +19,7 @@ from masakarimonitors.conf import consul
 from masakarimonitors.conf import host
 from masakarimonitors.conf import instance
 from masakarimonitors.conf import introspectiveinstancemonitor
+from masakarimonitors.conf import kubernetes
 from masakarimonitors.conf import process
 from masakarimonitors.conf import service
 
@@ -30,5 +31,6 @@ consul.register_opts(CONF)
 host.register_opts(CONF)
 instance.register_opts(CONF)
 introspectiveinstancemonitor.register_opts(CONF)
+kubernetes.register_opts(CONF)
 process.register_opts(CONF)
 service.register_opts(CONF)

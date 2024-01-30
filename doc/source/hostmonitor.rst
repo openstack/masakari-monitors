@@ -38,6 +38,14 @@ How does it work based on consul?
   it sends notifition to trigger host failure recovery according to defined
   HA strategy - host states and the corresponding actions.
 
+How does it work based on kubernetes?
+-------------------------------------
+
+If Openstack is deployed on kubernetes, just set host.monitoring_driver to
+`kubernetes` and deploy host-monitor pods. Then driver of host-monitor pod
+invokes the Kubernetes API to retrieve the status of the host(node). In case
+of any anomalies, it sends notifications to the masakari-api.
+
 
 Related configurations
 ------------------------
@@ -141,3 +149,12 @@ configuration file, and change the HA strategy in
 
 
 Then the hostmonitor by consul works as same as the hostmonitor by pacemaker.
+
+If you want to use or test monitor driver based on kubernetes, please modify
+following configuration.
+
+.. code-block:: ini
+
+    [host]
+    # Driver that hostmonitor uses for monitoring hosts.
+    monitoring_driver = kubernetes
