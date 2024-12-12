@@ -597,6 +597,33 @@ class TestHandleHost(testtools.TestCase):
         }
         self.assertEqual(event, ret)
 
+    def test_normalize_host_status_pre_pacemaker_pre_2_1_7(self):
+        status_xml = ElementTree.fromstring("""
+            <status>
+                <node_state crmd="online" uname="node1" />
+                <node_state crmd="offline" uname="node2" />
+                <node_state crmd="other" uname="node3" />
+            </status>
+        """)
+
+        obj = handle_host.HandleHost()
+        response = [obj._normalize_host_status(status.get('crmd'))
+                    for status in list(status_xml)]
+        self.assertEqual(["online", "offline", "other"], response)
+
+    def test_normalize_host_status_pacemaker_post_2_1_7(self):
+        status_tag = ElementTree.fromstring("""
+            <status>
+                <node_state crmd="1767856436" uname="node1" />
+                <node_state crmd="0" uname="node2" />
+            </status>
+        """)
+
+        obj = handle_host.HandleHost()
+        response = [obj._normalize_host_status(status.get('crmd'))
+                    for status in list(status_tag)]
+        self.assertEqual(["online", "offline"], response)
+
     @mock.patch.object(masakari.SendNotification, 'send_notification')
     @mock.patch.object(handle_host.HandleHost, '_make_event')
     @mock.patch.object(hold_host_status.HostHoldStatus, 'set_host_status')
