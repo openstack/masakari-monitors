@@ -27,7 +27,7 @@ Determine if monkey patching should be applied.
 Related options:
 
   * ``monkey_patch_modules``: This must have values set for this option to have
-  any effect
+    any effect
 """),
     cfg.ListOpt(
         'monkey_patch_modules',

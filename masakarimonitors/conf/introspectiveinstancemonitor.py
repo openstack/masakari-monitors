@@ -46,7 +46,7 @@ Guest monitoring interval of VM status (in seconds).
                help=r'''
 * The file path of qemu guest agent sock.
 * Please use Python raw string notation as regular expressions.
-e.g.  r'/var/lib/libvirt/qemu/org\.qemu\.guest_agent\..*\.instance-.*\.sock'
+  e.g.  r'/var/lib/libvirt/qemu/org\.qemu\.guest_agent\..*\.instance-.*\.sock'
 '''),
 ]
 
