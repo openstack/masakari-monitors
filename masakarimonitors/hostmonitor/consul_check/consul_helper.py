@@ -71,21 +71,23 @@ class ConsulManager(object):
         hosts_health = {}
         all_agents = []
         for name in sequence:
-            consul_agent = self.agents.get(name)
-            agent_health = consul_agent.get_health()
-            hosts_health[name] = agent_health
-            if not all_agents:
-                all_agents = agent_health.keys()
+            if name in self.agents:
+                consul_agent = self.agents.get(name)
+                agent_health = consul_agent.get_health()
+                hosts_health[name] = agent_health
+                if not all_agents:
+                    all_agents = agent_health.keys()
 
         sequence_hosts_health = {}
         for host in all_agents:
             sequence_hosts_health[host] = []
             for name in sequence:
-                state = hosts_health[name].get(host)
-                if state:
-                    sequence_hosts_health[host].append(state)
-                else:
-                    continue
+                if name in self.agents:
+                    state = hosts_health[name].get(host)
+                    if state:
+                        sequence_hosts_health[host].append(state)
+                    else:
+                        continue
 
         return sequence_hosts_health
 
