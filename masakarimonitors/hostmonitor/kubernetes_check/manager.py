@@ -81,6 +81,7 @@ class KubernetesCheck(driver.DriverBase):
 
     @staticmethod
     def _event(host, host_health):
+        host_status = ec.EventConstants.HOST_STATUS_NORMAL
         LOG.info("Host %s needs recovery, health status: %s." %
                  (host, host_health))
 
@@ -90,7 +91,8 @@ class KubernetesCheck(driver.DriverBase):
                 'hostname': host,
                 'generated_time': timeutils.utcnow(),
                 'payload': {
-                    'event': ec.EventConstants.EVENT_STOPPED
+                    'event': ec.EventConstants.EVENT_STOPPED,
+                    'host_status': host_status
                 }
             }
         }
