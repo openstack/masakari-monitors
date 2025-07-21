@@ -1,6 +1,7 @@
 [run]
 branch = True
 source = masakarimonitors
+omit = masakarimonitors/tests/*
 
 [report]
 ignore_errors = True
