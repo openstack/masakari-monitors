@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    kubernetes_check manager.py script missing host status from the payload data
+    to allow the masakari-engine to initiate the recovery workflow message to the API server.
+    Previous payload would be ignored by masakari-engine workflow driver.
