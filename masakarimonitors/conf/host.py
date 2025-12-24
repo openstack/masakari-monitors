@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from oslo_config import cfg
+from oslo_config import types
 
 monitor_host_opts = [
     cfg.StrOpt('monitoring_driver',
@@ -68,8 +69,8 @@ If ipmi RA is not set in pacemaker, this value should be set True.
                default=5,
                help='Timeout value(in seconds) of the tcpdump command when'
                     ' monitors the corosync communication.'),
-    cfg.StrOpt('corosync_multicast_interfaces',
-               help='''
+    cfg.ListOpt('corosync_multicast_interfaces',
+                help='''
 The name of interface that corosync is using for mutual communication
 between hosts.
 If there are multiple interfaces, specify them in comma-separated
@@ -78,8 +79,9 @@ The number of interfaces you specify must be equal to the number of
 corosync_multicast_ports values and must be in correct order with relevant
 ports in corosync_multicast_ports.
 '''),
-    cfg.StrOpt('corosync_multicast_ports',
-               help='''
+    cfg.ListOpt('corosync_multicast_ports',
+                item_type=types.Port(),
+                help='''
 The port numbers that corosync is using for mutual communication
 between hosts.
 If there are multiple port numbers, specify them in comma-separated
