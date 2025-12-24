@@ -17,8 +17,12 @@ Main abstraction layer for retrieving node status from consul
 """
 
 import consul
+from oslo_utils import netutils
 
 from masakarimonitors.i18n import _
+
+
+DEFAULT_CONSUL_PORT = 8500
 
 
 class ConsulException(Exception):
@@ -53,13 +57,16 @@ class ConsulManager(object):
 
     def init_agents(self, CONF):
         if CONF.consul.agent_manage:
-            addr, port = CONF.consul.agent_manage.split(':')
+            addr, port = netutils.parse_host_port(
+                CONF.consul.agent_manage, DEFAULT_CONSUL_PORT)
             self.agents['manage'] = ConsulAgent('manage', addr, port)
         if CONF.consul.agent_tenant:
-            addr, port = CONF.consul.agent_tenant.split(':')
+            addr, port = netutils.parse_host_port(
+                CONF.consul.agent_tenant, DEFAULT_CONSUL_PORT)
             self.agents['tenant'] = ConsulAgent('tenant', addr, port)
         if CONF.consul.agent_storage:
-            addr, port = CONF.consul.agent_storage.split(':')
+            addr, port = netutils.parse_host_port(
+                CONF.consul.agent_storage, DEFAULT_CONSUL_PORT)
             self.agents['storage'] = ConsulAgent('storage', addr, port)
 
     def valid_agents(self, sequence):
