@@ -125,18 +125,16 @@ class HandleHost(driver.DriverBase):
                 return 0
 
         # Check whether the necessary parameters are set.
-        if CONF.host.corosync_multicast_interfaces is None or \
-            CONF.host.corosync_multicast_ports is None:
+        if not CONF.host.corosync_multicast_interfaces or \
+                not CONF.host.corosync_multicast_ports:
             msg = ("corosync_multicast_interfaces or "
                    "corosync_multicast_ports is not set.")
             LOG.error("%s", msg)
             return 2
 
         # Check whether the corosync communication is normal.
-        corosync_multicast_interfaces = \
-            CONF.host.corosync_multicast_interfaces.split(',')
-        corosync_multicast_ports = \
-            CONF.host.corosync_multicast_ports.split(',')
+        corosync_multicast_interfaces = CONF.host.corosync_multicast_interfaces
+        corosync_multicast_ports = CONF.host.corosync_multicast_ports
 
         if len(corosync_multicast_interfaces) != len(corosync_multicast_ports):
             msg = ("Incorrect parameters corosync_multicast_interfaces or "
@@ -146,7 +144,7 @@ class HandleHost(driver.DriverBase):
 
         is_nic_normal = False
         for num in range(0, len(corosync_multicast_interfaces)):
-            cmd_str = ("timeout %s tcpdump -n -c 1 -p -i %s port %s") \
+            cmd_str = ("timeout %s tcpdump -n -c 1 -p -i %s port %d") \
                 % (CONF.host.tcpdump_timeout,
                    corosync_multicast_interfaces[num],
                    corosync_multicast_ports[num])

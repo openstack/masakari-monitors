@@ -135,8 +135,8 @@ class TestHandleHost(testtools.TestCase):
         mock_check_pacemaker_services.side_effect = [True, True, False]
         interfaces = "enp0s8"
         ports = "5405"
-        CONF.host.corosync_multicast_interfaces = interfaces
-        CONF.host.corosync_multicast_ports = ports
+        CONF.set_override("corosync_multicast_interfaces", interfaces, "host")
+        CONF.set_override("corosync_multicast_ports", ports, "host")
         mock_execute.return_value = ('', '')
 
         obj = handle_host.HandleHost()
@@ -189,8 +189,8 @@ class TestHandleHost(testtools.TestCase):
         mock_check_pacemaker_services.side_effect = [True, True, False]
         interfaces = None
         ports = "5405"
-        CONF.host.corosync_multicast_interfaces = interfaces
-        CONF.host.corosync_multicast_ports = ports
+        CONF.set_override("corosync_multicast_interfaces", interfaces, "host")
+        CONF.set_override("corosync_multicast_ports", ports, "host")
 
         obj = handle_host.HandleHost()
         ret = obj._check_hb_line()
@@ -208,8 +208,8 @@ class TestHandleHost(testtools.TestCase):
         mock_check_pacemaker_services.side_effect = [True, True, False]
         interfaces = "enp0s8"
         ports = None
-        CONF.host.corosync_multicast_interfaces = interfaces
-        CONF.host.corosync_multicast_ports = ports
+        CONF.set_override("corosync_multicast_interfaces", interfaces, "host")
+        CONF.set_override("corosync_multicast_ports", ports, "host")
 
         obj = handle_host.HandleHost()
         ret = obj._check_hb_line()
@@ -227,8 +227,8 @@ class TestHandleHost(testtools.TestCase):
         mock_check_pacemaker_services.side_effect = [True, True, False]
         interfaces = "enp0s3,enp0s8"
         ports = "5405"
-        CONF.host.corosync_multicast_interfaces = interfaces
-        CONF.host.corosync_multicast_ports = ports
+        CONF.set_override("corosync_multicast_interfaces", interfaces, "host")
+        CONF.set_override("corosync_multicast_ports", ports, "host")
 
         obj = handle_host.HandleHost()
         ret = obj._check_hb_line()
@@ -246,8 +246,8 @@ class TestHandleHost(testtools.TestCase):
         mock_check_pacemaker_services.side_effect = [True, True, False]
         interfaces = "enp0s8"
         ports = "5405,5406"
-        CONF.host.corosync_multicast_interfaces = interfaces
-        CONF.host.corosync_multicast_ports = ports
+        CONF.set_override("corosync_multicast_interfaces", interfaces, "host")
+        CONF.set_override("corosync_multicast_ports", ports, "host")
 
         obj = handle_host.HandleHost()
         ret = obj._check_hb_line()
@@ -266,8 +266,8 @@ class TestHandleHost(testtools.TestCase):
         mock_check_pacemaker_services.side_effect = [True, True, False]
         interfaces = "enp0s8"
         ports = "5405"
-        CONF.host.corosync_multicast_interfaces = interfaces
-        CONF.host.corosync_multicast_ports = ports
+        CONF.set_override("corosync_multicast_interfaces", interfaces, "host")
+        CONF.set_override("corosync_multicast_ports", ports, "host")
 
         mock_execute.side_effect = Exception("Test exception.")
 
