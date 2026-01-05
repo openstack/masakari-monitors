@@ -389,11 +389,10 @@ class QemuGuestAgent(object):
 
         try:
             conn = libvirt.open(CONF.libvirt.connection_uri)
-            ids = conn.listDomainsID()
-            running = map(conn.lookupByID, ids)
 
-            for domain in running:
+            for domain_id in conn.listDomainsID():
                 try:
+                    domain = conn.lookupByID(domain_id)
                     if self._hasQemuGuestAgent(domain):
                         @utils.synchronized(domain.UUIDString())
                         def do_qemuAgentGuestPing(domain, timeout):
