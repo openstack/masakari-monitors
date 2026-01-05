@@ -77,7 +77,6 @@ class IntrospectiveInstanceMonitorManager(manager.Manager):
             eventType, detail)
 
         LOG.debug("%s", msg)
-
         try:
             thread = threading.Thread(
                 _reset_handler(eventID, eventType, detail, uuID, msg)
