@@ -69,6 +69,61 @@ class TestConsulManager(testtools.TestCase):
             'storage': consul_helper.ConsulAgent('storage'),
         }
 
+    @mock.patch('consul.Consul')
+    def test_init_agents_no_agent(self, mock_consul):
+        mgr = consul_helper.ConsulManager(self.CONF)
+        self.assertEqual({}, mgr.agents)
+        mock_consul.assert_not_called()
+
+    @mock.patch('consul.Consul')
+    def test_init_agents_ipv4(self, mock_consul):
+        self.CONF.set_override('agent_manage', '192.0.2.10:1000', 'consul')
+        self.CONF.set_override('agent_tenant', '192.0.2.11:1001', 'consul')
+        self.CONF.set_override('agent_storage', '192.0.2.12', 'consul')
+        mgr = consul_helper.ConsulManager(self.CONF)
+        self.assertEqual('manage', mgr.agents['manage'].name)
+        self.assertEqual('192.0.2.10', mgr.agents['manage'].addr)
+        self.assertEqual(1000, mgr.agents['manage'].port)
+        self.assertEqual(mock.call(host='192.0.2.10', port=1000),
+                         mock_consul.mock_calls[0])
+        self.assertEqual('tenant', mgr.agents['tenant'].name)
+        self.assertEqual('192.0.2.11', mgr.agents['tenant'].addr)
+        self.assertEqual(1001, mgr.agents['tenant'].port)
+        self.assertEqual(mock.call(host='192.0.2.11', port=1001),
+                         mock_consul.mock_calls[1])
+        self.assertEqual('storage', mgr.agents['storage'].name)
+        self.assertEqual('192.0.2.12', mgr.agents['storage'].addr)
+        self.assertEqual(8500, mgr.agents['storage'].port)
+        self.assertEqual(mock.call(host='192.0.2.12', port=8500),
+                         mock_consul.mock_calls[2])
+        self.assertEqual(3, mock_consul.call_count)
+
+    @mock.patch('consul.Consul')
+    def test_init_agents_ipv6(self, mock_consul):
+        self.CONF.set_override(
+            'agent_manage', '[2001:db8::10]:1000', 'consul')
+        self.CONF.set_override(
+            'agent_tenant', '[2001:db8::11]:1001', 'consul')
+        self.CONF.set_override(
+            'agent_storage', '2001:db8::12', 'consul')
+        mgr = consul_helper.ConsulManager(self.CONF)
+        self.assertEqual('manage', mgr.agents['manage'].name)
+        self.assertEqual('2001:db8::10', mgr.agents['manage'].addr)
+        self.assertEqual(1000, mgr.agents['manage'].port)
+        self.assertEqual(mock.call(host='2001:db8::10', port=1000),
+                         mock_consul.mock_calls[0])
+        self.assertEqual('tenant', mgr.agents['tenant'].name)
+        self.assertEqual('2001:db8::11', mgr.agents['tenant'].addr)
+        self.assertEqual(1001, mgr.agents['tenant'].port)
+        self.assertEqual(mock.call(host='2001:db8::11', port=1001),
+                         mock_consul.mock_calls[1])
+        self.assertEqual('storage', mgr.agents['storage'].name)
+        self.assertEqual('2001:db8::12', mgr.agents['storage'].addr)
+        self.assertEqual(8500, mgr.agents['storage'].port)
+        self.assertEqual(mock.call(host='2001:db8::12', port=8500),
+                         mock_consul.mock_calls[2])
+        self.assertEqual(3, mock_consul.call_count)
+
     def test_get_health(self):
         fake_manage_agents = FakerAgentMembers()
         fake_manage_agents.create_agent('node01', status=1)
