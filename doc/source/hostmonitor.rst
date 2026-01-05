@@ -24,7 +24,7 @@ How does it work based on consul?
 - If the nodes in the cloud have multiple interfaces to connect to
   management network, tenant network or storage network, monitor driver based
   on consul is another choice. Consul agents are required to install into all
-  noedes, which make up multiple consul clusters.
+  nodes, which make up multiple consul clusters.
 
   Here is an example to show how to make up one consul cluster.
 
