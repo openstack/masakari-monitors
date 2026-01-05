@@ -77,7 +77,7 @@ class TestProcessmonitorManager(testtools.TestCase):
     @mock.patch.object(handle_process.HandleProcess, 'monitor_processes')
     @mock.patch.object(handle_process.HandleProcess, 'start_processes')
     @mock.patch.object(handle_process.HandleProcess, 'set_process_list')
-    @mock.patch.object(yaml, 'load')
+    @mock.patch.object(yaml, 'safe_load')
     @mock.patch('builtins.open')
     def test_main(self,
                   mock_file,
@@ -109,7 +109,7 @@ class TestProcessmonitorManager(testtools.TestCase):
     @mock.patch.object(handle_process.HandleProcess, 'monitor_processes')
     @mock.patch.object(handle_process.HandleProcess, 'start_processes')
     @mock.patch.object(handle_process.HandleProcess, 'set_process_list')
-    @mock.patch.object(yaml, 'load')
+    @mock.patch.object(yaml, 'safe_load')
     @mock.patch('builtins.open')
     def test_main_exception(self,
                             mock_file,
@@ -132,7 +132,7 @@ class TestProcessmonitorManager(testtools.TestCase):
         mock_restart_processes.assert_not_called()
 
     @mock.patch.object(handle_process.HandleProcess, 'set_process_list')
-    @mock.patch.object(yaml, 'load')
+    @mock.patch.object(yaml, 'safe_load')
     @mock.patch('builtins.open')
     def test_load_process_list_yaml_error(self,
                                          mock_file,
@@ -147,7 +147,7 @@ class TestProcessmonitorManager(testtools.TestCase):
         mock_set_process_list.assert_not_called()
 
     @mock.patch.object(handle_process.HandleProcess, 'set_process_list')
-    @mock.patch.object(yaml, 'load')
+    @mock.patch.object(yaml, 'safe_load')
     @mock.patch('builtins.open')
     def test_load_process_list_exception(self,
                                          mock_file,
