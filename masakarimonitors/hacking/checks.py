@@ -48,9 +48,6 @@ log_translation = re.compile(
     r"\("
     r"(_|_LC|_LE|_LI|_LW)"
     r"\(")
-yield_not_followed_by_space = re.compile(r"^\s*yield(?:\(|{|\[|\"|').*$")
-
-assert_raises_regexp = re.compile(r"assertRaisesRegexp\(")
 
 
 @core.flake8ext
@@ -84,36 +81,6 @@ def no_translate_logs(logical_line):
     """
     if log_translation.match(logical_line):
         yield (0, "M302 Don't translate log messages!")
-
-
-@core.flake8ext
-def yield_followed_by_space(logical_line):
-    """Yield should be followed by a space.
-
-    Yield should be followed by a space to clarify that yield is
-    not a function. Adding a space may force the developer to rethink
-    if there are unnecessary parentheses in the written code.
-
-    Not correct: yield(x), yield(a, b)
-    Correct: yield x, yield (a, b), yield a, b
-
-    M303
-    """
-    if yield_not_followed_by_space.match(logical_line):
-        yield (0,
-               "M303: Yield keyword should be followed by a space.")
-
-
-@core.flake8ext
-def assert_raisesRegexp(logical_line):
-    """Check that assertRaisesRegexp is not used.
-
-    M304
-    """
-    res = assert_raises_regexp.search(logical_line)
-    if res:
-        yield (0, "M304: assertRaisesRegex must be used instead "
-                  "of assertRaisesRegexp")
 
 
 @core.flake8ext
