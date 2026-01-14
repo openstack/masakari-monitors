@@ -1,3 +1,59 @@
 [build-system]
 requires = ["pbr>=6.1.1"]
 build-backend = "pbr.build"
+
+[project]
+name = "masakari-monitors"
+description = "Monitors for Masakari"
+authors = [
+    {name = "OpenStack", email = "openstack-discuss@lists.openstack.org"},
+]
+readme = {file = "README.rst", content-type = "text/x-rst"}
+license = {text = "Apache-2.0"}
+dynamic = ["version", "dependencies"]
+requires-python = ">=3.10"
+classifiers = [
+  "Environment :: OpenStack",
+  "Intended Audience :: Information Technology",
+  "Intended Audience :: System Administrators",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+
+[project.urls]
+Homepage = "https://docs.openstack.org/masakari-monitors/latest/"
+Repository = "https://opendev.org/openstack/masakari-monitors"
+
+[tool.setuptools]
+packages = [
+    "masakarimonitors"
+]
+
+[project.entry-points."oslo.config.opts"]
+"masakarimonitors.conf" = "masakarimonitors.conf.opts:list_opts"
+
+[project.entry-points."oslo.config.opts.defaults"]
+"masakarimonitors.introspectiveinstancemonitor" = "masakarimonitors.common.config:set_middleware_defaults"
+"masakarimonitors.instancemonitor" = "masakarimonitors.common.config:set_middleware_defaults"
+"masakarimonitors.processmonitor" = "masakarimonitors.common.config:set_middleware_defaults"
+"masakarimonitors.hostmonitor" = "masakarimonitors.common.config:set_middleware_defaults"
+
+[project.entry-points."console_scripts"]
+masakari-introspectiveinstancemonitor = "masakarimonitors.cmd.introspectiveinstancemonitor:main"
+masakari-instancemonitor = "masakarimonitors.cmd.instancemonitor:main"
+masakari-processmonitor = "masakarimonitors.cmd.processmonitor:main"
+masakari-hostmonitor = "masakarimonitors.cmd.hostmonitor:main"
+
+[project.entry-points."hostmonitor.driver"]
+"simple" = "masakarimonitors.hostmonitor.host_handler.handle_host:HandleHost"
+"default" = "masakarimonitors.hostmonitor.host_handler.handle_host:HandleHost"
+"consul" = "masakarimonitors.hostmonitor.consul_check.manager:ConsulCheck"
+"kubernetes" = "masakarimonitors.hostmonitor.kubernetes_check.manager:KubernetesCheck"
