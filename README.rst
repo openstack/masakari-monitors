@@ -21,5 +21,5 @@ detailed in the LICENSE file.
 
 * Free software: Apache license
 * Documentation: https://docs.openstack.org/masakari-monitors
-* Source: https://git.openstack.org/cgit/openstack/masakari-monitors
+* Source: https://opendev.org/openstack/masakari-monitors
 * Bugs: https://bugs.launchpad.net/masakari-monitors
