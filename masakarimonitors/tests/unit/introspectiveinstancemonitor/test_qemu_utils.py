@@ -20,6 +20,7 @@ import uuid
 
 from masakarimonitors.introspectiveinstancemonitor import instance as object
 from masakarimonitors.introspectiveinstancemonitor import qemu_utils
+from masakarimonitors.introspectiveinstancemonitor import scheduler
 
 
 class TestQemuUtils(testtools.TestCase):
@@ -95,8 +96,9 @@ class TestQemuUtils(testtools.TestCase):
         obj = qemu_utils.QemuGuestAgent()
         self.assertTrue(obj._hasQemuGuestAgent(mock_domain))
 
+    @mock.patch.object(scheduler.ThreadGroupManager, '_service_task')
     @mock.patch.object(qemu_utils, 'resetJournal')
-    def test_resetJournal(self, mock_resetJournal):
+    def test_resetJournal(self, mock_resetJournal, mock_service_task):
 
         mock_resetJournal.return_value = None
 
