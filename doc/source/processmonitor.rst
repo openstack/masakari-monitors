@@ -19,7 +19,7 @@ How does it work?
 
 Define one process to be monitored as follows:
 
-.. code-block:: ini
+.. code-block:: yaml
 
     process_name: [Name of the process as it in 'ps -ef'.]
     start_command: [Start command of the process.]
@@ -32,21 +32,26 @@ Define one process to be monitored as follows:
 
 Sample of definitions is shown as follows:
 
-.. code-block:: ini
+.. code-block:: yaml
 
     # nova-compute
-    process_name: /usr/local/bin/nova-compute
-    start_command: systemctl start nova-compute
-    pre_start_command:
-    post_start_command:
-    restart_command: systemctl restart nova-compute
-    pre_restart_command:
-    post_restart_command:
-    run_as_root: True
+    - process_name: /usr/local/bin/nova-compute
+      start_command: systemctl start nova-compute
+      pre_start_command:
+      post_start_command:
+      restart_command: systemctl restart nova-compute
+      pre_restart_command:
+      post_restart_command:
+      run_as_root: True
 
 - If masakari-processmonitor detects one process failure, it will try to
   restart it firstly. After several retries failed, it sends notification
   to masakari-api.
+
+.. note::
+
+   The process_list.yaml file should contain list data. Make sure the data
+   is formatted as a list even when only one item is defined.
 
 
 Related configurations
