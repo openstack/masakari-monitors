@@ -153,7 +153,8 @@ class IntrospectiveInstanceMonitorManager(manager.Manager):
                 try:
                     vc.domainEventDeregisterAny(cid)
                 except Exception:
-                    pass
+                    LOG.debug("Failed to deregister libvirt event "
+                              "callback %s.", cid, exc_info=True)
             vc.close()
             del vc
             time.sleep(3)

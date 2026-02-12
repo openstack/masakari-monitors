@@ -271,9 +271,9 @@ class QemuGuestAgent(object):
                 self._getJournalObject(domain_uuid).processEvent('report')
                 self._getJournalObject(domain_uuid).setSentNotification(True)
             except Exception:
-                LOG.warning('Exception :' + domain_uuid +
-                            ' @ ' + get_function_name())
-                pass
+                LOG.warning('Failed to send notification for instance '
+                            '%s in %s.', domain_uuid, get_function_name(),
+                            exc_info=True)
 
     def _qemuAgentGuestPing(self, domain, timeout, flags=0):
         def _no_heartbeat(domain_uuid):
@@ -376,7 +376,8 @@ class QemuGuestAgent(object):
                 if (qemuGuestAgentPathMatch(path) and mode == 'bind'):
                     return True
         except Exception:
-            pass
+            LOG.warning("Failed to check QEMU guest agent presence.",
+            exc_info=True)
 
         return False
 
@@ -402,9 +403,9 @@ class QemuGuestAgent(object):
                 except libvirt.libvirtError as le:
                     LOG.warning(le)
                     continue
-        except Exception as e:
-            LOG.warning(e)
-            pass
+        except Exception:
+            LOG.warning("Exception during guest checks.",
+                        exc_info=True)
 
 
 def reschedule(action, sleep_time=1):

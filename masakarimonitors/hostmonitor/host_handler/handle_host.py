@@ -88,11 +88,14 @@ class HandleHost(driver.DriverBase):
             out, err = utils.execute(*command, run_as_root=True)
 
             if err:
-                raise Exception
+                raise Exception("Service check for %s returned errors: %s"
+                % (target_service, err))
 
             return True
 
         except Exception:
+            LOG.warning("Failed to check pacemaker service '%s'.",
+                        target_service, exc_info=True)
             return False
 
     def _check_hb_line(self):
