@@ -1,9 +1,9 @@
-=============
+============
 Consul Usage
-=============
+============
 
 Consul overview
-================
+===============
 
 Consul is a service mesh solution providing a full featured control plane
 with service discovery, configuration, and segmentation functionality.
@@ -29,18 +29,37 @@ management, with an ip such as '192.168.101.*'. The second interface is used
 to connect to storage, with an ip such as '192.168.102.*'. The third interface
 is used for tenant, with an ip such as '192.168.103.*'.
 
+Configure Firewalld
+===================
 
-Download Consul
-================
+Before installing packages, you must open ports on your Consul servers.
 
-Download Consul package for CentOS. Other OS please refer to `Download Consul
+  .. code-block:: console
+
+    firewall-cmd --permanent --zone=public --add-port={8300,8301,8302,8400,8500,8600}/tcp
+    firewall-cmd --reload
+    firewall-cmd --zone=public --list-all
+
+Install Consul
+==============
+
+Install Consul for RHEL-based distributions. Other OS please refer to `Download Consul
 <https://www.consul.io/downloads>`_.
 
   .. code-block:: console
 
-    sudo yum install -y yum-utils
-    sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
-    sudo yum -y install Consul
+    sudo dnf install -y dnf-plugins-core
+    sudo dnf config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+    sudo dnf repolist
+    sudo dnf install consul
+
+Verify
+------
+
+  .. code-block:: console
+
+    which consul
+    consul version
 
 Configure Consul agent
 ======================
@@ -111,6 +130,11 @@ The Consul agent is started by the following command.
   .. code-block:: console
 
     # Consul agent –config-file management.json
+
+  .. code-block:: console
+
+    # sudo systemctl start consul
+    # sudo systemctl enable consul
 
 Test Consul installation
 ========================
