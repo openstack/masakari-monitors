@@ -309,6 +309,15 @@ class HandleHost(driver.DriverBase):
 
         return event
 
+    def _normalize_host_status(self, host_status):
+        if host_status is None:
+            return None
+
+        try:
+            return 'online' if int(host_status) > 0 else 'offline'
+        except ValueError:
+            return host_status
+
     def _check_if_status_changed(self, node_state_tag_list):
 
         # Check if host status changed.
@@ -318,9 +327,13 @@ class HandleHost(driver.DriverBase):
             if hostname == self.my_hostname:
                 continue
 
-            current_status = node_state_tag.get('crmd')
+            current_status = self._normalize_host_status(
+                node_state_tag.get('crmd')
+            )
             self._update_monitoring_data(hostname, current_status)
-            old_status = self.status_holder.get_host_status(hostname)
+            old_status = self._normalize_host_status(
+                self.status_holder.get_host_status(hostname)
+            )
 
             # If old_status is None, This is first get of host status.
             if old_status is None:
