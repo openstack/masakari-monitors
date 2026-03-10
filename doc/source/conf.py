@@ -63,7 +63,7 @@ pygments_style = 'native'
 # html_theme = '_theme'
 # html_static_path = ['static']
 html_theme = 'openstackdocs'
-openstackdocs_repo_name ='openstack/masakari-monitors'
+openstackdocs_repo_name = 'openstack/masakari-monitors'
 openstackdocs_bug_project = 'masakari-monitors'
 
 # Output file base name for HTML help builder.
