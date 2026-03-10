@@ -9,6 +9,7 @@ testrepository>=0.0.18 # Apache-2.0/BSD
 testscenarios>=0.4 # Apache-2.0/BSD
 testtools>=2.2.0 # MIT
 ddt>=1.0.1 # MIT
+pycodestyle>=2.0.0 # MIT
 
 # Due to the nature of libvirt-python package, in DevStack we use the one
 # provided in the distro alongside libvirtd - to ensure the two are compatible,
