@@ -32,6 +32,7 @@ monitor_api_opts = [
                help='Masakari API Version.'),
     cfg.StrOpt('api_interface',
                default='public',
+               choices=('public', 'internal', 'admin'),
                help='Interface of endpoint.'),
 ]
 
