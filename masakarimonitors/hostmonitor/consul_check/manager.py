@@ -69,6 +69,12 @@ class ConsulCheck(driver.DriverBase):
 
     def _event(self, host, host_health):
         host_status = ec.EventConstants.HOST_STATUS_NORMAL
+        # Skip notification for unstable health state (mixed up/down samples)
+        if None in host_health:
+            LOG.debug("Host %s has unstable health state %s, skipping "
+                      "notification.", host,
+                      str(self._formate_health(host_health)))
+            return None
         if 'down' not in host_health:
             event_type = ec.EventConstants.EVENT_STARTED
             cluster_status = ec.EventConstants.CLUSTER_STATUS_ONLINE
