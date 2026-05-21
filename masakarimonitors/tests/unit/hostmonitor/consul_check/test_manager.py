@@ -126,6 +126,32 @@ class TestConsulCheck(testtools.TestCase):
             ["recovery"],
             self.host_monitor.get_action_from_matrix(['down', 'down', 'down']))
 
+    def test_event_unstable_health_returns_none(self):
+        self.assertIsNone(
+            self.host_monitor._event('node01', [None]))
+        self.assertIsNone(
+            self.host_monitor._event('node01', ['up', 'up', None]))
+        self.assertIsNone(
+            self.host_monitor._event('node01', [None, 'up', 'up']))
+        self.assertIsNone(
+            self.host_monitor._event('node01', ['up', None, 'down']))
+
+    def test_event_all_up_returns_started(self):
+        event = self.host_monitor._event('node01', ['up', 'up', 'up'])
+        self.assertIsNotNone(event)
+        self.assertEqual('STARTED',
+                         event['notification']['payload']['event'])
+
+    def test_event_down_with_recovery_returns_stopped(self):
+        event = self.host_monitor._event('node01', ['up', 'up', 'down'])
+        self.assertIsNotNone(event)
+        self.assertEqual('STOPPED',
+                         event['notification']['payload']['event'])
+
+    def test_event_down_without_recovery_returns_none(self):
+        self.assertIsNone(
+            self.host_monitor._event('node01', ['down', 'up', 'up']))
+
     @mock.patch.object(masakari.SendNotification, 'send_notification')
     @mock.patch.object(manager.ConsulCheck, '_event')
     def test_poll_hosts(self, mock_event, mock_send_notification):
