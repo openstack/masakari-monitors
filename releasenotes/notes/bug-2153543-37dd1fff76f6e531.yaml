@@ -1,0 +1,11 @@
+---
+fixes:
+  - |
+    Fixed an issue with the Consul hostmonitor driver where false STARTED
+    notifications were sent when ``monitoring_samples`` was set to a value
+    greater than 1. During host state transitions (e.g., from UP to DOWN),
+    mixed health samples (e.g., ``['up', 'up', 'down']``) were incorrectly
+    treated as stable UP states, causing premature notifications. The fix
+    now skips notifications when the health state is unstable (contains
+    None values) and only sends notifications when the state is stable.
+    See `Bug #2153543 <https://bugs.launchpad.net/masakari-monitors/+bug/2153543>`_.
