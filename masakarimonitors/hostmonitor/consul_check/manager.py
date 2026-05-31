@@ -124,13 +124,11 @@ class ConsulCheck(driver.DriverBase):
         # Only continous 'down' represents the interface 'down',
         # while continous 'up' represents the interface 'up'.
         host_sequence_health = []
-        host_health_history = list(zip(*health_history))
-        for i in range(0, len(host_health_history)):
-            if ('up' in host_health_history[i] and
-                    'down' in host_health_history[i]):
+        for host_health in zip(*health_history):
+            if 'up' in host_health and 'down' in host_health:
                 host_sequence_health.append(None)
             else:
-                host_sequence_health.append(host_health_history[i][0])
+                host_sequence_health.append(host_health[0])
 
         return host_sequence_health
 
