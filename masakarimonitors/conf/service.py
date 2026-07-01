@@ -20,6 +20,7 @@ service_opts = [
     cfg.StrOpt('hostname',
                default=socket.gethostname(),
                deprecated_name="host",
+               sample_default='<HOSTNAME>',
                help='''
 Hostname, FQDN or IP address of this host. Must be valid within AMQP key.
 
