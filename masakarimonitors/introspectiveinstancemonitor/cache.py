@@ -30,8 +30,6 @@ the object is available.
 from oslo_cache import core
 from oslo_config import cfg
 
-from masakarimonitors.i18n import _
-
 WEEK = 604800
 
 
@@ -46,63 +44,6 @@ def register_cache_configurations(conf):
     """
     # register global configurations for caching
     core.configure(conf)
-
-    # register specific configurations
-    constraint_cache_group = cfg.OptGroup('constraint_validation_cache')
-    constraint_cache_opts = [
-        cfg.IntOpt('expiration_time', default=WEEK,
-                   help=_(
-                       'TTL, in seconds, for any cached item in the '
-                       'dogpile.cache region used for caching of validation '
-                       'constraints.')),
-        cfg.BoolOpt("caching", default=True,
-                    help=_(
-                        'Toggle to enable/disable caching when Orchestration '
-                        'Engine validates property constraints of stack.'
-                        'During property validation with constraints '
-                        'Orchestration Engine caches requests to other '
-                        'OpenStack services. Please note that the global '
-                        'toggle for oslo.cache(enabled=True in [cache] group) '
-                        'must be enabled to use this feature.'))
-    ]
-    conf.register_group(constraint_cache_group)
-    conf.register_opts(constraint_cache_opts, group=constraint_cache_group)
-
-    extension_cache_group = cfg.OptGroup('service_extension_cache')
-    extension_cache_opts = [
-        cfg.IntOpt('expiration_time', default=WEEK,
-                   help=_(
-                       'TTL, in seconds, for any cached item in the '
-                       'dogpile.cache region used for caching of service '
-                       'extensions.')),
-        cfg.BoolOpt('caching', default=True,
-                    help=_(
-                        'Toggle to enable/disable caching when Orchestration '
-                        'Engine retrieves extensions from other OpenStack '
-                        'services. Please note that the global toggle for '
-                        'oslo.cache(enabled=True in [cache] group) must be '
-                        'enabled to use this feature.'))
-    ]
-    conf.register_group(extension_cache_group)
-    conf.register_opts(extension_cache_opts, group=extension_cache_group)
-
-    find_cache_group = cfg.OptGroup('resource_finder_cache')
-    find_cache_opts = [
-        cfg.IntOpt('expiration_time', default=WEEK,
-                   help=_(
-                       'TTL, in seconds, for any cached item in the '
-                       'dogpile.cache region used for caching of OpenStack '
-                       'service finder functions.')),
-        cfg.BoolOpt('caching', default=True,
-                    help=_(
-                        'Toggle to enable/disable caching when Orchestration '
-                        'Engine looks for other OpenStack service resources '
-                        'using name or id. Please note that the global '
-                        'toggle for oslo.cache(enabled=True in [cache] group) '
-                        'must be enabled to use this feature.'))
-    ]
-    conf.register_group(find_cache_group)
-    conf.register_opts(find_cache_opts, group=find_cache_group)
 
     return conf
 
