@@ -43,43 +43,35 @@ class IntrospectiveInstanceMonitorManager(manager.Manager):
         # (if it is run in a background thread)
         self.event_loop_thread = None
 
-    def _reset_journal(self, eventID, eventType, detail, uuID):
+    def _reset_journal(self, event_id, event_type, detail, domain_uuid):
         """To reset the monitoring to discovery stage
 
-        :param eventID: Event ID
-        :param eventType: Event type
+        :param event_id: Event ID
+        :param event_type: Event type
         :param detail: Event code
-        :param uuID: Domain uuid
+        :param domain_uuid: Domain uuid
         """
 
-        noticeType = ec.EventConstants.TYPE_VM
-        hostname = socket.gethostname()
-        currentTime = timeutils.utcnow()
-
-        def _reset_handler(event_id, event_type, detail, domain_uuid, msg):
+        def _reset_handler(event_id, event_type, detail, domain_uuid):
             """Reset monitoring
 
             To reset monitoring to discovery stage for the following event:
             libvirt.VIR_DOMAIN_EVENT_STARTED
             """
 
+            LOG.debug(
+                "libvirt Event Received.type = %s hostname = %s uuid = %s "
+                "time = %s eventID = %d eventType = %d detail = %d",
+                ec.EventConstants.TYPE_VM, socket.gethostname(),
+                domain_uuid, timeutils.utcnow(), event_id, event_type, detail)
+
             if (event_id == libvirt.VIR_DOMAIN_EVENT_ID_LIFECYCLE) and \
                (event_type == libvirt.VIR_DOMAIN_EVENT_STARTED):
-                LOG.debug(msg)
                 qemu_utils.resetJournal(domain_uuid)
 
-        # All Event Output if debug mode is on.
-        msg = "libvirt Event Received.type = %s \
-            hostname = %s uuid = %s time = %s eventID = %d eventType = %d \
-            detail = %d" % (
-            noticeType,
-            hostname, uuID, currentTime, eventID,
-            eventType, detail)
-
-        LOG.debug("%s", msg)
         try:
             thread = threading.Thread(
-                _reset_handler(eventID, eventType, detail, uuID, msg)
+                _reset_handler(event_id, event_type, detail, domain_uuid)
             )
             thread.start()
         except KeyError as e:
@@ -111,11 +103,11 @@ class IntrospectiveInstanceMonitorManager(manager.Manager):
 
     def _my_domain_event_callback(self, conn, dom, event, detail, opaque):
         self._reset_journal(libvirt.VIR_DOMAIN_EVENT_ID_LIFECYCLE,
-        event, detail, dom.UUIDString())
+                            event, detail, dom.UUIDString())
 
     def _my_domain_event_reboot_callback(self, conn, dom, opaque):
         self._reset_journal(libvirt.VIR_DOMAIN_EVENT_ID_REBOOT,
-        -1, -1, dom.UUIDString())
+                            -1, -1, dom.UUIDString())
 
     def _err_handler(self, ctxt, err):
         LOG.warning("Error from libvirt : %s", err[2])
