@@ -110,7 +110,7 @@ class HandleProcess(object):
                 # Execute monitoring command.
                 out, err = utils.execute('ps', '-ef', run_as_root=False)
                 if process_name in out:
-                    LOG.debug("Process '%s' is found." % process_name)
+                    LOG.debug("Process '%s' is found.", process_name)
                 else:
                     # Append down_process_list.
                     down_process_list.append(process)

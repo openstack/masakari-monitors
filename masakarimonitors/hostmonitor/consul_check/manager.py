@@ -81,8 +81,8 @@ class ConsulCheck(driver.DriverBase):
         else:
             actions = self.get_action_from_matrix(host_health)
             if 'recovery' in actions:
-                LOG.info("Host %s needs recovery, health status: %s." %
-                         (host, str(self._formate_health(host_health))))
+                LOG.info("Host %s needs recovery, health status: %s.",
+                         host, str(self._formate_health(host_health)))
                 event_type = ec.EventConstants.EVENT_STOPPED
                 cluster_status = ec.EventConstants.CLUSTER_STATUS_OFFLINE
             else:

@@ -75,14 +75,14 @@ class IntrospectiveInstanceMonitorManager(manager.Manager):
             )
             thread.start()
         except KeyError as e:
-            LOG.error("virEventFilter KeyError: {0}".format(e))
+            LOG.error("virEventFilter KeyError: {0}", e)
         except IndexError as e:
-            LOG.error("virEventFilter IndexError: {0}".format(e))
+            LOG.error("virEventFilter IndexError: {0}", e)
         except TypeError as e:
-            LOG.error("virEventFilter TypeError: {0}".format(e))
+            LOG.error("virEventFilter TypeError: {0}", e)
         except Exception:
             with excutils.save_and_reraise_exception():
-                LOG.error("Unexpected error: %s" % sys.exc_info()[0])
+                LOG.error("Unexpected error: %s", sys.exc_info()[0])
 
     def init_tgm(self):
         """Manages the masakari-introspectiveinstancemonitor."""

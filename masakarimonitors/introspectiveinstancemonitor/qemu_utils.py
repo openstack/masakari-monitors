@@ -415,8 +415,7 @@ def reschedule(action, sleep_time=1):
     """
     LOG.debug('At reschedule')
     if sleep_time is not None:
-        LOG.debug('Action %s sleep for %s seconds' % (
-            action.id, sleep_time))
+        LOG.debug('Action %s sleep for %s seconds', action.id, sleep_time)
         eventlet.sleep(sleep_time)
 
 

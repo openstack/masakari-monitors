@@ -85,4 +85,4 @@ class EventFilter(object):
             LOG.debug("virEventFilter TypeError")
         except Exception:
             with excutils.save_and_reraise_exception():
-                LOG.debug("Unexpected error: %s" % sys.exc_info()[0])
+                LOG.debug("Unexpected error: %s", sys.exc_info()[0])

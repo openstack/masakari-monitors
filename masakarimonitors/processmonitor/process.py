@@ -36,7 +36,7 @@ class ProcessmonitorManager(manager.Manager):
     def _load_process_list(self):
         try:
             process_list = yaml.safe_load(open(CONF.process.process_list_path))
-            LOG.debug("Loaded process list. %s" % process_list)
+            LOG.debug("Loaded process list. %s", process_list)
 
             return process_list
         except yaml.YAMLError as e:

@@ -82,8 +82,8 @@ class KubernetesCheck(driver.DriverBase):
     @staticmethod
     def _event(host, host_health):
         host_status = ec.EventConstants.HOST_STATUS_NORMAL
-        LOG.info("Host %s needs recovery, health status: %s." %
-                 (host, host_health))
+        LOG.info("Host %s needs recovery, health status: %s.",
+                 host, host_health)
 
         event = {
             'notification': {

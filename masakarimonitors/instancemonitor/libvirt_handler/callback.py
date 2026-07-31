@@ -50,12 +50,12 @@ class Callback(object):
                  " hostname=%(hostname)s,"
                  " uuid=%(uuid)s, time=%(current_time)s,"
                  " event_id=%(event_id)s,"
-                 " detail=%(detail)s)" % {'notice_type': notice_type,
-                                          'hostname': hostname,
-                                          'uuid': domain_uuid,
-                                          'current_time': current_time,
-                                          'event_id': event_id,
-                                          'detail': details})
+                 " detail=%(detail)s)", {'notice_type': notice_type,
+                                         'hostname': hostname,
+                                         'uuid': domain_uuid,
+                                         'current_time': current_time,
+                                         'event_id': event_id,
+                                         'detail': details})
 
         # Set the event to the dictionary.
         event = {
