@@ -33,7 +33,7 @@ class ConsulException(Exception):
         if not message:
             message = self.msg_fmt % kwargs
 
-        super(ConsulException, self).__init__(message)
+        super().__init__(message)
 
 
 class ConsulAgentNotExist(ConsulException):
@@ -44,7 +44,7 @@ class ConsulGetMembersException(ConsulException):
     msg_fmt = _("Failed to get members of %(cluster)s: %(err)s.")
 
 
-class ConsulManager(object):
+class ConsulManager:
     """Consul manager class
 
     This class helps to pull health data from all consul clusters,
@@ -99,7 +99,7 @@ class ConsulManager(object):
         return sequence_hosts_health
 
 
-class ConsulAgent(object):
+class ConsulAgent:
     """Agent to consul cluster"""
 
     def __init__(self, name, addr=None, port=None):

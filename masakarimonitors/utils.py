@@ -71,16 +71,16 @@ def monkey_patch():
         for key, value in module_data.items():
             # set the decorator for the class methods
             if isinstance(value, pyclbr.Class):
-                clz = importutils.import_class("%s.%s" % (module, key))
+                clz = importutils.import_class(f"{module}.{key}")
                 for method, func in inspect.getmembers(clz, is_method):
                     setattr(clz, method,
-                            decorator("%s.%s.%s" % (module, key,
+                            decorator("{}.{}.{}".format(module, key,
                                                     method), func))
             # set the decorator for the function
             if isinstance(value, pyclbr.Function):
-                func = importutils.import_class("%s.%s" % (module, key))
+                func = importutils.import_class(f"{module}.{key}")
                 setattr(sys.modules[module], key,
-                        decorator("%s.%s" % (module, key), func))
+                        decorator(f"{module}.{key}", func))
 
 
 @contextlib.contextmanager
@@ -118,7 +118,7 @@ def synchronized(name, semaphores=None, blocking=False):
             lock_str = 'masakarimonitors-%s' % name
             int_lock = lockutils.internal_lock(lock_str,
                                                semaphores=semaphores)
-            msg = "Lock blocking: %s on resource %s " % (lock_str, f.__name__)
+            msg = f"Lock blocking: {lock_str} on resource {f.__name__} "
             """Acquiring lock: %(lock_str)s on resource """
             if not int_lock.acquire(blocking=blocking):
                 raise Exception(msg)

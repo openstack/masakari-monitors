@@ -51,7 +51,7 @@ class HandleHost(driver.DriverBase):
     """
 
     def __init__(self):
-        super(HandleHost, self).__init__()
+        super().__init__()
         self.my_hostname = socket.gethostname()
         self.xml_parser = parse_cib_xml.ParseCibXml()
         self.crmmon_xml_parser = parse_crmmon_xml.ParseCrmMonXml()

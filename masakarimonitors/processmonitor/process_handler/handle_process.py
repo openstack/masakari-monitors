@@ -27,7 +27,7 @@ LOG = oslo_logging.getLogger(__name__)
 CONF = masakarimonitors.conf.CONF
 
 
-class HandleProcess(object):
+class HandleProcess:
     """Handle process."""
 
     def __init__(self):

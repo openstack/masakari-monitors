@@ -26,7 +26,7 @@ from masakarimonitors.introspectiveinstancemonitor import scheduler
 class TestQemuUtils(testtools.TestCase):
 
     def setup(self):
-        super(TestQemuUtils, self).setUp()
+        super().setUp()
 
     @mock.patch.object(qemu_utils.libvirt, 'virDomain')
     def test_getVmFsm(self, mock_domain):

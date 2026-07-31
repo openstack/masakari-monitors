@@ -24,7 +24,7 @@ from masakarimonitors.hostmonitor import host
 class TestHostmonitorManager(testtools.TestCase):
 
     def setUp(self):
-        super(TestHostmonitorManager, self).setUp()
+        super().setUp()
 
     @mock.patch.object(driver, 'DriverManager')
     def test_init_host(self, mock_DriverManager):

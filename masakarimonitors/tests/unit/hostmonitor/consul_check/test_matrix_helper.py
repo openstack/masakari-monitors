@@ -24,7 +24,7 @@ from masakarimonitors.hostmonitor.consul_check import matrix_helper
 class TestMatrixManager(testtools.TestCase):
 
     def setUp(self):
-        super(TestMatrixManager, self).setUp()
+        super().setUp()
         self.CONF = self.useFixture(fixture_config.Config()).conf
 
     def test_get_matrix_and_sequence_from_file(self):

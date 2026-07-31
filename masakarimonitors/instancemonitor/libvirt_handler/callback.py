@@ -22,7 +22,7 @@ LOG = oslo_logging.getLogger(__name__)
 CONF = masakarimonitors.conf.CONF
 
 
-class Callback(object):
+class Callback:
     """Class of callback processing."""
 
     def __init__(self):

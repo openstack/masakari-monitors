@@ -30,7 +30,7 @@ eventlet.monkey_patch(os=False)
 class TestInstancemonitorManager(testtools.TestCase):
 
     def setUp(self):
-        super(TestInstancemonitorManager, self).setUp()
+        super().setUp()
 
     def _make_callback_params(self):
         mock_conn = mock.Mock()

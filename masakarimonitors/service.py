@@ -38,7 +38,7 @@ class Service(service.Service):
     """
 
     def __init__(self, host, binary, manager):
-        super(Service, self).__init__()
+        super().__init__()
         self.host = host
         self.binary = binary
         self.manager_class_name = manager
@@ -101,7 +101,7 @@ class Service(service.Service):
     def stop(self):
         LOG.info('Stopping %s', self.binary)
         self.manager.stop()
-        super(Service, self).stop()
+        super().stop()
 
     def basic_config_check(self):
         """Perform basic config checks before starting processing."""

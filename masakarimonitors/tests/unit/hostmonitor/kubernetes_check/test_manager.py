@@ -38,7 +38,7 @@ class TestKubernetesCheck(testtools.TestCase):
     @mock.patch.object(config, 'load_incluster_config')
     @mock.patch.object(client, 'CoreV1Api')
     def setUp(self, mock_core_v1_api, mock_load_incluster_config):
-        super(TestKubernetesCheck, self).setUp()
+        super().setUp()
         self.CONF = self.useFixture(fixture_config.Config()).conf
         self.CONF.kubernetes.monitoring_node_labels = \
             'openstack-compute-node=enabled'

@@ -83,7 +83,7 @@ CRMMON_NODES_TAG_XML = """
 class TestCibSchemaCompliantTag(testtools.TestCase):
 
     def setUp(self):
-        super(TestCibSchemaCompliantTag, self).setUp()
+        super().setUp()
 
     def test_init_offline(self):
         tag = handle_host.CibSchemaCompliantTag(
@@ -101,7 +101,7 @@ class TestCibSchemaCompliantTag(testtools.TestCase):
 class TestHandleHost(testtools.TestCase):
 
     def setUp(self):
-        super(TestHandleHost, self).setUp()
+        super().setUp()
 
     @mock.patch.object(utils, 'execute')
     def test_check_pacemaker_services(self, mock_execute):

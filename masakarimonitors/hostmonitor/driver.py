@@ -15,7 +15,7 @@
 import abc
 
 
-class DriverBase(object, metaclass=abc.ABCMeta):
+class DriverBase(metaclass=abc.ABCMeta):
     """Driver Base class.
 
     This class is base of monitoring hosts.

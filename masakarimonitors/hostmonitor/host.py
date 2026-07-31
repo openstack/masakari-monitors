@@ -28,7 +28,7 @@ class HostmonitorManager(manager.Manager):
     """Manages the masakari-hostmonitor."""
 
     def __init__(self, *args, **kwargs):
-        super(HostmonitorManager, self).__init__(
+        super().__init__(
             service_name="hostmonitor", *args, **kwargs)
         self.driver = None
 

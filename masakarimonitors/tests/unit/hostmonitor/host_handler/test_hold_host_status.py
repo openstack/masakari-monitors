@@ -30,7 +30,7 @@ NODE_STATE_TAG = ElementTree.fromstring(NODE_STATE_XML)
 class TestHostHoldStatus(testtools.TestCase):
 
     def setUp(self):
-        super(TestHostHoldStatus, self).setUp()
+        super().setUp()
 
     def test_set_host_status(self):
         obj = hold_host_status.HostHoldStatus()

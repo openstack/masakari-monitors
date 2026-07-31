@@ -24,7 +24,7 @@ LOG = oslo_logging.getLogger(__name__)
 CONF = masakarimonitors.conf.CONF
 
 
-class SendNotification(object):
+class SendNotification:
 
     def __init__(self):
         self._masakari_client = None

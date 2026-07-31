@@ -32,7 +32,7 @@ PROFILE_TYPE = "ha"
 PROFILE_NAME = "masakari"
 
 
-class FakeResponse(object):
+class FakeResponse:
 
     def __init__(self, status_code=200, headers=None):
         self.status_code = status_code
@@ -45,7 +45,7 @@ class FakeResponse(object):
 class TestSendNotification(testtools.TestCase):
 
     def setUp(self):
-        super(TestSendNotification, self).setUp()
+        super().setUp()
         self.api_retry_max = 3
         self.api_retry_interval = 1
         self.event = {

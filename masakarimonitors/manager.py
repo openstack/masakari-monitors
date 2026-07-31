@@ -48,7 +48,7 @@ CONF = masakarimonitors.conf.CONF
 
 class PeriodicTasks(periodic_task.PeriodicTasks):
     def __init__(self):
-        super(PeriodicTasks, self).__init__(CONF)
+        super().__init__(CONF)
 
 
 class Manager(PeriodicTasks):
@@ -58,7 +58,7 @@ class Manager(PeriodicTasks):
             host = CONF.hostname
         self.host = host
         self.service_name = service_name
-        super(Manager, self).__init__()
+        super().__init__()
 
     def periodic_tasks(self, context, raise_on_error=False):
         """Tasks to be run at a periodic interval."""

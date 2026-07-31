@@ -213,10 +213,10 @@ def resetJournal(domain_uuid):
 #  - VM is guest-agent-pingable or not
 #
 # Note: checkGuests function is called by the scheduler
-class QemuGuestAgent(object):
+class QemuGuestAgent:
 
     def __init__(self):
-        super(QemuGuestAgent, self).__init__()
+        super().__init__()
         self.notifier = masakari.SendNotification()
 
     # _thresholdsCrossing

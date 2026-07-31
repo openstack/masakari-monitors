@@ -25,7 +25,7 @@ eventlet.monkey_patch(os=False)
 class TestMonitorManager(testtools.TestCase):
 
     def setUp(self):
-        super(TestMonitorManager, self).setUp()
+        super().setUp()
 
     @mock.patch.object(libvirt, 'virEventRunDefaultImpl')
     def test_vir_event_loop_native_run(self, mock_virEventRunDefaultImpl):
