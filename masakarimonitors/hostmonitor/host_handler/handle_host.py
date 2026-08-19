@@ -81,8 +81,7 @@ class HandleHost(driver.DriverBase):
 
     def _check_pacemaker_services(self, target_service):
         try:
-            cmd_str = 'systemctl status ' + target_service
-            command = cmd_str.split()
+            command = ['systemctl', 'status', target_service]
 
             # Execute command.
             out, err = utils.execute(*command, run_as_root=True)
@@ -130,9 +129,8 @@ class HandleHost(driver.DriverBase):
         # Check whether the necessary parameters are set.
         if not CONF.host.corosync_multicast_interfaces or \
                 not CONF.host.corosync_multicast_ports:
-            msg = ("corosync_multicast_interfaces or "
-                   "corosync_multicast_ports is not set.")
-            LOG.error("%s", msg)
+            LOG.error("corosync_multicast_interfaces or "
+                      "corosync_multicast_ports is not set.")
             return 2
 
         # Check whether the corosync communication is normal.
@@ -140,36 +138,32 @@ class HandleHost(driver.DriverBase):
         corosync_multicast_ports = CONF.host.corosync_multicast_ports
 
         if len(corosync_multicast_interfaces) != len(corosync_multicast_ports):
-            msg = ("Incorrect parameters corosync_multicast_interfaces or "
-                   "corosync_multicast_ports.")
-            LOG.error("%s", msg)
+            LOG.error("Incorrect parameters corosync_multicast_interfaces or "
+                      "corosync_multicast_ports.")
             return 2
 
         is_nic_normal = False
-        for num in range(0, len(corosync_multicast_interfaces)):
-            cmd_str = ("timeout %s tcpdump -n -c 1 -p -i %s port %d") \
-                % (CONF.host.tcpdump_timeout,
-                   corosync_multicast_interfaces[num],
-                   corosync_multicast_ports[num])
-            command = cmd_str.split()
+        for interface, port in zip(
+                corosync_multicast_interfaces, corosync_multicast_ports):
+            command = ['timeout', str(CONF.host.tcpdump_timeout),
+                       'tcpdump', '-n', '-c', '1', '-p', '-i', interface,
+                       'port', str(port)]
 
             try:
                 # Execute tcpdump command.
                 out, err = utils.execute(*command, run_as_root=True)
 
                 # If command doesn't raise exception, nic is normal.
-                msg = ("Corosync communication using '%s' is normal.") \
-                    % corosync_multicast_interfaces[num]
-                LOG.info("%s", msg)
+                LOG.info("Corosync communication using '%s' is normal.",
+                         interface)
                 is_nic_normal = True
                 break
             except Exception:
-                msg = ("Corosync communication using '%s' is failed.") \
-                    % corosync_multicast_interfaces[num]
-                LOG.warning("%s", msg)
+                LOG.warning("Corosync communication using '%s' failed.",
+                            interface)
 
         if is_nic_normal is False:
-            LOG.error("Corosync communication is failed.")
+            LOG.error("Corosync communication failed.")
             return 1
 
         return 0
@@ -235,12 +229,10 @@ class HandleHost(driver.DriverBase):
             LOG.error("Failed to get params of ipmi RA.")
             return False
 
-        cmd_str = ("timeout %s ipmitool -U %s -P %s -I %s -H %s "
-                   "power status") \
-            % (str(CONF.host.ipmi_timeout), ipmi_values['userid'],
-               ipmi_values['passwd'], ipmi_values['interface'],
-               ipmi_values['ipaddr'])
-        command = cmd_str.split()
+        command = ['timeout', str(CONF.host.ipmi_timeout), 'ipmitool',
+                   '-U', ipmi_values['userid'], '-P', ipmi_values['passwd'],
+                   '-I', ipmi_values['interface'], '-H', ipmi_values['ipaddr'],
+                   'power', 'status']
 
         retry_count = 0
         while True:
