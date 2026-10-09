@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-class HostHoldStatus(object):
+class HostHoldStatus:
     """Hold host status.
 
     This class holds the host status.

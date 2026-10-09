@@ -33,7 +33,7 @@ CONF = masakarimonitors.conf.CONF
 class TestConsulCheck(testtools.TestCase):
 
     def setUp(self):
-        super(TestConsulCheck, self).setUp()
+        super().setUp()
         self.CONF = self.useFixture(fixture_config.Config()).conf
         self.host_monitor = manager.ConsulCheck()
         self.host_monitor.matrix_manager = \

@@ -106,7 +106,7 @@ CIB_TAG = ElementTree.fromstring(CIB_XML)
 class TestParseCibXml(testtools.TestCase):
 
     def setUp(self):
-        super(TestParseCibXml, self).setUp()
+        super().setUp()
 
     @mock.patch.object(ElementTree, 'fromstring')
     def test_set_cib_xml(self,

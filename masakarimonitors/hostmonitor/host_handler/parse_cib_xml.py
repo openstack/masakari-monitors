@@ -19,7 +19,7 @@ from oslo_log import log as oslo_logging
 LOG = oslo_logging.getLogger(__name__)
 
 
-class ParseCibXml(object):
+class ParseCibXml:
     """ParseCibXml class
 
     This class parses the cib xml.

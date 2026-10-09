@@ -34,7 +34,7 @@ eventlet.monkey_patch(os=False)
 class TestEventFilter(testtools.TestCase):
 
     def setUp(self):
-        super(TestEventFilter, self).setUp()
+        super().setUp()
 
     @mock.patch.object(excutils, 'save_and_reraise_exception')
     @mock.patch.object(callback.Callback, 'libvirt_event_callback')

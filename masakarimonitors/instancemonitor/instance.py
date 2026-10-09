@@ -31,7 +31,7 @@ class InstancemonitorManager(manager.Manager):
     """Manages the masakari-instancemonitor."""
 
     def __init__(self, *args, **kwargs):
-        super(InstancemonitorManager, self).__init__(
+        super().__init__(
             service_name="instancemonitor", *args, **kwargs)
         self.evf = eventfilter.EventFilter()
         # This keeps track of what thread is running the event loop,

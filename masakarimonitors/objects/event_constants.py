@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-class EventConstants(object):
+class EventConstants:
     # Define event types.
     TYPE_PROCESS = "PROCESS"
     TYPE_COMPUTE_HOST = "COMPUTE_HOST"

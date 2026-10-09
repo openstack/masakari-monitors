@@ -20,7 +20,7 @@ from oslo_config import fixture as fixture_config
 from masakarimonitors.hostmonitor.consul_check import consul_helper
 
 
-class FakerAgentMembers(object):
+class FakerAgentMembers:
 
     def __init__(self):
         self.agent_members = []
@@ -60,7 +60,7 @@ class FakerAgentMembers(object):
 class TestConsulManager(testtools.TestCase):
 
     def setUp(self):
-        super(TestConsulManager, self).setUp()
+        super().setUp()
         self.CONF = self.useFixture(fixture_config.Config()).conf
         self.consul_manager = consul_helper.ConsulManager(self.CONF)
         self.consul_manager.agents = {
@@ -162,7 +162,7 @@ class TestConsulManager(testtools.TestCase):
 class TestConsulAgent(testtools.TestCase):
 
     def setUp(self):
-        super(TestConsulAgent, self).setUp()
+        super().setUp()
         self.consul_agent = consul_helper.ConsulAgent('test')
 
     def test_get_health(self):

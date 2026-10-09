@@ -25,7 +25,7 @@ LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
 
 
-class ThreadGroupManager(object):
+class ThreadGroupManager:
     """Thread group manager."""
 
     def init_qemu_ga(self):
@@ -34,7 +34,7 @@ class ThreadGroupManager(object):
 
     def __init__(self):
         self.init_qemu_ga()
-        super(ThreadGroupManager, self).__init__()
+        super().__init__()
         self.threads = {}
         self.group = threadgroup.ThreadGroup()
 
@@ -77,7 +77,7 @@ class ThreadGroupManager(object):
 
         # Wait for link()ed functions (i.e. lock release)
         threads = self.group.threads[:]
-        links_done = dict((th, False) for th in threads)
+        links_done = {th: False for th in threads}
 
         def mark_done(gt, th):
             links_done[th] = True

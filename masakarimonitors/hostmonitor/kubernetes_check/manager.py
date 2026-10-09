@@ -37,7 +37,7 @@ class KubernetesCheck(driver.DriverBase):
     """Check host status by k8s"""
 
     def __init__(self):
-        super(KubernetesCheck, self).__init__()
+        super().__init__()
         self.hostname = socket.gethostname()
         self.monitoring_interval = CONF.host.monitoring_interval
         self.monitoring_samples = CONF.host.monitoring_samples

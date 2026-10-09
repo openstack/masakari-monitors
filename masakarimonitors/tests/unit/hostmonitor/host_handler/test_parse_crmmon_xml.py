@@ -54,7 +54,7 @@ CRMMON_NONODES_TAG_XML = '<?xml version="1.0"?>' \
 class TestParseCrmMonXml(testtools.TestCase):
 
     def setUp(self):
-        super(TestParseCrmMonXml, self).setUp()
+        super().setUp()
 
     def test_set_crmmon_xml(self):
         obj = parse_crmmon_xml.ParseCrmMonXml()

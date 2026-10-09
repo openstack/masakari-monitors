@@ -30,7 +30,7 @@ eventlet.monkey_patch(os=False)
 class TestCallback(testtools.TestCase):
 
     def setUp(self):
-        super(TestCallback, self).setUp()
+        super().setUp()
 
     @mock.patch.object(masakari.SendNotification, 'send_notification')
     def test_libvirt_event_callback(self, mock_send_notification):

@@ -37,7 +37,7 @@ class IntrospectiveInstanceMonitorManager(manager.Manager):
 
     def __init__(self, *args, **kwargs):
         self.init_tgm()
-        super(IntrospectiveInstanceMonitorManager, self).__init__(
+        super().__init__(
             service_name="introspectiveinstancemonitor", *args, **kwargs)
         # This keeps track of what thread is running the event loop,
         # (if it is run in a background thread)

@@ -31,7 +31,7 @@ LOG = oslo_logging.getLogger(__name__)
 CONF = masakarimonitors.conf.CONF
 
 
-class EventFilter(object):
+class EventFilter:
     """Class of filtering events."""
 
     def __init__(self):

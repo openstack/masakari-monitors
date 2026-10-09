@@ -19,7 +19,7 @@ from oslo_log import log as oslo_logging
 LOG = oslo_logging.getLogger(__name__)
 
 
-class ParseCrmMonXml(object):
+class ParseCrmMonXml:
     """ParseCrmMonXml class
 
     This class parses the crmmon xml.

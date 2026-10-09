@@ -29,7 +29,7 @@ class ProcessmonitorManager(manager.Manager):
     """Manages the masakari-processmonitor."""
 
     def __init__(self, *args, **kwargs):
-        super(ProcessmonitorManager, self).__init__(
+        super().__init__(
             service_name="processmonitor", *args, **kwargs)
         self.process_handler = handle_process.HandleProcess()
 

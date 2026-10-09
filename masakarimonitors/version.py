@@ -83,4 +83,4 @@ def version_string_with_package():
     if package_string() is None:
         return version_info.version_string()
     else:
-        return "%s-%s" % (version_info.version_string(), package_string())
+        return f"{version_info.version_string()}-{package_string()}"

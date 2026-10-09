@@ -43,7 +43,7 @@ DEFAULT_MATRIX = [
 ]
 
 
-class MatrixManager(object):
+class MatrixManager:
     """Matrix Manager"""
 
     def __init__(self, CONF):

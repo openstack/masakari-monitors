@@ -64,7 +64,7 @@ MOCK_DOWN_PROCESS_LIST = [
 class TestProcessmonitorManager(testtools.TestCase):
 
     def setUp(self):
-        super(TestProcessmonitorManager, self).setUp()
+        super().setUp()
 
     def _get_mock_process_list(self, call_count):
         if call_count == 0:

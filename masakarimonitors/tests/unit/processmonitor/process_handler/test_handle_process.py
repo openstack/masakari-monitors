@@ -69,7 +69,7 @@ PS_RESULT = \
 class TestHandleProcess(testtools.TestCase):
 
     def setUp(self):
-        super(TestHandleProcess, self).setUp()
+        super().setUp()
 
     def test_set_process_list(self):
         process_list = MOCK_PROCESS_LIST
