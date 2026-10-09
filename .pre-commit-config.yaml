@@ -1,0 +1,31 @@
+---
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      # Replaces or checks mixed line ending
+      - id: mixed-line-ending
+        args: ['--fix', 'lf']
+        exclude: '.*\.(svg)$'
+      - id: fix-byte-order-marker
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: check-yaml
+        files: .*\.(yaml|yml)$
+        exclude: 'rally-scenarios/heat-fakevirt.yaml'
+  - repo: https://opendev.org/openstack/hacking
+    rev: 8.1.0
+    hooks:
+      - id: hacking
+        additional_dependencies: []
+  - repo: https://github.com/PyCQA/doc8
+    rev: v2.0.0
+    hooks:
+      - id: doc8
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        args: [--strict]

@@ -1,9 +1,9 @@
-=========================================
+=============================================
 masakarimonitors-introspectiveinstancemonitor
-=========================================
+=============================================
 
 Introspective instance monitor for Masakari
-----------------------------------------
+-------------------------------------------
 - masakarimonitors-introspectiveinstancemonitor, provides Virtual Machine
   High Availability (VMHA) service for OpenStack clouds by automatically
   detecting the system-level failure events via QEMU Guest Agent. If it
@@ -17,7 +17,7 @@ Introspective instance monitor for Masakari
 
 
 How does it work?
-----------------------------------------
+-----------------
 - libvirt and QEMU Guest Agent are used as the underlying protocol for
   messaging to and from VM.
 
@@ -30,7 +30,7 @@ How does it work?
   to check the health of the applications inside a VM.
 
 QEMU Guest Agent Installation notes
-----------------------------------------
+-----------------------------------
 
 - Set image property: hw_qemu_guest_agent=yes.
 
@@ -53,7 +53,7 @@ QEMU Guest Agent Installation notes
 
 
 Configure masakarimonitors-introspectiveinstancemonitor
-----------------------------------------------
+-------------------------------------------------------
 #. Clone masakari-monitors using::
 
    $ git clone https://github.com/openstack/masakari-monitors.git

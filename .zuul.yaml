@@ -11,11 +11,9 @@
       - periodic-jobs-with-oslo-master
     check:
       jobs:
-        - openstack-tox-linters
         - masakari-functional-devstack-multinode
         - masakari-functional-devstack-ipv6
     gate:
       jobs:
-        - openstack-tox-linters
         - masakari-functional-devstack-multinode
         - masakari-functional-devstack-ipv6
