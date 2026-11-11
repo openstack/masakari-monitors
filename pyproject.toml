@@ -44,7 +44,7 @@ masakari-processmonitor = "masakarimonitors.cmd.processmonitor:main"
 masakari-hostmonitor = "masakarimonitors.cmd.hostmonitor:main"
 
 [project.entry-points."hostmonitor.driver"]
-"simple" = "masakarimonitors.hostmonitor.host_handler.handle_host:HandleHost"
-"default" = "masakarimonitors.hostmonitor.host_handler.handle_host:HandleHost"
+"simple" = "masakarimonitors.hostmonitor.corosync_check.manager:CorosyncCheck"
+"default" = "masakarimonitors.hostmonitor.corosync_check.manager:CorosyncCheck"
 "consul" = "masakarimonitors.hostmonitor.consul_check.manager:ConsulCheck"
 "kubernetes" = "masakarimonitors.hostmonitor.kubernetes_check.manager:KubernetesCheck"

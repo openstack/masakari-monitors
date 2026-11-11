@@ -23,10 +23,10 @@ from oslo_utils import timeutils
 
 import masakarimonitors.conf
 from masakarimonitors.ha import masakari
-from masakarimonitors.hostmonitor.host_handler import handle_host
-from masakarimonitors.hostmonitor.host_handler import hold_host_status
-from masakarimonitors.hostmonitor.host_handler import parse_cib_xml
-from masakarimonitors.hostmonitor.host_handler import parse_crmmon_xml
+from masakarimonitors.hostmonitor.corosync_check import hold_host_status
+from masakarimonitors.hostmonitor.corosync_check import manager
+from masakarimonitors.hostmonitor.corosync_check import parse_cib_xml
+from masakarimonitors.hostmonitor.corosync_check import parse_crmmon_xml
 from masakarimonitors.objects import event_constants as ec
 from masakarimonitors import utils
 
@@ -86,19 +86,19 @@ class TestCibSchemaCompliantTag(testtools.TestCase):
         super().setUp()
 
     def test_init_offline(self):
-        tag = handle_host.CibSchemaCompliantTag(
+        tag = manager.CibSchemaCompliantTag(
             {'name': 'test1', 'online': 'false'})
         self.assertEqual(tag['uname'], 'test1')
         self.assertEqual(tag['crmd'], 'offline')
 
     def test_init_online(self):
-        tag = handle_host.CibSchemaCompliantTag(
+        tag = manager.CibSchemaCompliantTag(
             {'name': 'test1', 'online': 'true'})
         self.assertEqual(tag['uname'], 'test1')
         self.assertEqual(tag['crmd'], 'online')
 
 
-class TestHandleHost(testtools.TestCase):
+class TestCorosyncCheck(testtools.TestCase):
 
     def setUp(self):
         super().setUp()
@@ -108,7 +108,7 @@ class TestHandleHost(testtools.TestCase):
 
         mock_execute.return_value = ('test_stdout', '')
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_pacemaker_services('corosync')
 
         self.assertTrue(ret)
@@ -120,7 +120,7 @@ class TestHandleHost(testtools.TestCase):
 
         mock_execute.return_value = ('test_stdout', 'test_stderr')
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_pacemaker_services('corosync')
 
         self.assertFalse(ret)
@@ -128,7 +128,7 @@ class TestHandleHost(testtools.TestCase):
             'systemctl', 'status', 'corosync', run_as_root=True)
 
     @mock.patch.object(utils, 'execute')
-    @mock.patch.object(handle_host.HandleHost, '_check_pacemaker_services')
+    @mock.patch.object(manager.CorosyncCheck, '_check_pacemaker_services')
     def test_check_hb_line(
         self, mock_check_pacemaker_services, mock_execute):
 
@@ -139,7 +139,7 @@ class TestHandleHost(testtools.TestCase):
         CONF.set_override("corosync_multicast_ports", ports, "host")
         mock_execute.return_value = ('', '')
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_hb_line()
 
         self.assertEqual(0, ret)
@@ -152,13 +152,13 @@ class TestHandleHost(testtools.TestCase):
         command = cmd_str.split()
         mock_execute.assert_called_once_with(*command, run_as_root=True)
 
-    @mock.patch.object(handle_host.HandleHost, '_check_pacemaker_services')
+    @mock.patch.object(manager.CorosyncCheck, '_check_pacemaker_services')
     def test_check_hb_line_pacemaker_not_running(
         self, mock_check_pacemaker_services):
 
         mock_check_pacemaker_services.side_effect = [False, False, False]
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_hb_line()
 
         self.assertEqual(2, ret)
@@ -167,13 +167,13 @@ class TestHandleHost(testtools.TestCase):
         mock_check_pacemaker_services.assert_any_call('pacemaker')
         mock_check_pacemaker_services.assert_any_call('pacemaker_remote')
 
-    @mock.patch.object(handle_host.HandleHost, '_check_pacemaker_services')
+    @mock.patch.object(manager.CorosyncCheck, '_check_pacemaker_services')
     def test_check_hb_line_work_on_pacemaker_remote(
         self, mock_check_pacemaker_services):
 
         mock_check_pacemaker_services.side_effect = [False, False, True]
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_hb_line()
 
         self.assertEqual(0, ret)
@@ -182,7 +182,7 @@ class TestHandleHost(testtools.TestCase):
         mock_check_pacemaker_services.assert_any_call('pacemaker')
         mock_check_pacemaker_services.assert_any_call('pacemaker_remote')
 
-    @mock.patch.object(handle_host.HandleHost, '_check_pacemaker_services')
+    @mock.patch.object(manager.CorosyncCheck, '_check_pacemaker_services')
     def test_check_hb_line_conf_interfaces_is_none(
         self, mock_check_pacemaker_services):
 
@@ -192,7 +192,7 @@ class TestHandleHost(testtools.TestCase):
         CONF.set_override("corosync_multicast_interfaces", interfaces, "host")
         CONF.set_override("corosync_multicast_ports", ports, "host")
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_hb_line()
 
         self.assertEqual(2, ret)
@@ -201,7 +201,7 @@ class TestHandleHost(testtools.TestCase):
         mock_check_pacemaker_services.assert_any_call('pacemaker')
         mock_check_pacemaker_services.assert_any_call('pacemaker_remote')
 
-    @mock.patch.object(handle_host.HandleHost, '_check_pacemaker_services')
+    @mock.patch.object(manager.CorosyncCheck, '_check_pacemaker_services')
     def test_check_hb_line_conf_ports_is_none(
         self, mock_check_pacemaker_services):
 
@@ -211,7 +211,7 @@ class TestHandleHost(testtools.TestCase):
         CONF.set_override("corosync_multicast_interfaces", interfaces, "host")
         CONF.set_override("corosync_multicast_ports", ports, "host")
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_hb_line()
 
         self.assertEqual(2, ret)
@@ -220,7 +220,7 @@ class TestHandleHost(testtools.TestCase):
         mock_check_pacemaker_services.assert_any_call('pacemaker')
         mock_check_pacemaker_services.assert_any_call('pacemaker_remote')
 
-    @mock.patch.object(handle_host.HandleHost, '_check_pacemaker_services')
+    @mock.patch.object(manager.CorosyncCheck, '_check_pacemaker_services')
     def test_check_hb_line_incorrect_interfaces(
         self, mock_check_pacemaker_services):
 
@@ -230,7 +230,7 @@ class TestHandleHost(testtools.TestCase):
         CONF.set_override("corosync_multicast_interfaces", interfaces, "host")
         CONF.set_override("corosync_multicast_ports", ports, "host")
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_hb_line()
 
         self.assertEqual(2, ret)
@@ -239,7 +239,7 @@ class TestHandleHost(testtools.TestCase):
         mock_check_pacemaker_services.assert_any_call('pacemaker')
         mock_check_pacemaker_services.assert_any_call('pacemaker_remote')
 
-    @mock.patch.object(handle_host.HandleHost, '_check_pacemaker_services')
+    @mock.patch.object(manager.CorosyncCheck, '_check_pacemaker_services')
     def test_check_hb_line_incorrect_ports(
         self, mock_check_pacemaker_services):
 
@@ -249,7 +249,7 @@ class TestHandleHost(testtools.TestCase):
         CONF.set_override("corosync_multicast_interfaces", interfaces, "host")
         CONF.set_override("corosync_multicast_ports", ports, "host")
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_hb_line()
 
         self.assertEqual(2, ret)
@@ -259,7 +259,7 @@ class TestHandleHost(testtools.TestCase):
         mock_check_pacemaker_services.assert_any_call('pacemaker_remote')
 
     @mock.patch.object(utils, 'execute')
-    @mock.patch.object(handle_host.HandleHost, '_check_pacemaker_services')
+    @mock.patch.object(manager.CorosyncCheck, '_check_pacemaker_services')
     def test_check_hb_line_tcpdump_fail(
         self, mock_check_pacemaker_services, mock_execute):
 
@@ -271,7 +271,7 @@ class TestHandleHost(testtools.TestCase):
 
         mock_execute.side_effect = Exception("Test exception.")
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_hb_line()
 
         self.assertEqual(1, ret)
@@ -290,7 +290,7 @@ class TestHandleHost(testtools.TestCase):
         crmadmin_stdout = "Status of crmd@%s: S_IDLE (ok)" % my_hostname
         mock_execute.return_value = (crmadmin_stdout, '')
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_host_status_by_crmadmin()
 
         self.assertEqual(0, ret)
@@ -303,7 +303,7 @@ class TestHandleHost(testtools.TestCase):
         crmadmin_stdout = "Status of crmd@%s: S_NOT_DC (ok)" % my_hostname
         mock_execute.return_value = (crmadmin_stdout, '')
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_host_status_by_crmadmin()
 
         self.assertEqual(0, ret)
@@ -315,7 +315,7 @@ class TestHandleHost(testtools.TestCase):
         my_hostname = socket.gethostname()
         mock_execute.return_value = ('', 'crmadmin: command not found')
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_host_status_by_crmadmin()
 
         self.assertEqual(1, ret)
@@ -328,7 +328,7 @@ class TestHandleHost(testtools.TestCase):
         my_hostname = socket.gethostname()
         mock_execute.return_value = ('Unexpected message.', '')
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_host_status_by_crmadmin()
 
         self.assertEqual(1, ret)
@@ -339,7 +339,7 @@ class TestHandleHost(testtools.TestCase):
     def test_get_cib_xml(self, mock_execute):
         mock_execute.return_value = ('test_stdout', '')
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._get_cib_xml()
 
         self.assertEqual('test_stdout', ret)
@@ -350,7 +350,7 @@ class TestHandleHost(testtools.TestCase):
     def test_get_cib_xml_output_stderr(self, mock_execute):
         mock_execute.return_value = ('test_stdout', 'test_stderr')
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._get_cib_xml()
 
         self.assertIsNone(ret)
@@ -361,7 +361,7 @@ class TestHandleHost(testtools.TestCase):
     def test_get_crmmon_xml(self, mock_execute):
         mock_execute.return_value = ('test_stdout', '')
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._get_crmmon_xml()
 
         self.assertEqual('test_stdout', ret)
@@ -372,7 +372,7 @@ class TestHandleHost(testtools.TestCase):
     def test_get_crmmon_xml_stderr(self, mock_execute):
         mock_execute.return_value = ('test_stdout', 'test_stderr')
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._get_crmmon_xml()
 
         self.assertIsNone(ret)
@@ -391,7 +391,7 @@ class TestHandleHost(testtools.TestCase):
         mock_get_stonith_ipmi_params.return_value = ipmi_values
         mock_execute.return_value = ('Chassis Power is off', '')
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._is_poweroff('test_hostname')
 
         self.assertTrue(ret)
@@ -410,7 +410,7 @@ class TestHandleHost(testtools.TestCase):
         mock_get_stonith_ipmi_params.return_value = None
         mock_execute.return_value = ('Chassis Power is off', '')
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._is_poweroff('test_hostname')
 
         self.assertFalse(ret)
@@ -431,7 +431,7 @@ class TestHandleHost(testtools.TestCase):
         mock_execute.return_value = ('Chassis Power is off', 'test_stderr')
         mock_sleep.return_value = None
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._is_poweroff('test_hostname')
 
         self.assertFalse(ret)
@@ -462,7 +462,7 @@ class TestHandleHost(testtools.TestCase):
         mock_execute.return_value = ('Unexpected message.', '')
         mock_sleep.return_value = None
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._is_poweroff('test_hostname')
 
         self.assertFalse(ret)
@@ -483,7 +483,7 @@ class TestHandleHost(testtools.TestCase):
         current_time = timeutils.utcnow()
         mock_utcnow.return_value = current_time
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         hostname = 'test_hostname'
         current_status = 'online'
         ret = obj._make_event(hostname, current_status)
@@ -506,7 +506,7 @@ class TestHandleHost(testtools.TestCase):
         self.assertEqual(event, ret)
 
     @mock.patch.object(timeutils, 'utcnow')
-    @mock.patch.object(handle_host.HandleHost, '_is_poweroff')
+    @mock.patch.object(manager.CorosyncCheck, '_is_poweroff')
     def test_make_event_offline_disable_ipmi_check_false_poweroff(
         self, mock_is_poweroff, mock_utcnow):
         mock_is_poweroff.return_value = True
@@ -514,7 +514,7 @@ class TestHandleHost(testtools.TestCase):
         mock_utcnow.return_value = current_time
         CONF.host.disable_ipmi_check = False
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         hostname = 'test_hostname'
         current_status = 'offline'
         ret = obj._make_event(hostname, current_status)
@@ -538,7 +538,7 @@ class TestHandleHost(testtools.TestCase):
         mock_is_poweroff.assert_called_once_with(hostname)
 
     @mock.patch.object(timeutils, 'utcnow')
-    @mock.patch.object(handle_host.HandleHost, '_is_poweroff')
+    @mock.patch.object(manager.CorosyncCheck, '_is_poweroff')
     def test_make_event_offline_disable_ipmi_check_false_poweron(
         self, mock_is_poweroff, mock_utcnow):
         mock_is_poweroff.return_value = False
@@ -546,7 +546,7 @@ class TestHandleHost(testtools.TestCase):
         mock_utcnow.return_value = current_time
         CONF.host.disable_ipmi_check = False
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         hostname = 'test_hostname'
         current_status = 'offline'
         ret = obj._make_event(hostname, current_status)
@@ -575,7 +575,7 @@ class TestHandleHost(testtools.TestCase):
         mock_utcnow.return_value = current_time
         CONF.host.disable_ipmi_check = True
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         hostname = 'test_hostname'
         current_status = 'offline'
         ret = obj._make_event(hostname, current_status)
@@ -606,7 +606,7 @@ class TestHandleHost(testtools.TestCase):
             </status>
         """)
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         response = [obj._normalize_host_status(status.get('crmd'))
                     for status in list(status_xml)]
         self.assertEqual(["online", "offline", "other"], response)
@@ -619,13 +619,13 @@ class TestHandleHost(testtools.TestCase):
             </status>
         """)
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         response = [obj._normalize_host_status(status.get('crmd'))
                     for status in list(status_tag)]
         self.assertEqual(["online", "offline"], response)
 
     @mock.patch.object(masakari.SendNotification, 'send_notification')
-    @mock.patch.object(handle_host.HandleHost, '_make_event')
+    @mock.patch.object(manager.CorosyncCheck, '_make_event')
     @mock.patch.object(hold_host_status.HostHoldStatus, 'set_host_status')
     @mock.patch.object(hold_host_status.HostHoldStatus, 'get_host_status')
     @mock.patch.object(socket, 'gethostname')
@@ -642,7 +642,7 @@ class TestHandleHost(testtools.TestCase):
         status_tag = ElementTree.fromstring(STATUS_TAG_XML)
         node_state_tag_list = list(status_tag)
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         obj._check_if_status_changed(node_state_tag_list)
 
         node_state_node2 = node_state_tag_list[1]
@@ -666,7 +666,7 @@ class TestHandleHost(testtools.TestCase):
             CONF.host.api_retry_max, CONF.host.api_retry_interval, test_event)
 
     @mock.patch.object(masakari.SendNotification, 'send_notification')
-    @mock.patch.object(handle_host.HandleHost, '_make_event')
+    @mock.patch.object(manager.CorosyncCheck, '_make_event')
     @mock.patch.object(hold_host_status.HostHoldStatus, 'set_host_status')
     @mock.patch.object(hold_host_status.HostHoldStatus, 'get_host_status')
     @mock.patch.object(socket, 'gethostname')
@@ -684,7 +684,7 @@ class TestHandleHost(testtools.TestCase):
         node_state_tag_list = list(status_tag)
         CONF.host.monitoring_samples = 3
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         obj.monitoring_data = {
             "node1": deque(['online', 'online', 'online'], maxlen=3),
             "node2": deque(['offline', 'online', 'online'], maxlen=3),
@@ -723,13 +723,13 @@ class TestHandleHost(testtools.TestCase):
         mock_send_notification.assert_called_once_with(
             CONF.host.api_retry_max, CONF.host.api_retry_interval, test_event)
 
-    @mock.patch.object(handle_host.HandleHost, '_check_if_status_changed')
+    @mock.patch.object(manager.CorosyncCheck, '_check_if_status_changed')
     @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml,
                        'get_node_state_tag_list')
     @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml,
                        'has_quorum')
     @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml, 'set_crmmon_xml')
-    @mock.patch.object(handle_host.HandleHost, '_get_crmmon_xml')
+    @mock.patch.object(manager.CorosyncCheck, '_get_crmmon_xml')
     def test_check_host_status_by_crm_mon(
         self, mock_get_crmmon_xml, mock_set_crmmon_xml,
         mock_has_quorum, mock_get_node_state_tag_list,
@@ -742,7 +742,7 @@ class TestHandleHost(testtools.TestCase):
         mock_get_node_state_tag_list.return_value = node_state_tag_list
         mock_check_if_status_changed.return_value = None
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_host_status_by_crm_mon()
 
         self.assertEqual(0, ret)
@@ -754,11 +754,11 @@ class TestHandleHost(testtools.TestCase):
                 {'uname': 'remote2', 'crmd': 'online'},
                 {'uname': 'remote3', 'crmd': 'online'}])
 
-    @mock.patch.object(handle_host.HandleHost, '_check_if_status_changed')
+    @mock.patch.object(manager.CorosyncCheck, '_check_if_status_changed')
     @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml,
                        'has_quorum')
     @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml, 'set_crmmon_xml')
-    @mock.patch.object(handle_host.HandleHost, '_get_crmmon_xml')
+    @mock.patch.object(manager.CorosyncCheck, '_get_crmmon_xml')
     def test_check_host_status_by_crm_mon_no_quorum(
         self, mock_get_crmmon_xml, mock_set_crmmon_xml,
         mock_has_quorum, mock_check_if_status_changed):
@@ -766,7 +766,7 @@ class TestHandleHost(testtools.TestCase):
         mock_set_crmmon_xml.return_value = None
         mock_has_quorum.return_value = False
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_host_status_by_crm_mon()
 
         self.assertEqual(2, ret)
@@ -778,7 +778,7 @@ class TestHandleHost(testtools.TestCase):
     @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml,
                        'get_node_state_tag_list')
     @mock.patch.object(parse_crmmon_xml.ParseCrmMonXml, 'set_crmmon_xml')
-    @mock.patch.object(handle_host.HandleHost, '_get_crmmon_xml')
+    @mock.patch.object(manager.CorosyncCheck, '_get_crmmon_xml')
     def test_check_host_status_by_crm_mon_not_have_node_state_tag(
         self, mock_get_crmmon_xml, mock_set_crmmon_xml,
         mock_get_node_state_tag_list, mock_has_quorum):
@@ -787,7 +787,7 @@ class TestHandleHost(testtools.TestCase):
         mock_get_node_state_tag_list.return_value = []
         mock_has_quorum.return_value = True
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
 
         self.assertRaisesRegex(
             Exception, "Failed to get nodes tag from crm_mon xml.",
@@ -796,22 +796,22 @@ class TestHandleHost(testtools.TestCase):
         mock_set_crmmon_xml.assert_called_once_with(CRMMON_NODES_TAG_XML)
         mock_get_node_state_tag_list.assert_called_once_with()
 
-    @mock.patch.object(handle_host.HandleHost, '_get_crmmon_xml')
+    @mock.patch.object(manager.CorosyncCheck, '_get_crmmon_xml')
     def test_check_host_status_by_crm_mon_xml_is_None(
         self, mock_get_crmmon_xml):
         mock_get_crmmon_xml.return_value = None
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_host_status_by_crm_mon()
 
         self.assertEqual(1, ret)
         mock_get_crmmon_xml.assert_called_once_with()
 
-    @mock.patch.object(handle_host.HandleHost, '_check_if_status_changed')
+    @mock.patch.object(manager.CorosyncCheck, '_check_if_status_changed')
     @mock.patch.object(parse_cib_xml.ParseCibXml, 'get_node_state_tag_list')
     @mock.patch.object(parse_cib_xml.ParseCibXml, 'have_quorum')
     @mock.patch.object(parse_cib_xml.ParseCibXml, 'set_cib_xml')
-    @mock.patch.object(handle_host.HandleHost, '_get_cib_xml')
+    @mock.patch.object(manager.CorosyncCheck, '_get_cib_xml')
     def test_check_host_status_by_cibadmin(
         self, mock_get_cib_xml, mock_set_cib_xml, mock_have_quorum,
         mock_get_node_state_tag_list, mock_check_if_status_changed):
@@ -823,7 +823,7 @@ class TestHandleHost(testtools.TestCase):
         mock_get_node_state_tag_list.return_value = node_state_tag_list
         mock_check_if_status_changed.return_value = None
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_host_status_by_cibadmin()
 
         self.assertEqual(0, ret)
@@ -834,10 +834,10 @@ class TestHandleHost(testtools.TestCase):
         mock_check_if_status_changed.assert_called_once_with(
             node_state_tag_list)
 
-    @mock.patch.object(handle_host.HandleHost, '_check_if_status_changed')
+    @mock.patch.object(manager.CorosyncCheck, '_check_if_status_changed')
     @mock.patch.object(parse_cib_xml.ParseCibXml, 'have_quorum')
     @mock.patch.object(parse_cib_xml.ParseCibXml, 'set_cib_xml')
-    @mock.patch.object(handle_host.HandleHost, '_get_cib_xml')
+    @mock.patch.object(manager.CorosyncCheck, '_get_cib_xml')
     def test_check_host_status_by_cibadmin_no_quorum(
         self, mock_get_cib_xml, mock_set_cib_xml, mock_have_quorum,
         mock_check_if_status_changed):
@@ -845,7 +845,7 @@ class TestHandleHost(testtools.TestCase):
         mock_set_cib_xml.return_value = None
         mock_have_quorum.return_value = 0
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_host_status_by_cibadmin()
 
         self.assertEqual(2, ret)
@@ -854,12 +854,12 @@ class TestHandleHost(testtools.TestCase):
         mock_have_quorum.assert_called_once_with()
         mock_check_if_status_changed.assert_not_called()
 
-    @mock.patch.object(handle_host.HandleHost, '_get_cib_xml')
+    @mock.patch.object(manager.CorosyncCheck, '_get_cib_xml')
     def test_check_host_status_by_cibadmin_cib_xml_is_None(
         self, mock_get_cib_xml):
         mock_get_cib_xml.return_value = None
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         ret = obj._check_host_status_by_cibadmin()
 
         self.assertEqual(1, ret)
@@ -868,7 +868,7 @@ class TestHandleHost(testtools.TestCase):
     @mock.patch.object(parse_cib_xml.ParseCibXml, 'get_node_state_tag_list')
     @mock.patch.object(parse_cib_xml.ParseCibXml, 'have_quorum')
     @mock.patch.object(parse_cib_xml.ParseCibXml, 'set_cib_xml')
-    @mock.patch.object(handle_host.HandleHost, '_get_cib_xml')
+    @mock.patch.object(manager.CorosyncCheck, '_get_cib_xml')
     def test_check_host_status_by_cibadmin_not_have_node_state_tag(
         self, mock_get_cib_xml, mock_set_cib_xml, mock_have_quorum,
         mock_get_node_state_tag_list):
@@ -877,7 +877,7 @@ class TestHandleHost(testtools.TestCase):
         mock_have_quorum.return_value = 1
         mock_get_node_state_tag_list.return_value = []
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
 
         self.assertRaisesRegex(
             Exception, "Failed to get node_state tag from cib xml.",
@@ -889,18 +889,18 @@ class TestHandleHost(testtools.TestCase):
 
     def test_stop(self):
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         obj.stop()
 
         self.assertFalse(obj.running)
 
     @mock.patch.object(eventlet.greenthread, 'sleep')
-    @mock.patch.object(handle_host.HandleHost,
+    @mock.patch.object(manager.CorosyncCheck,
                        '_check_host_status_by_cibadmin')
-    @mock.patch.object(handle_host.HandleHost,
+    @mock.patch.object(manager.CorosyncCheck,
                        '_check_host_status_by_crmadmin')
-    @mock.patch.object(handle_host.HandleHost, '_check_pacemaker_services')
-    @mock.patch.object(handle_host.HandleHost, '_check_hb_line')
+    @mock.patch.object(manager.CorosyncCheck, '_check_pacemaker_services')
+    @mock.patch.object(manager.CorosyncCheck, '_check_hb_line')
     def test_monitor_hosts(self,
                            mock_check_hb_line,
                            mock_check_pacemaker_services,
@@ -915,7 +915,7 @@ class TestHandleHost(testtools.TestCase):
         mock_check_host_status_by_cibadmin.side_effect = [0, 1, 0]
         mock_sleep.return_value = None
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         self.assertRaises(KeyboardInterrupt, obj.monitor_hosts)
 
         self.assertEqual(7, mock_check_hb_line.call_count)
@@ -925,10 +925,10 @@ class TestHandleHost(testtools.TestCase):
         self.assertEqual(3, mock_check_host_status_by_cibadmin.call_count)
 
     @mock.patch.object(eventlet.greenthread, 'sleep')
-    @mock.patch.object(handle_host.HandleHost,
+    @mock.patch.object(manager.CorosyncCheck,
                        '_check_host_status_by_crm_mon')
-    @mock.patch.object(handle_host.HandleHost, '_check_pacemaker_services')
-    @mock.patch.object(handle_host.HandleHost, '_check_hb_line')
+    @mock.patch.object(manager.CorosyncCheck, '_check_pacemaker_services')
+    @mock.patch.object(manager.CorosyncCheck, '_check_hb_line')
     def test_monitor_hosts_remotes_only(self,
                                         mock_check_hb_line,
                                         mock_check_pacemaker_services,
@@ -942,7 +942,7 @@ class TestHandleHost(testtools.TestCase):
         mock_check_host_status_by_crm_mon.return_value = 0
         mock_sleep.return_value = None
 
-        obj = handle_host.HandleHost()
+        obj = manager.CorosyncCheck()
         self.assertRaises(KeyboardInterrupt, obj.monitor_hosts)
 
         self.assertEqual(4, mock_check_hb_line.call_count)

@@ -18,7 +18,7 @@ from xml.etree import ElementTree
 
 import eventlet
 
-from masakarimonitors.hostmonitor.host_handler import parse_cib_xml
+from masakarimonitors.hostmonitor.corosync_check import parse_cib_xml
 
 eventlet.monkey_patch(os=False)
 

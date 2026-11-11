@@ -15,7 +15,7 @@
 
 import testtools
 
-from masakarimonitors.hostmonitor.host_handler import parse_crmmon_xml
+from masakarimonitors.hostmonitor.corosync_check import parse_crmmon_xml
 
 
 CRMMON_XML = '<?xml version="1.0"?>' \

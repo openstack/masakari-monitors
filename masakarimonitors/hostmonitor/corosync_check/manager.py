@@ -21,10 +21,10 @@ from oslo_utils import timeutils
 
 import masakarimonitors.conf
 from masakarimonitors.ha import masakari
+from masakarimonitors.hostmonitor.corosync_check import hold_host_status
+from masakarimonitors.hostmonitor.corosync_check import parse_cib_xml
+from masakarimonitors.hostmonitor.corosync_check import parse_crmmon_xml
 import masakarimonitors.hostmonitor.driver as driver
-from masakarimonitors.hostmonitor.host_handler import hold_host_status
-from masakarimonitors.hostmonitor.host_handler import parse_cib_xml
-from masakarimonitors.hostmonitor.host_handler import parse_crmmon_xml
 from masakarimonitors.objects import event_constants as ec
 from masakarimonitors import utils
 
@@ -44,7 +44,7 @@ class CibSchemaCompliantTag(dict):
         self['crmd'] = 'online' if online == 'true' else 'offline'
 
 
-class HandleHost(driver.DriverBase):
+class CorosyncCheck(driver.DriverBase):
     """Handle hosts.
 
     This class handles the host status.

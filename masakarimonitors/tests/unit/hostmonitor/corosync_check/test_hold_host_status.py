@@ -17,7 +17,7 @@ from xml.etree import ElementTree
 
 import eventlet
 
-from masakarimonitors.hostmonitor.host_handler import hold_host_status
+from masakarimonitors.hostmonitor.corosync_check import hold_host_status
 
 eventlet.monkey_patch(os=False)
 
